@@ -70,29 +70,27 @@ Explicitly excluded from MVP1. Documented to prevent scope creep.
 
 ## Traceability
 
-Populated during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DOCTYPE-01 | TBD | Pending |
-| DOCTYPE-02 | TBD | Pending |
-| DESIGN-01 | TBD | Pending |
-| DESIGN-02 | TBD | Pending |
-| CONTENT-01 | TBD | Pending |
-| CONTENT-02 | TBD | Pending |
-| CONTENT-03 | TBD | Pending |
-| VERSION-01 | TBD | Pending |
-| VERSION-02 | TBD | Pending |
-| GEN-01 | TBD | Pending |
-| GEN-02 | TBD | Pending |
-| VALID-01 | TBD | Pending |
-| AUTH-01 | TBD | Pending |
+| AUTH-01 | Phase 1 | Pending |
+| DOCTYPE-01 | Phase 2 | Pending |
+| DOCTYPE-02 | Phase 2 | Pending |
+| CONTENT-01 | Phase 3 | Pending |
+| CONTENT-02 | Phase 3 | Pending |
+| CONTENT-03 | Phase 3 | Pending |
+| VALID-01 | Phase 3 | Pending |
+| DESIGN-01 | Phase 4 | Pending |
+| DESIGN-02 | Phase 4 | Pending |
+| VERSION-01 | Phase 5 | Pending |
+| VERSION-02 | Phase 5 | Pending |
+| GEN-01 | Phase 6 | Pending |
+| GEN-02 | Phase 6 | Pending |
 
 **Coverage:**
 - v1 requirements: 13 total
-- Mapped to phases: 0
-- Unmapped: 13 ⚠️ (roadmap not yet created)
+- Mapped to phases: 13
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-07-05*
-*Last updated: 2026-07-05 after initial definition*
+*Last updated: 2026-07-05 after roadmap creation (6 phases, full coverage)*
