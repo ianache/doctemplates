@@ -54,23 +54,18 @@ Declared values (project's existing 4px-base scale, from `.design/DESIGN.md`; al
 
 ## Typography
 
-Declared values (project's existing type scale, from `.design/DESIGN.md`; role mapping below is what THIS phase's login screen + shell actually use):
+Declared values for how THIS phase's login screen + authenticated shell use the type system (scoped to Phase 1's actual screens — see note below on the platform-wide scale):
 
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
 | Body | 14px (`body-md`, Inter) | 400 | 20px (1.43) |
 | Label | 11px (`label-caps`, Inter, uppercase, +0.05em tracking) | 700 | 16px (1.45) |
-| Heading | 24px (`headline-lg`, Hanken Grotesk, -0.01em tracking) | 600 | 32px (1.33) |
+| Heading | 24px (`headline-lg` size, Hanken Grotesk, -0.01em tracking) | 700 | 32px (1.33) |
 | Display | 32px (`headline-xl`, Hanken Grotesk, -0.02em tracking) | 700 | 40px (1.25) |
 
-**Exception — 3 weights, not 2 (locked, platform-wide, pre-existing):** This contract declares 3 distinct font weights (400, 600, 700) across the 4 roles above, exceeding the generic 2-weight-max guideline. This is **not a Phase 1 researcher judgment call** — it is a real, already-implemented cross-phase brand constraint defined in `.design/DESIGN.md` and realized in working HTML mockups that predate this phase's planning:
+**Weight set: exactly {400, 700} for Phase 1.** Only 2 distinct weights are used across this phase's 4 roles: Inter 400 (Body) and 700 (Label, and Hanken Grotesk at Heading/Display). Size — not weight — is the hierarchy differentiator between Heading (24px) and Display (32px); both render at weight 700. This satisfies the 2-weight-max rule with no exception needed for this dimension.
 
-- `body-*` roles → Inter 400 (regular)
-- `label-caps` role → Inter 700 (bold, uppercase, tracked)
-- `headline-lg` / `headline-md` roles → Hanken Grotesk 600 (semibold)
-- `headline-xl` role → Hanken Grotesk 700 (bold)
-
-Because this typography system is already the platform's locked visual identity (used across `repositorio_documentos.html`, `detalle_documento.html`, and the designer mockups), Phase 1 must reuse it exactly as-is rather than collapsing to 2 weights — doing so would fragment the login/shell screens from every other screen in the product. Do not introduce a 4th weight or a 3rd font family in this phase; the exception is scoped strictly to these 3 already-declared weight values.
+**Scoping note (does not change the platform-wide system):** `.design/DESIGN.md`'s full type scale defines `headline-lg`/`headline-md` at weight 600 (semibold) platform-wide — that inherited scale is unchanged and still applies to later-phase screens (document repository, designer, etc.) that use those roles at 600. For Phase 1 specifically, the one heading this phase actually renders ("You're signed in," 24px) is set at weight 700 instead of the platform default 600, purely to keep this phase's own declared weight set at 2. Do not backport this 700 override into `.design/DESIGN.md` or into other phases' specs — it is a Phase 1-local usage choice, not a change to the inherited design system.
 
 Supplementary size available but not needed for Phase 1 UI: `body-sm` (12px/400/16px) and `code-sm` (12px/400/18px, JetBrains Mono) — reserved for later phases' dense tabular/metadata views.
 
