@@ -17,6 +17,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session as SQLAlchemySession
 
 from app.auth.dependencies import get_current_user
+from app.auth.session_service import create_session
 from app.config import settings
 from app.main import app
 from app.models.session import Session as SessionModel
@@ -84,3 +85,24 @@ def test_valid_session_accepted(
     response = client.get(protected_route)
     assert response.status_code == 200
     assert response.json() == {"sub": "test-sub-valid", "email": "valid@example.com"}
+
+
+def test_health_endpoint_requires_auth(client: TestClient) -> None:
+    response = client.get("/api/health")
+    assert response.status_code == 401
+
+
+def test_health_endpoint_accepts_session_cookie(
+    client: TestClient, db_session: SQLAlchemySession
+) -> None:
+    user = User(sub="health-cookie-sub", email="cookie@example.com")
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+    session = create_session(db_session, user)
+
+    client.cookies.set(settings.session_cookie_name, session.id)
+    response = client.get("/api/health")
+
+    assert response.status_code == 200
+    assert response.json() == {"sub": "health-cookie-sub", "email": "cookie@example.com"}
