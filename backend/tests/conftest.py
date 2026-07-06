@@ -1,0 +1,127 @@
+"""Shared pytest fixtures for the DocManagement backend test suite.
+
+Every later Phase 1 test file (test_bearer_auth.py, test_auth_gating.py,
+test_auth_callback.py, test_session_service.py) builds on the fixtures
+defined here so test wiring is solved once, in Wave 0.
+"""
+import importlib
+from collections.abc import Generator
+from typing import Callable
+
+import jwt
+import pytest
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives.serialization import load_pem_public_key
+from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session as SQLAlchemySession
+from sqlalchemy.orm import sessionmaker
+
+from app.config import settings
+from app.db import Base, get_db
+from app.main import app
+
+
+@pytest.fixture(scope="session")
+def test_engine():
+    """Session-scoped engine against the dedicated test database.
+
+    Requires `settings.test_database_url` to be reachable (Postgres via
+    docker-compose, stood up in 01-02-PLAN). Only invoked lazily by tests
+    that actually depend on `db_session`/`client`.
+    """
+    engine = create_engine(settings.test_database_url)
+    Base.metadata.create_all(bind=engine)
+    yield engine
+    engine.dispose()
+
+
+@pytest.fixture
+def db_session(test_engine) -> Generator[SQLAlchemySession, None, None]:
+    """Function-scoped SQLAlchemy session, truncated after each test so
+    tests stay isolated without needing per-test transaction rollback."""
+    TestSessionLocal = sessionmaker(bind=test_engine, autoflush=False, autocommit=False)
+    session = TestSessionLocal()
+    try:
+        yield session
+    finally:
+        session.rollback()
+        for table in reversed(Base.metadata.sorted_tables):
+            session.execute(table.delete())
+        session.commit()
+        session.close()
+
+
+@pytest.fixture
+def client(db_session: SQLAlchemySession) -> Generator[TestClient, None, None]:
+    """FastAPI TestClient with `get_db` overridden to use the test DB session."""
+
+    def _get_db_override() -> Generator[SQLAlchemySession, None, None]:
+        yield db_session
+
+    app.dependency_overrides[get_db] = _get_db_override
+    with TestClient(app) as test_client:
+        yield test_client
+    app.dependency_overrides.pop(get_db, None)
+
+
+@pytest.fixture(scope="session")
+def rsa_keypair() -> tuple[bytes, bytes]:
+    """Generates a 2048-bit RSA keypair once per test session for signing
+    and validating test JWTs without a live Keycloak instance."""
+    private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    private_pem = private_key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=serialization.NoEncryption(),
+    )
+    public_pem = private_key.public_key().public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo,
+    )
+    return private_pem, public_pem
+
+
+@pytest.fixture
+def mint_test_jwt(rsa_keypair: tuple[bytes, bytes]) -> Callable[..., str]:
+    """Returns a callable that signs `claims` with the test private key."""
+    private_pem, _ = rsa_keypair
+
+    def mint(claims: dict, kid: str = "test-key-1") -> str:
+        return jwt.encode(claims, private_pem, algorithm="RS256", headers={"kid": kid})
+
+    return mint
+
+
+@pytest.fixture
+def mock_jwks_client(monkeypatch: pytest.MonkeyPatch, rsa_keypair: tuple[bytes, bytes]):
+    """Monkeypatches `app.auth.jwks._get_jwks_client` to return a stub whose
+    `get_signing_key_from_jwt(token)` resolves to the test RSA public key
+    regardless of token/kid.
+
+    Forward dependency: `app.auth.jwks` does not exist yet in this Wave 0
+    plan - it is created by 01-04-PLAN's Task 1. Until then this fixture is
+    inert: the monkeypatch target module import is attempted and skipped
+    gracefully if it fails, so this fixture is safe to request even before
+    that module exists.
+    """
+    _, public_pem = rsa_keypair
+    public_key = load_pem_public_key(public_pem)
+
+    class _StubSigningKey:
+        def __init__(self, key: object) -> None:
+            self.key = key
+
+    class _StubJWKSClient:
+        def get_signing_key_from_jwt(self, token: str) -> "_StubSigningKey":
+            return _StubSigningKey(public_key)
+
+    try:
+        jwks_module = importlib.import_module("app.auth.jwks")
+    except ImportError:
+        return None
+
+    stub = _StubJWKSClient()
+    monkeypatch.setattr(jwks_module, "_get_jwks_client", lambda: stub)
+    return stub
