@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-03-PLAN.md
-last_updated: "2026-07-06T01:48:25.331Z"
+stopped_at: Completed 01-04-PLAN.md
+last_updated: "2026-07-06T02:34:25.980Z"
 last_activity: 2026-07-06
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 8
-  completed_plans: 3
+  completed_plans: 4
   percent: 38
 ---
 
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-07-05)
 ## Current Position
 
 Phase: 01 (foundation-authentication) — EXECUTING
-Plan: 4 of 8
-Status: Executing Phase 01
-Last activity: 2026-07-06 -- Completed 01-03-PLAN.md
+Plan: 5 of 8
+Status: Ready to execute
+Last activity: 2026-07-06
 
 Progress: [███░░░░░░░] 38%
 
@@ -55,6 +55,7 @@ Progress: [███░░░░░░░] 38%
 | Phase 01 P01 | 35 | 3 tasks | 20 files |
 | Phase 01 P02 | 6 | 2 tasks | 4 files |
 | Phase 01 P03 | 35 | 2 tasks | 20 files |
+| Phase 01 P04 | 20 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -71,6 +72,8 @@ Recent decisions affecting current work:
 - [Phase 01]: Pinned quay.io/keycloak/keycloak:26.6 (not :latest) for reproducible local dev
 - [Phase 01]: .env.example reconciled at merge time — combined 01-01's DB/session keys with 01-02's working OIDC client secret (matches Keycloak realm-export)
 - [Phase 01]: Pinned Tailwind CSS to v3.4.19 (classic JS-config workflow) instead of latest v4 to match the plan's tailwind.config.ts + postcss.config.js file layout and acceptance criteria
+- [Phase 01]: Normalized naive sessions.expires_at DB datetime to aware UTC before comparison in get_current_user (0001 migration column has no timezone)
+- [Phase 01]: Forged algorithm-confusion test JWT by hand (base64url+hmac) since PyJWT's own encode() now blocks using an asymmetric key as HMAC secret
 
 ### Pending Todos
 
@@ -82,6 +85,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-07-06T01:48:25.325Z
-Stopped at: Completed 01-03-PLAN.md
+Last session: 2026-07-06T02:34:25.968Z
+Stopped at: Completed 01-04-PLAN.md
 Resume file: None

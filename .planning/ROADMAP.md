@@ -35,7 +35,7 @@ Plans:
 - [x] 01-01-PLAN.md — Backend sub-project scaffold, Settings, SQLAlchemy models/Alembic, pytest infra
 - [x] 01-02-PLAN.md — Docker Compose (Keycloak + Postgres) + Keycloak realm bootstrap
 - [x] 01-03-PLAN.md — Frontend Vite/React scaffold + Precision Archival Tailwind design tokens
-- [ ] 01-04-PLAN.md — Bearer-token JWKS validation + cookie-session dependency
+- [x] 01-04-PLAN.md — Bearer-token JWKS validation + cookie-session dependency
 - [ ] 01-05-PLAN.md — User upsert-on-login service + session create/delete service
 - [ ] 01-06-PLAN.md — Authlib OIDC login/callback/logout routes + CORS + protected /api/health
 - [ ] 01-07-PLAN.md — Frontend Login page + Authenticated Shell wired to backend contract
