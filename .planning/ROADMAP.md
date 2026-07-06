@@ -34,7 +34,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 Plans:
 - [x] 01-01-PLAN.md — Backend sub-project scaffold, Settings, SQLAlchemy models/Alembic, pytest infra
 - [x] 01-02-PLAN.md — Docker Compose (Keycloak + Postgres) + Keycloak realm bootstrap
-- [ ] 01-03-PLAN.md — Frontend Vite/React scaffold + Precision Archival Tailwind design tokens
+- [x] 01-03-PLAN.md — Frontend Vite/React scaffold + Precision Archival Tailwind design tokens
 - [ ] 01-04-PLAN.md — Bearer-token JWKS validation + cookie-session dependency
 - [ ] 01-05-PLAN.md — User upsert-on-login service + session create/delete service
 - [ ] 01-06-PLAN.md — Authlib OIDC login/callback/logout routes + CORS + protected /api/health
@@ -103,7 +103,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Authentication | 0/TBD | Not started | - |
+| 1. Foundation & Authentication | 3/8 | In progress | - |
 | 2. Document Types | 0/TBD | Not started | - |
 | 3. Content Building Blocks | 0/TBD | Not started | - |
 | 4. Visual Designer | 0/TBD | Not started | - |
