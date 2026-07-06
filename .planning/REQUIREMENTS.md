@@ -39,7 +39,7 @@ Requirements for initial release (MVP1). Each maps to roadmap phases.
 
 ### Auth
 
-- [ ] **AUTH-01**: Multi-user access is gated behind an OAuth2/OIDC login flow (generic identity provider integration, not custom-built credentials)
+- [x] **AUTH-01**: Multi-user access is gated behind an OAuth2/OIDC login flow (generic identity provider integration, not custom-built credentials)
 
 ## v2 Requirements
 
@@ -72,7 +72,7 @@ Explicitly excluded from MVP1. Documented to prevent scope creep.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | Phase 1 | Pending |
+| AUTH-01 | Phase 1 | Complete |
 | DOCTYPE-01 | Phase 2 | Pending |
 | DOCTYPE-02 | Phase 2 | Pending |
 | CONTENT-01 | Phase 3 | Pending |
