@@ -37,7 +37,7 @@ Plans:
 - [x] 01-03-PLAN.md — Frontend Vite/React scaffold + Precision Archival Tailwind design tokens
 - [x] 01-04-PLAN.md — Bearer-token JWKS validation + cookie-session dependency
 - [x] 01-05-PLAN.md — User upsert-on-login service + session create/delete service
-- [ ] 01-06-PLAN.md — Authlib OIDC login/callback/logout routes + CORS + protected /api/health
+- [x] 01-06-PLAN.md — Authlib OIDC login/callback/logout routes + CORS + protected /api/health
 - [ ] 01-07-PLAN.md — Frontend Login page + Authenticated Shell wired to backend contract
 - [ ] 01-08-PLAN.md — Manual end-to-end AUTH-01 verification checkpoint
 **UI hint**: yes
@@ -103,7 +103,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Authentication | 5/8 | In progress | - |
+| 1. Foundation & Authentication | 6/8 | In progress | - |
 | 2. Document Types | 0/TBD | Not started | - |
 | 3. Content Building Blocks | 0/TBD | Not started | - |
 | 4. Visual Designer | 0/TBD | Not started | - |
