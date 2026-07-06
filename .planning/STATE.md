@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-04-PLAN.md
-last_updated: "2026-07-06T02:34:25.980Z"
+stopped_at: Completed 01-05-PLAN.md
+last_updated: "2026-07-06T02:38:53.093Z"
 last_activity: 2026-07-06
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 8
-  completed_plans: 4
-  percent: 50
+  completed_plans: 5
+  percent: 63
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-07-05)
 ## Current Position
 
 Phase: 01 (foundation-authentication) — EXECUTING
-Plan: 5 of 8
+Plan: 6 of 8
 Status: Executing Phase 01
-Last activity: 2026-07-06 -- Completed 01-04-PLAN.md
+Last activity: 2026-07-06 -- Completed 01-05-PLAN.md
 
-Progress: [█████░░░░░] 50%
+Progress: [██████░░░░] 63%
 
 ## Performance Metrics
 
@@ -56,6 +56,7 @@ Progress: [█████░░░░░] 50%
 | Phase 01 P02 | 6 | 2 tasks | 4 files |
 | Phase 01 P03 | 35 | 2 tasks | 20 files |
 | Phase 01 P04 | 20 | 2 tasks | 5 files |
+| Phase 01 P05 | 25 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -74,6 +75,8 @@ Recent decisions affecting current work:
 - [Phase 01]: Pinned Tailwind CSS to v3.4.19 (classic JS-config workflow) instead of latest v4 to match the plan's tailwind.config.ts + postcss.config.js file layout and acceptance criteria
 - [Phase 01]: Normalized naive sessions.expires_at DB datetime to aware UTC before comparison in get_current_user (0001 migration column has no timezone)
 - [Phase 01]: Forged algorithm-confusion test JWT by hand (base64url+hmac) since PyJWT's own encode() now blocks using an asymmetric key as HMAC secret
+- [Phase 01]: upsert_user updates email in place on repeat login if changed at the IdP
+- [Phase 01]: delete_session is idempotent (no-op) on an already-deleted/nonexistent token
 
 ### Pending Todos
 
@@ -85,6 +88,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-07-06T02:34:25.968Z
-Stopped at: Completed 01-04-PLAN.md
+Last session: 2026-07-06T02:38:53.085Z
+Stopped at: Completed 01-05-PLAN.md
 Resume file: None
