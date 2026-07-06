@@ -1,4 +1,5 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
+const AUTH_CHECK_TIMEOUT_MS = 5000;
 
 // Typed fetch wrapper - the ONLY function used to talk to the backend.
 // Always sends credentials so the httpOnly session cookie is included
@@ -15,8 +16,22 @@ export interface CurrentUser {
   email: string;
 }
 
+async function apiFetchWithTimeout(
+  path: string,
+  init: RequestInit = {},
+  timeoutMs = AUTH_CHECK_TIMEOUT_MS,
+): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await apiFetch(path, { ...init, signal: controller.signal });
+  } finally {
+    window.clearTimeout(timeout);
+  }
+}
+
 export async function fetchCurrentUser(): Promise<CurrentUser | null> {
-  const res = await apiFetch("/api/health");
+  const res = await apiFetchWithTimeout("/api/health");
   if (res.status === 401) return null;
   if (!res.ok) throw new Error(`Unexpected status ${res.status}`);
   return res.json();

@@ -22,6 +22,8 @@ async def _optional_cookie_user(
 async def _optional_bearer_claims(
     authorization: str | None = Header(default=None),
 ) -> dict | None:
+    if not authorization or not authorization.startswith("Bearer "):
+        return None
     try:
         return verify_bearer_token_dep(authorization)
     except HTTPException:

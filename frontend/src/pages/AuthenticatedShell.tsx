@@ -20,6 +20,8 @@ export default function AuthenticatedShell() {
           return;
         }
         setUser(currentUser);
+      } catch {
+        if (!cancelled) navigate("/login?error=session_expired");
       } finally {
         if (!cancelled) setLoading(false);
       }
