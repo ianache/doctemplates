@@ -41,14 +41,14 @@ Declared values (project's existing 4px-base scale, from `.design/DESIGN.md`; al
 |-------|-------|-------|
 | base | 4px | Icon gaps, hairline offsets |
 | xs | 8px | Compact element spacing (icon-to-label gaps, tight padding) |
-| sm | 12px | Input padding, list item padding |
 | md | 16px | Default element spacing, card/panel padding |
 | lg | 24px | Section padding, form field vertical rhythm |
 | xl | 32px | Layout gaps, major block separation |
 | 2xl | 48px | Major section breaks (extension beyond existing scale, for this phase's centered login layout) |
 | 3xl | 64px | Page-level spacing (extension beyond existing scale) |
 
-Exceptions: none for this phase. Gutters between structural panels (sidebar/shell divisions) use a 1px hairline border (`outline-variant` color) rather than whitespace, per the existing system's "tiled workspace" convention — not applicable to the login screen itself (single centered card, no panels).
+**Exceptions:**
+- `sm: 12px` — not part of the generic 4/8/16/24/32/48/64 set, but this is a **locked, already-implemented platform-wide token** from `.design/DESIGN.md`, not a per-phase judgment call. It is used for input padding and list-item padding across every existing mockup (`repositorio_documentos.html`, `detalle_documento.html`, and others). Use `sm: 12px` wherever this phase's login form inputs or any list-row padding needs it. Do **not** substitute 8px or 16px in its place — doing so would break platform-wide grid consistency with every other screen already built, and would be a worse outcome than declaring this one documented exception. No other non-standard spacing value beyond this single exception is permitted.
 
 ---
 
@@ -63,7 +63,14 @@ Declared values (project's existing type scale, from `.design/DESIGN.md`; role m
 | Heading | 24px (`headline-lg`, Hanken Grotesk, -0.01em tracking) | 600 | 32px (1.33) |
 | Display | 32px (`headline-xl`, Hanken Grotesk, -0.02em tracking) | 700 | 40px (1.25) |
 
-**Deviation note:** The generic contract guideline caps declared weights at 2. This project's pre-existing brand system (established in `.design/DESIGN.md`, already realized in working mockups) uses 3 weight values across 2 families — Inter 400 (body) / 700 (label-caps), Hanken Grotesk 600 (headline-lg/md) / 700 (headline-xl). This is inherited, not invented for this phase, so it is declared as-is rather than force-reduced. Do not introduce a 4th weight or a 3rd font family in this phase.
+**Exception — 3 weights, not 2 (locked, platform-wide, pre-existing):** This contract declares 3 distinct font weights (400, 600, 700) across the 4 roles above, exceeding the generic 2-weight-max guideline. This is **not a Phase 1 researcher judgment call** — it is a real, already-implemented cross-phase brand constraint defined in `.design/DESIGN.md` and realized in working HTML mockups that predate this phase's planning:
+
+- `body-*` roles → Inter 400 (regular)
+- `label-caps` role → Inter 700 (bold, uppercase, tracked)
+- `headline-lg` / `headline-md` roles → Hanken Grotesk 600 (semibold)
+- `headline-xl` role → Hanken Grotesk 700 (bold)
+
+Because this typography system is already the platform's locked visual identity (used across `repositorio_documentos.html`, `detalle_documento.html`, and the designer mockups), Phase 1 must reuse it exactly as-is rather than collapsing to 2 weights — doing so would fragment the login/shell screens from every other screen in the product. Do not introduce a 4th weight or a 3rd font family in this phase; the exception is scoped strictly to these 3 already-declared weight values.
 
 Supplementary size available but not needed for Phase 1 UI: `body-sm` (12px/400/16px) and `code-sm` (12px/400/18px, JetBrains Mono) — reserved for later phases' dense tabular/metadata views.
 
@@ -116,6 +123,7 @@ This phase's only screens: (1) logged-out landing/login page, (2) authenticated 
 
 ## Layout Notes (Phase 1 specific)
 
+- **Primary visual anchor:** The "Sign In" button is the primary visual anchor on the login screen — it is the only accent-colored (`#610000`) element at rest, drawing the eye immediately. The brand wordmark ("Precision Archival," also accent-colored text but non-interactive) is the secondary anchor, establishing product identity above the CTA without competing with it for action-priority.
 - **Login page:** Single centered card, ~400px wide, on the `background` (#fff8f6) page. Card styled per the existing system's "Overlay" treatment: `surface-container-lowest` background, 1px `outline-variant` border, `rounded-lg` (0.5rem per DESIGN.md), subtle shadow (4px blur). Vertical rhythm inside the card: `xl` (32px) padding, `lg` (24px) gap between wordmark block and CTA block.
 - **Authenticated shell:** Minimal topbar only for this phase — brand wordmark (left), authenticated user's email + "Sign Out" button (right). Do **not** build the full left sidebar rail (Documents/Assets/Templates) shown in `.design/repositorio_documentos.html` yet — those destinations don't exist until Phase 2+ and would be dead links. Reintroduce the full sidebar shell when Phase 2 has real nav targets.
 - **Icons:** Material Symbols Outlined only, 24px default size, `FILL 0 wght 400`. No other icon set.
