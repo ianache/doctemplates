@@ -29,7 +29,17 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. User can log in via the configured OAuth2/OIDC identity provider and reach the platform.
   2. Unauthenticated requests to the platform (UI and API) are rejected rather than allowed through.
   3. Multiple distinct users can each authenticate under their own identity and use the platform.
-**Plans**: TBD
+**Plans**: 8 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Backend sub-project scaffold, Settings, SQLAlchemy models/Alembic, pytest infra
+- [ ] 01-02-PLAN.md — Docker Compose (Keycloak + Postgres) + Keycloak realm bootstrap
+- [ ] 01-03-PLAN.md — Frontend Vite/React scaffold + Precision Archival Tailwind design tokens
+- [ ] 01-04-PLAN.md — Bearer-token JWKS validation + cookie-session dependency
+- [ ] 01-05-PLAN.md — User upsert-on-login service + session create/delete service
+- [ ] 01-06-PLAN.md — Authlib OIDC login/callback/logout routes + CORS + protected /api/health
+- [ ] 01-07-PLAN.md — Frontend Login page + Authenticated Shell wired to backend contract
+- [ ] 01-08-PLAN.md — Manual end-to-end AUTH-01 verification checkpoint
 **UI hint**: yes
 
 ### Phase 2: Document Types
