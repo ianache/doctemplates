@@ -1,0 +1,70 @@
+{
+  "realm": "docmanagement",
+  "enabled": true,
+  "sslRequired": "none",
+  "clients": [
+    {
+      "clientId": "docmanagement-backend",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "dev-backend-secret-change-in-prod",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": ["http://localhost:8000/auth/callback"],
+      "webOrigins": ["http://localhost:5173"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "protocolMappers": [
+        {
+          "name": "audience-mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.client.audience": "docmanagement-backend",
+            "id.token.claim": "false",
+            "access.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "docmanagement-api-client",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "dev-api-client-secret-change-in-prod",
+      "standardFlowEnabled": false,
+      "serviceAccountsEnabled": true,
+      "directAccessGrantsEnabled": false
+    }
+  ],
+  "users": [
+    {
+      "username": "alice@example.com",
+      "email": "alice@example.com",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "devpass123",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "bob@example.com",
+      "email": "bob@example.com",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "devpass123",
+          "temporary": false
+        }
+      ]
+    }
+  ]
+}
