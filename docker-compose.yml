@@ -1,0 +1,26 @@
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.6
+    command: start-dev --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: change_me
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./keycloak/import:/opt/keycloak/data/import
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: docmanagement
+      POSTGRES_PASSWORD: change_me
+      POSTGRES_DB: docmanagement
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - ./postgres/init:/docker-entrypoint-initdb.d
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
