@@ -1,6 +1,6 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
-// Typed fetch wrapper — the ONLY function used to talk to the backend.
+// Typed fetch wrapper - the ONLY function used to talk to the backend.
 // Always sends credentials so the httpOnly session cookie is included
 // (per D-08 and RESEARCH.md Pitfall 5 on same-site cookies).
 export async function apiFetch(
@@ -8,4 +8,20 @@ export async function apiFetch(
   init: RequestInit = {},
 ): Promise<Response> {
   return fetch(`${API_BASE_URL}${path}`, { ...init, credentials: "include" });
+}
+
+export interface CurrentUser {
+  sub: string;
+  email: string;
+}
+
+export async function fetchCurrentUser(): Promise<CurrentUser | null> {
+  const res = await apiFetch("/api/health");
+  if (res.status === 401) return null;
+  if (!res.ok) throw new Error(`Unexpected status ${res.status}`);
+  return res.json();
+}
+
+export async function logout(): Promise<void> {
+  await apiFetch("/auth/logout", { method: "POST" });
 }
