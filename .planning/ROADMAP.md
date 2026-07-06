@@ -32,7 +32,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 8 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Backend sub-project scaffold, Settings, SQLAlchemy models/Alembic, pytest infra
+- [x] 01-01-PLAN.md — Backend sub-project scaffold, Settings, SQLAlchemy models/Alembic, pytest infra
 - [ ] 01-02-PLAN.md — Docker Compose (Keycloak + Postgres) + Keycloak realm bootstrap
 - [ ] 01-03-PLAN.md — Frontend Vite/React scaffold + Precision Archival Tailwind design tokens
 - [ ] 01-04-PLAN.md — Bearer-token JWKS validation + cookie-session dependency
