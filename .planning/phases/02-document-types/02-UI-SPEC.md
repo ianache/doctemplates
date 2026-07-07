@@ -1,10 +1,11 @@
 ---
 phase: 2
 slug: document-types
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-07-06
+reviewed_at: 2026-07-06
 ---
 
 # Phase 2 — UI Design Contract
