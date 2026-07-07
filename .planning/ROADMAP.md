@@ -50,8 +50,13 @@ Plans:
   1. User can create a new document type and define its allowed schema (named tokens/fields).
   2. User can view a list of existing document types.
   3. User can view the allowed schema (tokens/fields) of a specific document type.
-**Plans**: TBD
+**Plans**: 3 plans
 **UI hint**: yes
+
+Plans:
+- [ ] 02-01-PLAN.md — Backend: DocumentType/DocumentTypeField models, migration, schemas, create/list/detail API (TDD)
+- [ ] 02-02-PLAN.md — Frontend: nested routing + left nav rail, document type list + detail pages
+- [ ] 02-03-PLAN.md — Frontend: document type create form (react-hook-form + useFieldArray) + manual E2E verification checkpoint
 
 ### Phase 3: Content Building Blocks
 **Goal**: Users can create the two kinds of page content that document designs are composed from — token-scoped HTML templates and uploaded static PDFs — with schema violations rejected.
