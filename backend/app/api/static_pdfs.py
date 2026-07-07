@@ -1,0 +1,131 @@
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi.responses import FileResponse
+from pathlib import Path
+from sqlalchemy.orm import Session as SQLAlchemySession, joinedload
+
+from app.auth.dependencies import get_current_user
+from app.config import settings
+from app.db import get_db
+from app.models.static_pdf_asset import StaticPdfAsset
+from app.models.user import User
+from app.schemas.static_pdf_asset import StaticPdfAssetDetail, StaticPdfAssetListItem
+from app.services.content_storage import save_static_pdf_asset
+
+router = APIRouter(prefix="/api/content/static-pdfs", tags=["static-pdfs"])
+
+
+def _detail(asset: StaticPdfAsset) -> StaticPdfAssetDetail:
+    return StaticPdfAssetDetail(
+        id=asset.id,
+        filename=asset.original_filename,
+        stored_filename=asset.stored_filename,
+        stored_path=asset.stored_path,
+        page_count=asset.page_count,
+        page_start=asset.page_start,
+        page_end=asset.page_end,
+        file_size=asset.file_size,
+        created_by_email=asset.created_by.email,
+        created_at=asset.created_at,
+        download_url=f"/api/content/static-pdfs/{asset.id}/download",
+    )
+
+
+@router.post("", response_model=StaticPdfAssetDetail, status_code=201)
+def upload_static_pdf_asset(
+    file: UploadFile = File(...),
+    page_start: int | None = Form(default=None),
+    page_end: int | None = Form(default=None),
+    user: User = Depends(get_current_user),
+    db: SQLAlchemySession = Depends(get_db),
+) -> StaticPdfAssetDetail:
+    (
+        asset_id,
+        original_filename,
+        stored_filename,
+        stored_path,
+        page_count,
+        file_size,
+        _source_page_count,
+        stored_page_start,
+        stored_page_end,
+    ) = save_static_pdf_asset(
+        file,
+        storage_root=settings.content_storage_root,
+        page_start=page_start,
+        page_end=page_end,
+    )
+
+    asset = StaticPdfAsset(
+        id=UUID(asset_id),
+        original_filename=original_filename,
+        stored_filename=stored_filename,
+        stored_path=stored_path,
+        page_count=page_count,
+        page_start=stored_page_start,
+        page_end=stored_page_end,
+        file_size=file_size,
+        created_by=user,
+    )
+    db.add(asset)
+    db.commit()
+    db.refresh(asset)
+    db.refresh(user)
+    return _detail(asset)
+
+
+@router.get("", response_model=list[StaticPdfAssetListItem])
+def list_static_pdf_assets(
+    user: User = Depends(get_current_user),
+    db: SQLAlchemySession = Depends(get_db),
+) -> list[StaticPdfAssetListItem]:
+    assets = (
+        db.query(StaticPdfAsset)
+        .options(joinedload(StaticPdfAsset.created_by))
+        .order_by(StaticPdfAsset.created_at.desc())
+        .all()
+    )
+    return [
+        StaticPdfAssetListItem(
+            id=asset.id,
+            filename=asset.original_filename,
+            page_count=asset.page_count,
+            created_by_email=asset.created_by.email,
+            created_at=asset.created_at,
+        )
+        for asset in assets
+    ]
+
+
+@router.get("/{asset_id}", response_model=StaticPdfAssetDetail)
+def get_static_pdf_asset(
+    asset_id: UUID,
+    user: User = Depends(get_current_user),
+    db: SQLAlchemySession = Depends(get_db),
+) -> StaticPdfAssetDetail:
+    asset = (
+        db.query(StaticPdfAsset)
+        .options(joinedload(StaticPdfAsset.created_by))
+        .filter(StaticPdfAsset.id == asset_id)
+        .first()
+    )
+    if asset is None:
+        raise HTTPException(status_code=404, detail="PDF asset not found")
+    return _detail(asset)
+
+
+@router.get("/{asset_id}/download")
+def download_static_pdf_asset(
+    asset_id: UUID,
+    user: User = Depends(get_current_user),
+    db: SQLAlchemySession = Depends(get_db),
+):
+    asset = db.query(StaticPdfAsset).filter(StaticPdfAsset.id == asset_id).first()
+    if asset is None:
+        raise HTTPException(status_code=404, detail="PDF asset not found")
+    return FileResponse(
+        Path(asset.stored_path),
+        media_type="application/pdf",
+        filename=asset.original_filename,
+    )

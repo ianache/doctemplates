@@ -12,8 +12,8 @@ The platform is built bottom-up along its natural dependency chain: first gate a
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation & Authentication** - Platform scaffolding with access gated behind OAuth2/OIDC login
-- [ ] **Phase 2: Document Types** - Admins define document types with their own allowed token/field schemas
+- [x] **Phase 1: Foundation & Authentication** - Platform scaffolding with access gated behind OAuth2/OIDC login
+- [x] **Phase 2: Document Types** - Admins define document types with their own allowed token/field schemas
 - [ ] **Phase 3: Content Building Blocks** - Token-scoped HTML templates and uploaded static PDFs, with schema enforcement
 - [ ] **Phase 4: Visual Designer** - Drag-and-drop composition of ordered pages into a document design
 - [ ] **Phase 5: Versioning** - Editing a design creates a new version; history is preserved and viewable
@@ -39,7 +39,7 @@ Plans:
 - [x] 01-05-PLAN.md — User upsert-on-login service + session create/delete service
 - [x] 01-06-PLAN.md — Authlib OIDC login/callback/logout routes + CORS + protected /api/health
 - [x] 01-07-PLAN.md — Frontend Login page + Authenticated Shell wired to backend contract
-- [ ] 01-08-PLAN.md — Manual end-to-end AUTH-01 verification checkpoint
+- [x] 01-08-PLAN.md — Manual end-to-end AUTH-01 verification checkpoint
 **UI hint**: yes
 
 ### Phase 2: Document Types
@@ -54,9 +54,9 @@ Plans:
 **UI hint**: yes
 
 Plans:
-- [ ] 02-01-PLAN.md — Backend: DocumentType/DocumentTypeField models, migration, schemas, create/list/detail API (TDD)
-- [ ] 02-02-PLAN.md — Frontend: nested routing + left nav rail, document type list + detail pages
-- [ ] 02-03-PLAN.md — Frontend: document type create form (react-hook-form + useFieldArray) + manual E2E verification checkpoint
+- [x] 02-01-PLAN.md — Backend: DocumentType/DocumentTypeField models, migration, schemas, create/list/detail API (TDD)
+- [x] 02-02-PLAN.md — Frontend: nested routing + left nav rail, document type list + detail pages
+- [x] 02-03-PLAN.md — Frontend: document type create form (react-hook-form + useFieldArray) + manual E2E verification checkpoint
 
 ### Phase 3: Content Building Blocks
 **Goal**: Users can create the two kinds of page content that document designs are composed from — token-scoped HTML templates and uploaded static PDFs — with schema violations rejected.
@@ -67,8 +67,13 @@ Plans:
   2. Saving a template that uses a token outside the document type's allowed schema is rejected with a clear error (e.g. 400) instead of silently accepted.
   3. User can upload a static PDF, or a specific page range extracted from one, as page content.
   4. Uploaded static PDFs are stored by the platform and remain referenceable for later use in document designs.
-**Plans**: TBD
+**Plans**: 3 plans
 **UI hint**: yes
+
+Plans:
+- [x] 03-01-PLAN.md — Backend: schema-scoped HTML templates + live token validation
+- [x] 03-02-PLAN.md — Backend: static PDF uploads, local storage, and page-range extraction
+- [x] 03-03-PLAN.md — Frontend: content library, template authoring, PDF upload, and manual verification checkpoint
 
 ### Phase 4: Visual Designer
 **Goal**: Users can visually compose a document design from an ordered sequence of the content pieces built in Phase 3.
@@ -108,9 +113,9 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Authentication | 7/8 | In progress | - |
-| 2. Document Types | 0/TBD | Not started | - |
-| 3. Content Building Blocks | 0/TBD | Not started | - |
+| 1. Foundation & Authentication | 8/8 | Complete | 2026-07-07 |
+| 2. Document Types | 3/3 | Complete | 2026-07-07 |
+| 3. Content Building Blocks | 3/3 | Ready to execute | - |
 | 4. Visual Designer | 0/TBD | Not started | - |
 | 5. Versioning | 0/TBD | Not started | - |
 | 6. Generation & Preview API | 0/TBD | Not started | - |

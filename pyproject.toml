@@ -1,0 +1,9 @@
+[project]
+name = "29-docmanagemet"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "headroom-ai[all]>=0.30.0",
+]

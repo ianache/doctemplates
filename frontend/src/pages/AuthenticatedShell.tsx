@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 
 import { type CurrentUser, fetchCurrentUser, logout } from "../lib/api";
 
@@ -61,18 +61,43 @@ export default function AuthenticatedShell() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-lg py-2xl">
-        {loading ? null : (
-          <section className="max-w-2xl">
-            <h1 className="font-headings text-[24px] font-bold leading-[32px] tracking-[-0.01em] text-on-surface">
-              You're signed in
-            </h1>
-            <p className="mt-sm text-sm leading-5 text-on-surface-variant">
-              Document management features will appear here as they're built out. Come back once document types, templates, and the designer are live.
-            </p>
-          </section>
-        )}
-      </main>
+      {loading ? null : (
+        <div className="flex">
+          <nav className="w-[280px] shrink-0 border-r border-outline-variant bg-surface-container-lowest">
+            <div className="px-md py-lg">
+            <NavLink
+              to="/document-types"
+              className={({ isActive }) =>
+                `flex items-center gap-xs rounded px-sm py-xs text-sm font-bold ${
+                  isActive
+                      ? "bg-surface-container text-primary"
+                      : "text-on-surface hover:bg-surface-container"
+                  }`
+                }
+              >
+                <span className="material-symbols-outlined text-[20px]">schema</span>
+                Document Types
+              </NavLink>
+              <NavLink
+                to="/content"
+                className={({ isActive }) =>
+                  `mt-sm flex items-center gap-xs rounded px-sm py-xs text-sm font-bold ${
+                    isActive
+                      ? "bg-surface-container text-primary"
+                      : "text-on-surface hover:bg-surface-container"
+                  }`
+                }
+              >
+                <span className="material-symbols-outlined text-[20px]">library_books</span>
+                Content Library
+              </NavLink>
+            </div>
+          </nav>
+          <main className="mx-auto max-w-6xl flex-1 px-lg py-2xl">
+            <Outlet />
+          </main>
+        </div>
+      )}
     </div>
   );
 }

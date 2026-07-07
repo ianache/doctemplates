@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     session_ttl_seconds: int = 604800
 
     frontend_origin: str
+    content_storage_root: str = "../.content-storage"
 
 
 settings = Settings()

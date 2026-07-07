@@ -7,6 +7,7 @@ export default function LoginPage() {
   const error = searchParams.get("error");
   const callbackFailed = error === "callback_failed";
   const sessionExpired = error === "session_expired";
+  const reason = searchParams.get("reason");
 
   const signIn = () => {
     window.location.href = `${API_BASE_URL}/auth/login`;
@@ -36,6 +37,9 @@ export default function LoginPage() {
             <p className="mt-xs text-sm leading-5">
               Something went wrong completing sign-in. Please try again, or contact your administrator if this keeps happening.
             </p>
+            {reason ? (
+              <p className="mt-xs text-xs text-on-surface-variant">Error: {reason}</p>
+            ) : null}
             <button
               className="mt-md rounded border border-error px-md py-xs text-sm font-bold text-error hover:bg-error hover:text-white"
               type="button"

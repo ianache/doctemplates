@@ -10,3 +10,12 @@ wheels/
 
 # Environment
 .env
+
+# Runtime and local tool output
+.content-storage/
+.claude/
+.codegraph/
+.codex/
+.design/
+.tokensave/
+backend/server*.log

@@ -1,0 +1,104 @@
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session as SQLAlchemySession, joinedload
+
+from app.auth.dependencies import get_current_user
+from app.db import get_db
+from app.models.content_template import HtmlTemplate
+from app.models.document_type import DocumentType
+from app.models.user import User
+from app.schemas.content_template import (
+    HtmlTemplateCreate,
+    HtmlTemplateDetail,
+    HtmlTemplateListItem,
+)
+from app.services.content_validation import validate_template_tokens
+
+router = APIRouter(prefix="/api/content/templates", tags=["content-templates"])
+
+
+def _detail(template: HtmlTemplate) -> HtmlTemplateDetail:
+    return HtmlTemplateDetail(
+        id=template.id,
+        name=template.name,
+        document_type_id=template.document_type_id,
+        document_type_name=template.document_type.name,
+        html=template.html,
+        token_names=list(template.token_names or []),
+        created_by_email=template.created_by.email,
+        created_at=template.created_at,
+    )
+
+
+@router.post("", response_model=HtmlTemplateDetail, status_code=201)
+def create_html_template(
+    payload: HtmlTemplateCreate,
+    user: User = Depends(get_current_user),
+    db: SQLAlchemySession = Depends(get_db),
+) -> HtmlTemplateDetail:
+    document_type = (
+        db.query(DocumentType)
+        .options(joinedload(DocumentType.fields), joinedload(DocumentType.created_by))
+        .filter(DocumentType.id == payload.document_type_id)
+        .first()
+    )
+    if document_type is None:
+        raise HTTPException(status_code=404, detail="Document type not found")
+
+    tokens = validate_template_tokens(payload.html, [field.name for field in document_type.fields])
+
+    template = HtmlTemplate(
+        document_type=document_type,
+        name=payload.name,
+        html=payload.html,
+        token_names=tokens,
+        created_by=user,
+    )
+    db.add(template)
+    db.commit()
+    db.refresh(template)
+    db.refresh(document_type)
+    db.refresh(user)
+    return _detail(template)
+
+
+@router.get("", response_model=list[HtmlTemplateListItem])
+def list_html_templates(
+    user: User = Depends(get_current_user),
+    db: SQLAlchemySession = Depends(get_db),
+) -> list[HtmlTemplateListItem]:
+    templates = (
+        db.query(HtmlTemplate)
+        .options(joinedload(HtmlTemplate.document_type), joinedload(HtmlTemplate.created_by))
+        .order_by(HtmlTemplate.created_at.desc())
+        .all()
+    )
+    return [
+        HtmlTemplateListItem(
+            id=template.id,
+            name=template.name,
+            document_type_name=template.document_type.name,
+            token_count=len(template.token_names or []),
+            created_by_email=template.created_by.email,
+            created_at=template.created_at,
+        )
+        for template in templates
+    ]
+
+
+@router.get("/{template_id}", response_model=HtmlTemplateDetail)
+def get_html_template(
+    template_id: UUID,
+    user: User = Depends(get_current_user),
+    db: SQLAlchemySession = Depends(get_db),
+) -> HtmlTemplateDetail:
+    template = (
+        db.query(HtmlTemplate)
+        .options(joinedload(HtmlTemplate.document_type), joinedload(HtmlTemplate.created_by))
+        .filter(HtmlTemplate.id == template_id)
+        .first()
+    )
+    if template is None:
+        raise HTTPException(status_code=404, detail="Template not found")
+    return _detail(template)
