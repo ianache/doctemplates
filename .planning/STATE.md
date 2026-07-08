@@ -6,14 +6,14 @@ current_phase: 05
 current_phase_name: versioning
 status: executing
 stopped_at: Completed 05-01-PLAN.md
-last_updated: "2026-07-08T06:04:36.196Z"
+last_updated: "2026-07-08T06:11:42.708Z"
 last_activity: 2026-07-08
 last_activity_desc: Phase 05 execution started
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 20
-  completed_plans: 18
+  completed_plans: 19
   percent: 67
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-05)
 ## Current Position
 
 Phase: 05 (versioning) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-07-08 — Phase 05 execution started
 
@@ -60,6 +60,7 @@ Progress: [████████░░] 82%
 *Updated after each plan completion*
 | Phase 04 P01 | 0 | 0 tasks | 0 files |
 | Phase 05 P01 | 15 | 1 tasks | 5 files |
+| Phase 05-versioning P02 | 5 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -80,6 +81,9 @@ Recent decisions affecting current work:
 - [Phase 01]: Forged algorithm-confusion test JWT by hand (base64url+hmac) since PyJWT's own encode() now blocks using an asymmetric key as HMAC secret
 - [Phase 01]: upsert_user updates email in place on repeat login if changed at the IdP
 - [Phase 01]: delete_session is idempotent (no-op) on an already-deleted/nonexistent token
+- [Phase 05-versioning]: Reuse the existing DocumentDesignDetailPage for past versions and current active versions by making them read-only.
+- [Phase 05-versioning]: Disable the dnd-kit SortableContext and hide page remove/drag affordances on read-only versions.
+- [Phase 05-versioning]: Navigate users to a newly forked draft version with state indicators to trigger creation notice banners.
 
 ### Pending Todos
 
@@ -91,6 +95,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-07-08T06:04:36.111Z
+Last session: 2026-07-08T06:10:51.294Z
 Stopped at: Completed 05-01-PLAN.md
 Resume file: None
