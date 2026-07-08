@@ -91,6 +91,21 @@ export default function AuthenticatedShell() {
                 <span className="material-symbols-outlined text-[20px]">library_books</span>
                 Content Library
               </NavLink>
+              <NavLink
+                to="/document-designs"
+                className={({ isActive }) =>
+                  `mt-sm flex items-center gap-xs rounded px-sm py-xs text-sm font-bold ${
+                    isActive
+                      ? "bg-surface-container text-primary"
+                      : "text-on-surface hover:bg-surface-container"
+                  }`
+                }
+              >
+                <span className="material-symbols-outlined text-[20px]">
+                  dashboard_customize
+                </span>
+                Document Designs
+              </NavLink>
             </div>
           </nav>
           <main className="mx-auto max-w-6xl flex-1 px-lg py-2xl">

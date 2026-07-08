@@ -30,6 +30,8 @@ export interface StaticPdfAssetListItem {
   id: string;
   filename: string;
   page_count: number;
+  document_type_id: string | null;
+  document_type_name: string | null;
   created_by_email: string;
   created_at: string;
 }
@@ -43,6 +45,8 @@ export interface StaticPdfAssetDetail {
   page_start: number | null;
   page_end: number | null;
   file_size: number;
+  document_type_id: string | null;
+  document_type_name: string | null;
   created_by_email: string;
   created_at: string;
   download_url: string;
