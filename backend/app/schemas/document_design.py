@@ -55,6 +55,8 @@ class DocumentDesignListItem(BaseModel):
     name: str
     description: str | None
     status: str
+    version_group_id: UUID | None = None
+    version_number: int | None = None
     document_type_id: UUID
     document_type_name: str
     page_count: int
@@ -69,6 +71,8 @@ class DocumentDesignDetail(BaseModel):
     name: str
     description: str | None
     status: str
+    version_group_id: UUID | None = None
+    version_number: int | None = None
     document_type_id: UUID
     document_type_name: str
     created_by_email: str

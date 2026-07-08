@@ -1,13 +1,13 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import CheckConstraint, ForeignKey, JSON, func
+from sqlalchemy import CheckConstraint, ForeignKey, JSON, func, Index, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
 
 
-DESIGN_STATUSES = ("draft", "active")
+DESIGN_STATUSES = ("draft", "active", "superseded")
 DESIGN_BLOCK_TYPES = ("html_template", "static_pdf")
 
 
@@ -15,6 +15,18 @@ class DocumentDesign(Base):
     __tablename__ = "document_designs"
     __table_args__ = (
         CheckConstraint(f"status IN {DESIGN_STATUSES!r}", name="ck_document_design_status"),
+        Index(
+            "uq_document_design_one_active_per_group",
+            "version_group_id",
+            unique=True,
+            postgresql_where=text("status = 'active' AND version_group_id IS NOT NULL"),
+        ),
+        Index(
+            "uq_document_design_one_draft_per_group",
+            "version_group_id",
+            unique=True,
+            postgresql_where=text("status = 'draft' AND version_group_id IS NOT NULL"),
+        ),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
@@ -22,6 +34,8 @@ class DocumentDesign(Base):
     name: Mapped[str]
     description: Mapped[str | None]
     status: Mapped[str] = mapped_column(default="draft")
+    version_group_id: Mapped[uuid.UUID | None] = mapped_column(nullable=True, index=True)
+    version_number: Mapped[int | None] = mapped_column(nullable=True)
     created_by_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 

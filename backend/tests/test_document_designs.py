@@ -253,7 +253,18 @@ def test_update_delete_and_activate_design(
     assert activate_response.status_code == 200
     assert activate_response.json()["status"] == "active"
 
+    # Deleting a page on an active design must be blocked (returns 400)
     delete_response = client.delete(f"/api/document-designs/{design['id']}/pages/{page['id']}")
+    assert delete_response.status_code == 400
+
+    # Verify we can delete a page on a draft design (returns 204)
+    draft_page_response = client.post(
+        f"/api/document-designs/{empty_design['id']}/pages/template",
+        json={"template_id": str(template.id)},
+    )
+    assert draft_page_response.status_code == 201
+    draft_page = draft_page_response.json()
+    delete_response = client.delete(f"/api/document-designs/{empty_design['id']}/pages/{draft_page['id']}")
     assert delete_response.status_code == 204
 
 
@@ -278,3 +289,246 @@ def test_activation_reports_invalid_template_tokens(
     activate_response = client.post(f"/api/document-designs/{design['id']}/activate")
     assert activate_response.status_code == 400
     assert "cliente.inexistente" in activate_response.text
+
+
+def test_first_activation_becomes_version_1(
+    client: TestClient, db_session: SQLAlchemySession
+) -> None:
+    user = _auth_client(client, db_session)
+    document_type = _create_document_type(db_session, user)
+    template = _create_template(db_session, user, document_type)
+    design = _create_design(client, document_type)
+
+    # Add a page so it can be activated
+    page_response = client.post(
+        f"/api/document-designs/{design['id']}/pages/template",
+        json={"template_id": str(template.id)},
+    )
+    assert page_response.status_code == 201
+
+    # First activation
+    activate_response = client.post(f"/api/document-designs/{design['id']}/activate")
+    assert activate_response.status_code == 200
+    activated = activate_response.json()
+    assert activated["status"] == "active"
+    assert activated["version_group_id"] == design["id"]
+    assert activated["version_number"] == 1
+
+
+def test_fork_clones_pages_without_mutating_current(
+    client: TestClient, db_session: SQLAlchemySession
+) -> None:
+    user = _auth_client(client, db_session)
+    document_type = _create_document_type(db_session, user)
+    template = _create_template(db_session, user, document_type)
+    design = _create_design(client, document_type)
+
+    client.post(
+        f"/api/document-designs/{design['id']}/pages/template",
+        json={"template_id": str(template.id), "title": "Original Page"},
+    )
+    client.post(f"/api/document-designs/{design['id']}/activate")
+
+    # Fork a new draft from the active design
+    fork_response = client.post(f"/api/document-designs/{design['id']}/versions")
+    assert fork_response.status_code == 201
+    draft = fork_response.json()
+    assert draft["status"] == "draft"
+    assert draft["version_group_id"] == design["id"]
+    assert draft["version_number"] == 2
+    assert len(draft["pages"]) == 1
+    assert draft["pages"][0]["title"] == "Original Page"
+
+    # Modify the draft page (should work since it's draft)
+    draft_page_id = draft["pages"][0]["id"]
+    update_response = client.patch(
+        f"/api/document-designs/{draft['id']}/pages/{draft_page_id}",
+        json={"title": "Modified Page"},
+    )
+    assert update_response.status_code == 200
+
+    # Current/Active version page must remain untouched
+    current = client.get(f"/api/document-designs/{design['id']}").json()
+    assert current["pages"][0]["title"] == "Original Page"
+    
+    # Try modifying current version page (should be blocked)
+    current_page_id = current["pages"][0]["id"]
+    blocked_update = client.patch(
+        f"/api/document-designs/{design['id']}/pages/{current_page_id}",
+        json={"title": "Mutated Current Page"},
+    )
+    assert blocked_update.status_code == 400
+
+
+def test_activate_draft_supersedes_old_current(
+    client: TestClient, db_session: SQLAlchemySession
+) -> None:
+    user = _auth_client(client, db_session)
+    document_type = _create_document_type(db_session, user)
+    template = _create_template(db_session, user, document_type)
+    design = _create_design(client, document_type)
+
+    client.post(
+        f"/api/document-designs/{design['id']}/pages/template",
+        json={"template_id": str(template.id)},
+    )
+    client.post(f"/api/document-designs/{design['id']}/activate")
+
+    # Fork
+    fork_response = client.post(f"/api/document-designs/{design['id']}/versions")
+    draft = fork_response.json()
+
+    # Activate draft
+    activate_response = client.post(f"/api/document-designs/{draft['id']}/activate")
+    assert activate_response.status_code == 200
+    new_active = activate_response.json()
+    assert new_active["status"] == "active"
+    assert new_active["version_number"] == 2
+
+    # Check that original is now superseded
+    original = client.get(f"/api/document-designs/{design['id']}").json()
+    assert original["status"] == "superseded"
+
+
+def test_fork_resumes_existing_draft(
+    client: TestClient, db_session: SQLAlchemySession
+) -> None:
+    user = _auth_client(client, db_session)
+    document_type = _create_document_type(db_session, user)
+    template = _create_template(db_session, user, document_type)
+    design = _create_design(client, document_type)
+
+    client.post(
+        f"/api/document-designs/{design['id']}/pages/template",
+        json={"template_id": str(template.id)},
+    )
+    client.post(f"/api/document-designs/{design['id']}/activate")
+
+    # Fork once
+    fork_1 = client.post(f"/api/document-designs/{design['id']}/versions").json()
+    # Fork again (should return same draft instead of creating a new one)
+    fork_2 = client.post(f"/api/document-designs/{design['id']}/versions").json()
+    assert fork_1["id"] == fork_2["id"]
+
+
+def test_version_history_newest_first_includes_draft(
+    client: TestClient, db_session: SQLAlchemySession
+) -> None:
+    user = _auth_client(client, db_session)
+    document_type = _create_document_type(db_session, user)
+    template = _create_template(db_session, user, document_type)
+    design = _create_design(client, document_type)
+
+    client.post(
+        f"/api/document-designs/{design['id']}/pages/template",
+        json={"template_id": str(template.id)},
+    )
+    client.post(f"/api/document-designs/{design['id']}/activate")
+
+    # Version 2
+    v2_draft = client.post(f"/api/document-designs/{design['id']}/versions").json()
+    client.post(f"/api/document-designs/{v2_draft['id']}/activate")
+
+    # Version 3 Draft (forked from the current active version)
+    v3_draft = client.post(f"/api/document-designs/{v2_draft['id']}/versions").json()
+
+    # Get history
+    history_response = client.get(f"/api/document-designs/{design['id']}/versions")
+    assert history_response.status_code == 200
+    history = history_response.json()
+    
+    # 3 versions: v3 draft (draft), v2 active (active), v1 original (superseded)
+    assert len(history) == 3
+    assert history[0]["id"] == v3_draft["id"]
+    assert history[0]["status"] == "draft"
+    assert history[0]["version_number"] == 3
+
+    assert history[1]["id"] == v2_draft["id"]
+    assert history[1]["status"] == "active"
+    assert history[1]["version_number"] == 2
+
+    assert history[2]["id"] == design["id"]
+    assert history[2]["status"] == "superseded"
+    assert history[2]["version_number"] == 1
+
+
+def test_discard_draft_leaves_current_intact(
+    client: TestClient, db_session: SQLAlchemySession
+) -> None:
+    user = _auth_client(client, db_session)
+    document_type = _create_document_type(db_session, user)
+    template = _create_template(db_session, user, document_type)
+    design = _create_design(client, document_type)
+
+    client.post(
+        f"/api/document-designs/{design['id']}/pages/template",
+        json={"template_id": str(template.id)},
+    )
+    client.post(f"/api/document-designs/{design['id']}/activate")
+
+    # Create draft
+    draft = client.post(f"/api/document-designs/{design['id']}/versions").json()
+
+    # Discard draft
+    discard_response = client.delete(f"/api/document-designs/{draft['id']}")
+    assert discard_response.status_code == 204
+
+    # Verify draft is gone (should return 404)
+    get_draft = client.get(f"/api/document-designs/{draft['id']}")
+    assert get_draft.status_code == 404
+
+    # Current remains active and intact
+    current = client.get(f"/api/document-designs/{design['id']}").json()
+    assert current["status"] == "active"
+    assert len(current["pages"]) == 1
+
+
+def test_migration_backfill_d05(
+    client: TestClient, db_session: SQLAlchemySession
+) -> None:
+    import sqlalchemy as sa
+    user = _auth_client(client, db_session)
+    document_type = _create_document_type(db_session, user)
+    
+    # We will manually construct designs in pre-Phase-5 states in DB
+    from app.models.document_design import DocumentDesign
+
+    # 1. An active design with NULL versioning info (pre-Phase-5)
+    legacy_active = DocumentDesign(
+        document_type_id=document_type.id,
+        name="Legacy Active",
+        status="active",
+        created_by_id=user.id,
+        version_group_id=None,
+        version_number=None,
+    )
+    # 2. A draft design with NULL versioning info (pre-Phase-5)
+    legacy_draft = DocumentDesign(
+        document_type_id=document_type.id,
+        name="Legacy Draft",
+        status="draft",
+        created_by_id=user.id,
+        version_group_id=None,
+        version_number=None,
+    )
+    db_session.add_all([legacy_active, legacy_draft])
+    db_session.commit()
+
+    # Let's run the backfill logic manually (same as migration)
+    db_session.execute(
+        sa.text(
+            "UPDATE document_designs SET version_group_id = id, version_number = 1 "
+            "WHERE status = 'active' AND version_group_id IS NULL"
+        )
+    )
+    db_session.commit()
+    db_session.refresh(legacy_active)
+    db_session.refresh(legacy_draft)
+
+    # Legacy active must become Version 1
+    assert legacy_active.version_group_id == legacy_active.id
+    assert legacy_active.version_number == 1
+
+    # Legacy draft remains version-less (NULL)
+    assert legacy_draft.version_group_id is None
+    assert legacy_draft.version_number is None
