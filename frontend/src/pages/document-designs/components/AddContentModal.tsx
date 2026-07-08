@@ -35,12 +35,7 @@ export default function AddContentModal({
     setError(null);
     setSelectedId("");
 
-    const loader =
-      mode === "template"
-        ? listHtmlTemplates().then((rows) =>
-            rows.filter((template) => template.document_type_id === documentTypeId),
-          )
-        : listStaticPdfAssets(documentTypeId);
+    const loader = mode === "template" ? listHtmlTemplates(documentTypeId) : listStaticPdfAssets(documentTypeId);
 
     loader
       .then((rows) => {

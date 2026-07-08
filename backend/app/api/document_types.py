@@ -17,6 +17,13 @@ from app.schemas.document_type import (
 router = APIRouter(prefix="/api/document-types", tags=["document-types"])
 
 
+def require_document_type(db: SQLAlchemySession, document_type_id: UUID) -> DocumentType:
+    document_type = db.query(DocumentType).filter(DocumentType.id == document_type_id).first()
+    if document_type is None:
+        raise HTTPException(status_code=404, detail="Document type not found")
+    return document_type
+
+
 def _to_detail(document_type: DocumentType) -> DocumentTypeDetail:
     return DocumentTypeDetail(
         id=document_type.id,

@@ -34,6 +34,28 @@ async function apiFetchWithTimeout(
   }
 }
 
+export function readErrorMessage(body: unknown, status: number): string {
+  if (body && typeof body === "object" && "detail" in body) {
+    const detail = (body as { detail?: unknown }).detail;
+    if (typeof detail === "string") return detail;
+    if (Array.isArray(detail)) {
+      return detail
+        .map((item) => (typeof item === "string" ? item : item?.msg ?? JSON.stringify(item)))
+        .join("; ");
+    }
+    return JSON.stringify(detail);
+  }
+  return `Unexpected status ${status}`;
+}
+
+export async function jsonOrError<T>(res: Response): Promise<T> {
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    throw new Error(readErrorMessage(body, res.status));
+  }
+  return res.json();
+}
+
 export async function fetchCurrentUser(): Promise<CurrentUser | null> {
   const res = await apiFetchWithTimeout("/api/health");
   if (res.status === 401) return null;

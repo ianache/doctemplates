@@ -1,8 +1,10 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Response
+from sqlalchemy import func
 from sqlalchemy.orm import Session as SQLAlchemySession, joinedload, selectinload
 
+from app.api.document_types import require_document_type
 from app.auth.dependencies import get_current_user
 from app.db import get_db
 from app.models.content_template import HtmlTemplate
@@ -21,6 +23,7 @@ from app.schemas.document_design import (
     UpdateDesignPage,
 )
 from app.services.design_validation import (
+    assert_no_duplicate_static_pdf,
     assert_static_pdf_compatible,
     assert_template_compatible,
     static_pdf_snapshot,
@@ -49,6 +52,13 @@ def _require_design(db: SQLAlchemySession, design_id: UUID) -> DocumentDesign:
     if design is None:
         raise HTTPException(status_code=404, detail="Document design not found")
     return design
+
+
+def _require_page(design: DocumentDesign, page_id: UUID) -> DocumentDesignPage:
+    page = next((candidate for candidate in design.pages if candidate.id == page_id), None)
+    if page is None:
+        raise HTTPException(status_code=404, detail="Design page not found")
+    return page
 
 
 def _page_out(page: DocumentDesignPage) -> DocumentDesignPageOut:
@@ -86,9 +96,7 @@ def create_document_design(
     user: User = Depends(get_current_user),
     db: SQLAlchemySession = Depends(get_db),
 ) -> DocumentDesignDetail:
-    document_type = db.query(DocumentType).filter(DocumentType.id == payload.document_type_id).first()
-    if document_type is None:
-        raise HTTPException(status_code=404, detail="Document type not found")
+    document_type = require_document_type(db, payload.document_type_id)
 
     design = DocumentDesign(
         document_type=document_type,
@@ -100,7 +108,7 @@ def create_document_design(
     db.add(design)
     db.commit()
     db.refresh(design)
-    return _detail(_require_design(db, design.id))
+    return _detail(design)
 
 
 @router.get("", response_model=list[DocumentDesignListItem])
@@ -108,13 +116,14 @@ def list_document_designs(
     user: User = Depends(get_current_user),
     db: SQLAlchemySession = Depends(get_db),
 ) -> list[DocumentDesignListItem]:
-    designs = (
-        db.query(DocumentDesign)
+    rows = (
+        db.query(DocumentDesign, func.count(DocumentDesignPage.id))
+        .outerjoin(DocumentDesignPage, DocumentDesignPage.design_id == DocumentDesign.id)
         .options(
             joinedload(DocumentDesign.document_type),
             joinedload(DocumentDesign.created_by),
-            selectinload(DocumentDesign.pages),
         )
+        .group_by(DocumentDesign.id)
         .order_by(DocumentDesign.created_at.desc())
         .all()
     )
@@ -126,11 +135,11 @@ def list_document_designs(
             status=design.status,
             document_type_id=design.document_type_id,
             document_type_name=design.document_type.name,
-            page_count=len(design.pages),
+            page_count=page_count,
             created_by_email=design.created_by.email,
             created_at=design.created_at,
         )
-        for design in designs
+        for design, page_count in rows
     ]
 
 
@@ -184,12 +193,7 @@ def add_static_pdf_page(
     if asset is None:
         raise HTTPException(status_code=404, detail="PDF asset not found")
     assert_static_pdf_compatible(design, asset)
-
-    duplicate = any(
-        page.block_type == "static_pdf" and page.content_id == asset.id for page in design.pages
-    )
-    if duplicate:
-        raise HTTPException(status_code=400, detail="PDF asset already exists in this design")
+    assert_no_duplicate_static_pdf(design, asset)
 
     page = DocumentDesignPage(
         design=design,
@@ -222,7 +226,7 @@ def reorder_design_pages(
     for position, page_id in enumerate(payload.page_ids):
         pages_by_id[page_id].position = position
     db.commit()
-    return _detail(_require_design(db, design_id))
+    return _detail(design)
 
 
 @router.patch("/{design_id}/pages/{page_id}", response_model=DocumentDesignPageOut)
@@ -234,9 +238,7 @@ def update_design_page(
     db: SQLAlchemySession = Depends(get_db),
 ) -> DocumentDesignPageOut:
     design = _require_design(db, design_id)
-    page = next((candidate for candidate in design.pages if candidate.id == page_id), None)
-    if page is None:
-        raise HTTPException(status_code=404, detail="Design page not found")
+    page = _require_page(design, page_id)
 
     update_data = payload.model_dump(exclude_unset=True)
     for field, value in update_data.items():
@@ -254,9 +256,7 @@ def delete_design_page(
     db: SQLAlchemySession = Depends(get_db),
 ) -> Response:
     design = _require_design(db, design_id)
-    page = next((candidate for candidate in design.pages if candidate.id == page_id), None)
-    if page is None:
-        raise HTTPException(status_code=404, detail="Design page not found")
+    page = _require_page(design, page_id)
 
     db.delete(page)
     remaining = [candidate for candidate in design.pages if candidate.id != page_id]
@@ -276,4 +276,4 @@ def activate_document_design(
     validate_design_activation(design, db)
     design.status = "active"
     db.commit()
-    return _detail(_require_design(db, design_id))
+    return _detail(design)

@@ -46,6 +46,14 @@ def assert_static_pdf_compatible(design: DocumentDesign, asset: StaticPdfAsset) 
         )
 
 
+def assert_no_duplicate_static_pdf(design: DocumentDesign, asset: StaticPdfAsset) -> None:
+    duplicate = any(
+        page.block_type == "static_pdf" and page.content_id == asset.id for page in design.pages
+    )
+    if duplicate:
+        raise HTTPException(status_code=400, detail="PDF asset already exists in this design")
+
+
 def validate_design_activation(design: DocumentDesign, db: SQLAlchemySession) -> None:
     if not design.name or not design.document_type_id:
         raise HTTPException(status_code=400, detail="Design name and document type are required")
@@ -55,11 +63,17 @@ def validate_design_activation(design: DocumentDesign, db: SQLAlchemySession) ->
     allowed_tokens = {field.name for field in design.document_type.fields}
     invalid_tokens: set[str] = set()
 
+    template_page_ids = {page.content_id for page in design.pages if page.block_type == "html_template"}
+    templates_by_id = {}
+    if template_page_ids:
+        templates = db.query(HtmlTemplate).filter(HtmlTemplate.id.in_(template_page_ids)).all()
+        templates_by_id = {template.id: template for template in templates}
+
     for page in design.pages:
         if page.block_type != "html_template":
             continue
 
-        template = db.query(HtmlTemplate).filter(HtmlTemplate.id == page.content_id).first()
+        template = templates_by_id.get(page.content_id)
         if template is not None:
             token_names = list(template.token_names or [])
         else:

@@ -5,10 +5,10 @@ from fastapi.responses import FileResponse
 from pathlib import Path
 from sqlalchemy.orm import Session as SQLAlchemySession, joinedload
 
+from app.api.document_types import require_document_type
 from app.auth.dependencies import get_current_user
 from app.config import settings
 from app.db import get_db
-from app.models.document_type import DocumentType
 from app.models.static_pdf_asset import StaticPdfAsset
 from app.models.user import User
 from app.schemas.static_pdf_asset import StaticPdfAssetDetail, StaticPdfAssetListItem
@@ -44,11 +44,7 @@ def upload_static_pdf_asset(
     user: User = Depends(get_current_user),
     db: SQLAlchemySession = Depends(get_db),
 ) -> StaticPdfAssetDetail:
-    document_type = None
-    if document_type_id is not None:
-        document_type = db.query(DocumentType).filter(DocumentType.id == document_type_id).first()
-        if document_type is None:
-            raise HTTPException(status_code=404, detail="Document type not found")
+    document_type = require_document_type(db, document_type_id) if document_type_id is not None else None
 
     (
         asset_id,

@@ -65,15 +65,18 @@ def create_html_template(
 
 @router.get("", response_model=list[HtmlTemplateListItem])
 def list_html_templates(
+    document_type_id: UUID | None = None,
     user: User = Depends(get_current_user),
     db: SQLAlchemySession = Depends(get_db),
 ) -> list[HtmlTemplateListItem]:
-    templates = (
+    query = (
         db.query(HtmlTemplate)
         .options(joinedload(HtmlTemplate.document_type), joinedload(HtmlTemplate.created_by))
         .order_by(HtmlTemplate.created_at.desc())
-        .all()
     )
+    if document_type_id is not None:
+        query = query.filter(HtmlTemplate.document_type_id == document_type_id)
+    templates = query.all()
     return [
         HtmlTemplateListItem(
             id=template.id,

@@ -1,4 +1,4 @@
-import { apiFetch } from "./api";
+import { apiFetch, jsonOrError, readErrorMessage } from "./api";
 
 export type DesignStatus = "draft" | "active";
 export type DesignBlockType = "html_template" | "static_pdf";
@@ -55,23 +55,6 @@ export interface UpdateDesignPagePayload {
   title?: string | null;
   notes?: string | null;
   config?: Record<string, unknown>;
-}
-
-function readErrorMessage(body: unknown, status: number): string {
-  if (body && typeof body === "object" && "detail" in body) {
-    const detail = (body as { detail?: unknown }).detail;
-    if (typeof detail === "string") return detail;
-    return JSON.stringify(detail);
-  }
-  return `Unexpected status ${status}`;
-}
-
-async function jsonOrError<T>(res: Response): Promise<T> {
-  if (!res.ok) {
-    const body = await res.json().catch(() => null);
-    throw new Error(readErrorMessage(body, res.status));
-  }
-  return res.json();
 }
 
 export async function listDocumentDesigns(): Promise<DocumentDesignListItem[]> {

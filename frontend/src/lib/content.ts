@@ -1,4 +1,4 @@
-import { apiFetch } from "./api";
+import { apiFetch, jsonOrError } from "./api";
 
 export interface HtmlTemplateListItem {
   id: string;
@@ -53,29 +53,9 @@ export interface StaticPdfAssetDetail {
   download_url: string;
 }
 
-function readErrorMessage(body: unknown, status: number): string {
-  if (body && typeof body === "object" && "detail" in body) {
-    const detail = (body as { detail?: unknown }).detail;
-    if (typeof detail === "string") return detail;
-    if (Array.isArray(detail)) {
-      return detail
-        .map((item) => (typeof item === "string" ? item : item?.msg ?? JSON.stringify(item)))
-        .join("; ");
-    }
-  }
-  return `Unexpected status ${status}`;
-}
-
-async function jsonOrError<T>(res: Response): Promise<T> {
-  if (!res.ok) {
-    const body = await res.json().catch(() => null);
-    throw new Error(readErrorMessage(body, res.status));
-  }
-  return res.json();
-}
-
-export async function listHtmlTemplates(): Promise<HtmlTemplateListItem[]> {
-  return jsonOrError(await apiFetch("/api/content/templates"));
+export async function listHtmlTemplates(documentTypeId?: string): Promise<HtmlTemplateListItem[]> {
+  const query = documentTypeId ? `?document_type_id=${encodeURIComponent(documentTypeId)}` : "";
+  return jsonOrError(await apiFetch(`/api/content/templates${query}`));
 }
 
 export async function getHtmlTemplate(id: string): Promise<HtmlTemplateDetail | null> {

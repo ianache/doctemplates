@@ -70,9 +70,10 @@ export default function DocumentDesignDetailPage() {
 
   const pages = useMemo(() => sortPages(design?.pages ?? []), [design?.pages]);
   const selectedPage = pages.find((page) => page.id === selectedPageId) ?? null;
-  const existingPdfIds = pages
-    .filter((page) => page.block_type === "static_pdf")
-    .map((page) => page.content_id);
+  const existingPdfIds = useMemo(
+    () => pages.filter((page) => page.block_type === "static_pdf").map((page) => page.content_id),
+    [pages],
+  );
 
   const setPages = (nextPages: DocumentDesignPage[]) => {
     setDesign((current) =>
