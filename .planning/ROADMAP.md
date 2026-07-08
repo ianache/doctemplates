@@ -88,7 +88,7 @@ Plans:
 
 Plans:
 - [x] 04-01-PLAN.md - Backend: document design models, page snapshots, compatibility rules, activation validation (TDD)
-- [ ] 04-02-PLAN.md - Frontend: document design routes, API client, list/create/detail shell
+- [x] 04-02-PLAN.md - Frontend: document design routes, API client, list/create/detail shell
 - [ ] 04-03-PLAN.md - Frontend: interactive designer stack, content modals, inspector, activation checkpoint
 
 ### Phase 5: Versioning
@@ -121,6 +121,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 1. Foundation & Authentication | 8/8 | Complete | 2026-07-07 |
 | 2. Document Types | 3/3 | Complete | 2026-07-07 |
 | 3. Content Building Blocks | 3/3 | Ready to execute | - |
-| 4. Visual Designer | 1/3 | In Progress | - |
+| 4. Visual Designer | 2/3 | In Progress | - |
 | 5. Versioning | 0/TBD | Not started | - |
 | 6. Generation & Preview API | 0/TBD | Not started | - |
