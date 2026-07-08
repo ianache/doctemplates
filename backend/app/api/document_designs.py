@@ -492,11 +492,12 @@ def preview_document(
     payload: dict = Body(default={}),
     user: User = Depends(get_current_user),
     db: SQLAlchemySession = Depends(get_db),
-) -> StreamingResponse:
+) -> Response:
     design = _require_design(db, design_id)
     if design.status not in ("draft", "active"):
         raise HTTPException(status_code=400, detail="Preview only allowed for draft or active designs")
 
     pdf_bytes = generate_composed_pdf(design, payload, db, mock_fallback=True)
-    return StreamingResponse(io.BytesIO(pdf_bytes), media_type="application/pdf")
+    return Response(content=pdf_bytes, media_type="application/pdf")
+
 
