@@ -83,8 +83,13 @@ Plans:
   1. User can create a new document design scoped to a chosen document type using a drag-and-drop canvas.
   2. User can add both HTML-template pages and static-PDF pages to the design as an ordered sequence.
   3. User can reorder pages in the canvas, and the resulting order is what persists and is used downstream.
-**Plans**: TBD
+**Plans**: 3 plans
 **UI hint**: yes
+
+Plans:
+- [ ] 04-01-PLAN.md - Backend: document design models, page snapshots, compatibility rules, activation validation (TDD)
+- [ ] 04-02-PLAN.md - Frontend: document design routes, API client, list/create/detail shell
+- [ ] 04-03-PLAN.md - Frontend: interactive designer stack, content modals, inspector, activation checkpoint
 
 ### Phase 5: Versioning
 **Goal**: Users can revise an existing document design without losing prior versions.
@@ -116,6 +121,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 1. Foundation & Authentication | 8/8 | Complete | 2026-07-07 |
 | 2. Document Types | 3/3 | Complete | 2026-07-07 |
 | 3. Content Building Blocks | 3/3 | Ready to execute | - |
-| 4. Visual Designer | 0/TBD | Not started | - |
+| 4. Visual Designer | 0/3 | Planned | - |
 | 5. Versioning | 0/TBD | Not started | - |
 | 6. Generation & Preview API | 0/TBD | Not started | - |
