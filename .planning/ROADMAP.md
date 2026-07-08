@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundation & Authentication** - Platform scaffolding with access gated behind OAuth2/OIDC login
 - [x] **Phase 2: Document Types** - Admins define document types with their own allowed token/field schemas
 - [ ] **Phase 3: Content Building Blocks** - Token-scoped HTML templates and uploaded static PDFs, with schema enforcement
-- [ ] **Phase 4: Visual Designer** - Drag-and-drop composition of ordered pages into a document design
+- [x] **Phase 4: Visual Designer** - Drag-and-drop composition of ordered pages into a document design
 - [ ] **Phase 5: Versioning** - Editing a design creates a new version; history is preserved and viewable
 - [ ] **Phase 6: Generation & Preview API** - API generates final and preview PDFs from a design plus caller-supplied data
 
@@ -89,7 +89,7 @@ Plans:
 Plans:
 - [x] 04-01-PLAN.md - Backend: document design models, page snapshots, compatibility rules, activation validation (TDD)
 - [x] 04-02-PLAN.md - Frontend: document design routes, API client, list/create/detail shell
-- [ ] 04-03-PLAN.md - Frontend: interactive designer stack, content modals, inspector, activation checkpoint
+- [x] 04-03-PLAN.md - Frontend: interactive designer stack, content modals, inspector, activation checkpoint
 
 ### Phase 5: Versioning
 **Goal**: Users can revise an existing document design without losing prior versions.
@@ -121,6 +121,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 1. Foundation & Authentication | 8/8 | Complete | 2026-07-07 |
 | 2. Document Types | 3/3 | Complete | 2026-07-07 |
 | 3. Content Building Blocks | 3/3 | Ready to execute | - |
-| 4. Visual Designer | 2/3 | In Progress | - |
+| 4. Visual Designer | 3/3 | Complete | 2026-07-07 |
 | 5. Versioning | 0/TBD | Not started | - |
 | 6. Generation & Preview API | 0/TBD | Not started | - |
