@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 05
-current_phase_name: versioning
-status: verifying
-stopped_at: Completed 05-03-PLAN.md
-last_updated: "2026-07-08T15:01:38.006Z"
+current_phase: 6
+current_phase_name: Generation & Preview API
+status: ready_to_plan
+stopped_at: Phase 05 complete, ready to plan Phase 6
+last_updated: "2026-07-08T15:23:00.000Z"
 last_activity: 2026-07-08
-last_activity_desc: Phase 05 execution started
+last_activity_desc: Phase 05 complete, transitioned to Phase 6
 progress:
   total_phases: 6
   completed_phases: 5
@@ -21,41 +21,40 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-07-05)
+See: .planning/PROJECT.md (updated 2026-07-08)
 
 **Core value:** Operational users can visually compose a document design (templates + fixed content, in order) and reliably generate a correct final PDF from it via API, without engineering involvement per document type.
-**Current focus:** Phase 05 — versioning
+**Current focus:** Phase 06 — Generation & Preview API
 
 ## Current Position
 
-Phase: 05 (versioning) — EXECUTING
-Plan: 3 of 3
-Status: Phase complete — ready for verification
-Last activity: 2026-07-08 — Phase 05 execution started
+Phase: 6 — Generation & Preview API
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-07-08 — Phase 05 complete, transitioned to Phase 6
 
-Progress: [████████░░] 82%
+Progress: [████████░░] 83%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 14
+- Total plans completed: 17
 - Average duration: - min
 - Total execution time: 0 hours
 
 **By Phase:**
 
-| Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
-| 1 | 8 | 8/8 | Complete |
-| 2 | 3 | 3/3 | Complete |
-| 3 | 0 | 3 | Not started |
-| 4 | 3 | 3/3 | Complete |
+- Phase 1: 8/8 plans complete
+- Phase 2: 3/3 plans complete
+- Phase 3: 3/3 plans complete
+- Phase 4: 3/3 plans complete
+- Phase 5: 3/3 plans complete
 
 **Recent Trend:**
 
-- Last 5 plans: 04-01, 04-02, 04-03 complete
-- Trend: Phase 4 implementation complete
+- Last 5 plans: 05-01, 05-02, 05-03 complete
+- Trend: Phase 5 manual verification complete
 
 *Updated after each plan completion*
 | Phase 04 P01 | 0 | 0 tasks | 0 files |
@@ -85,6 +84,7 @@ Recent decisions affecting current work:
 - [Phase 05-versioning]: Reuse the existing DocumentDesignDetailPage for past versions and current active versions by making them read-only.
 - [Phase 05-versioning]: Disable the dnd-kit SortableContext and hide page remove/drag affordances on read-only versions.
 - [Phase 05-versioning]: Navigate users to a newly forked draft version with state indicators to trigger creation notice banners.
+- [Phase 05-versioning]: Postgres partial unique indexes to guarantee at most one active and one draft version per group.
 
 ### Pending Todos
 
@@ -92,10 +92,10 @@ None yet.
 
 ### Blockers/Concerns
 
-- Research phase was skipped this run due to a session rate limit — no research/SUMMARY.md exists. Phase 1 planning should confirm concrete stack choices (backend framework, DB, HTML-to-PDF library, OIDC provider integration approach) since none are pre-selected.
+None.
 
 ## Session Continuity
 
-Last session: 2026-07-08T15:01:37.985Z
-Stopped at: Completed 05-03-PLAN.md
+Last session: 2026-07-08T15:21:00.000Z
+Stopped at: Phase 05 complete, ready to plan Phase 06
 Resume file: None

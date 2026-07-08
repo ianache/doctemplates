@@ -12,21 +12,20 @@ Operational users can visually compose a document design (templates + fixed cont
 
 ### Validated
 
-(None yet — ship to validate)
+- ✓ Multi-user access with OAuth2/OIDC-based authentication — Phase 1
+- ✓ Admin/operational users can define a new "document type" with its own allowed data schema (tokens/fields) — Phase 2
+- ✓ A page can be a dynamic HTML template with tokens scoped to the document type's schema — Phase 3
+- ✓ A page can be a static PDF (or specific page range from one), uploaded through the UI — Phase 3
+- ✓ Static PDFs uploaded through the UI are stored and referenceable by document designs — Phase 3
+- ✓ Attempting to use a token outside a document type's allowed schema is rejected (400-style error) — Phase 3
+- ✓ Users can visually design a document (drag-and-drop canvas) by composing ordered pages — Phase 4
+- ✓ Users can reorder pages in the designer; order is preserved through to generation — Phase 4
+- ✓ Users can edit an existing document design, creating a new version (version history preserved) — Phase 5
 
 ### Active
 
-- [ ] Admin/operational users can define a new "document type" with its own allowed data schema (tokens/fields)
-- [ ] Users can visually design a document (drag-and-drop canvas) by composing ordered pages
-- [ ] A page can be a dynamic HTML template with tokens scoped to the document type's schema
-- [ ] A page can be a static PDF (or specific page range from one), uploaded through the UI
-- [ ] Users can reorder pages in the designer; order is preserved through to generation
-- [ ] Users can edit an existing document design, creating a new version (version history preserved)
 - [ ] API endpoint generates a final merged PDF from a document design + caller-supplied data (fills template tokens, merges with static pages in order)
 - [ ] Preview endpoint generates a PDF from mock/sample data without persisting an issuance
-- [ ] Attempting to use a token outside a document type's allowed schema is rejected (400-style error)
-- [ ] Multi-user access with OAuth2/OIDC-based authentication
-- [ ] Static PDFs uploaded through the UI are stored and referenceable by document designs
 
 ### Out of Scope
 
@@ -53,13 +52,16 @@ Operational users can visually compose a document design (templates + fixed cont
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Generalize "Canal de Venta + Servicio" into a generic "document type" abstraction | Platform must support many scenarios beyond the vehicle-contract example; hardcoding one business rule would block reuse | — Pending |
-| Visual drag-and-drop designer is in scope for MVP1 (not API/JSON-only) | User confirmed the visual UI is needed now, not deferred | — Pending |
-| Document types are admin-configurable through the platform, not developer-defined config | User wants operational users to create new document types without engineering involvement | — Pending |
-| Static PDFs are uploaded through the UI (not referenced from a pre-existing repository) | User confirmed upload is the intended flow | — Pending |
-| MVP1 data flow: caller supplies all data in the generation request; platform does not resolve data from external systems | Keeps MVP1 scoped; data-source integration explicitly deferred | — Pending |
-| Auth integrates an existing OAuth2/OIDC IdP rather than building custom auth | User confirmed multi-user with an existing identity provider, generic OIDC | — Pending |
-| Document designs are editable with version history | User wants to iterate on designs after creation without losing prior versions | — Pending |
+| Generalize "Canal de Venta + Servicio" into a generic "document type" abstraction | Platform must support many scenarios beyond the vehicle-contract example; hardcoding one business rule would block reuse | Implemented (Phase 2) |
+| Visual drag-and-drop designer is in scope for MVP1 (not API/JSON-only) | User confirmed the visual UI is needed now, not deferred | Implemented (Phase 4) |
+| Document types are admin-configurable through the platform, not developer-defined config | User wants operational users to create new document types without engineering involvement | Implemented (Phase 2) |
+| Static PDFs are uploaded through the UI (not referenced from a pre-existing repository) | User confirmed upload is the intended flow | Implemented (Phase 3) |
+| MVP1 data flow: caller supplies all data in the generation request; platform does not resolve data from external systems | Keeps MVP1 scoped; data-source integration explicitly deferred | Design confirmed (Phase 6) |
+| Auth integrates an existing OAuth2/OIDC IdP rather than building custom auth | User confirmed multi-user with an existing identity provider, generic OIDC | Implemented (Phase 1) |
+| Document designs are editable with version history | User wants to iterate on designs after creation without losing prior versions | Implemented (Phase 5) |
+| Row-per-version design schema extending document_designs with version_group_id and version_number | Simplifies SQL querying of past designs and keeps schemas uniform across versions | Implemented (Phase 5) |
+| Postgres partial unique indexes to guarantee at most one active and one draft version per group | Leverages database-level constraints for versioning safety | Implemented (Phase 5) |
+| Exclusively allow modifying design pages (add, update, delete, reorder) on draft designs | Prevents mutation of activated/superseded historical designs | Implemented (Phase 5) |
 
 ## Evolution
 
@@ -79,4 +81,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-05 after initialization*
+*Last updated: 2026-07-08 after Phase 5*
