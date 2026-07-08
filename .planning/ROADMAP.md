@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation & Authentication** - Platform scaffolding with access gated behind OAuth2/OIDC login
 - [x] **Phase 2: Document Types** - Admins define document types with their own allowed token/field schemas
-- [ ] **Phase 3: Content Building Blocks** - Token-scoped HTML templates and uploaded static PDFs, with schema enforcement
+- [x] **Phase 3: Content Building Blocks** - Token-scoped HTML templates and uploaded static PDFs, with schema enforcement
 - [x] **Phase 4: Visual Designer** - Drag-and-drop composition of ordered pages into a document design
 - [x] **Phase 5: Versioning** - Editing a design creates a new version; history is preserved and viewable (completed 2026-07-08)
 - [ ] **Phase 6: Generation & Preview API** - API generates final and preview PDFs from a design plus caller-supplied data
@@ -150,7 +150,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 |-------|----------------|--------|-----------|
 | 1. Foundation & Authentication | 8/8 | Complete | 2026-07-07 |
 | 2. Document Types | 3/3 | Complete | 2026-07-07 |
-| 3. Content Building Blocks | 3/3 | Ready to execute | - |
+| 3. Content Building Blocks | 3/3 | Complete | 2026-07-08 |
 | 4. Visual Designer | 3/3 | Complete | 2026-07-07 |
 | 5. Versioning | 3/3 | Complete    | 2026-07-08 |
-| 6. Generation & Preview API | 0/TBD | Not started | - |
+| 6. Generation & Preview API | 1/2 | Executing | - |

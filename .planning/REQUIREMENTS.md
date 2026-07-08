@@ -9,19 +9,19 @@ Requirements for initial release (MVP1). Each maps to roadmap phases.
 
 ### Document Types
 
-- [ ] **DOCTYPE-01**: Admin/operational user can define a new document type with its own allowed data schema (tokens/fields)
-- [ ] **DOCTYPE-02**: User can list/view existing document types and their schemas
+- [x] **DOCTYPE-01**: Admin/operational user can define a new document type with its own allowed data schema (tokens/fields)
+- [x] **DOCTYPE-02**: User can list/view existing document types and their schemas
 
 ### Designer
 
-- [ ] **DESIGN-01**: User can visually design a document (drag-and-drop canvas) by composing an ordered sequence of pages, scoped to a chosen document type
-- [ ] **DESIGN-02**: User can reorder pages in the designer; the resulting order is preserved through to generation
+- [x] **DESIGN-01**: User can visually design a document (drag-and-drop canvas) by composing an ordered sequence of pages, scoped to a chosen document type
+- [x] **DESIGN-02**: User can reorder pages in the designer; the resulting order is preserved through to generation
 
 ### Content
 
-- [ ] **CONTENT-01**: A page can be a dynamic HTML template containing tokens restricted to the document type's allowed schema
-- [ ] **CONTENT-02**: A page can be a static PDF (or a specific page extracted from one), uploaded through the UI
-- [ ] **CONTENT-03**: Uploaded static PDFs are stored by the platform and referenceable by document designs
+- [x] **CONTENT-01**: A page can be a dynamic HTML template containing tokens restricted to the document type's allowed schema
+- [x] **CONTENT-02**: A page can be a static PDF (or a specific page extracted from one), uploaded through the UI
+- [x] **CONTENT-03**: Uploaded static PDFs are stored by the platform and referenceable by document designs
 
 ### Versioning
 
@@ -35,7 +35,7 @@ Requirements for initial release (MVP1). Each maps to roadmap phases.
 
 ### Validation
 
-- [ ] **VALID-01**: Using a token outside a document type's allowed schema is rejected with a clear error (e.g. 400 Bad Request) rather than silently ignored or leaking data
+- [x] **VALID-01**: Using a token outside a document type's allowed schema is rejected with a clear error (e.g. 400 Bad Request) rather than silently ignored or leaking data
 
 ### Auth
 
@@ -73,14 +73,14 @@ Explicitly excluded from MVP1. Documented to prevent scope creep.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | AUTH-01 | Phase 1 | Complete |
-| DOCTYPE-01 | Phase 2 | Pending |
-| DOCTYPE-02 | Phase 2 | Pending |
-| CONTENT-01 | Phase 3 | Pending |
-| CONTENT-02 | Phase 3 | Pending |
-| CONTENT-03 | Phase 3 | Pending |
-| VALID-01 | Phase 3 | Pending |
-| DESIGN-01 | Phase 4 | Pending |
-| DESIGN-02 | Phase 4 | Pending |
+| DOCTYPE-01 | Phase 2 | Complete |
+| DOCTYPE-02 | Phase 2 | Complete |
+| CONTENT-01 | Phase 3 | Complete |
+| CONTENT-02 | Phase 3 | Complete |
+| CONTENT-03 | Phase 3 | Complete |
+| VALID-01 | Phase 3 | Complete |
+| DESIGN-01 | Phase 4 | Complete |
+| DESIGN-02 | Phase 4 | Complete |
 | VERSION-01 | Phase 5 | Complete |
 | VERSION-02 | Phase 5 | Complete |
 | GEN-01 | Phase 6 | Pending |
