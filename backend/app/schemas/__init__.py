@@ -14,6 +14,9 @@ from app.schemas.static_pdf_asset import (
     StaticPdfAssetDetail,
     StaticPdfAssetListItem,
 )
+from app.schemas.document_issuance import (
+    DocumentIssuanceOut,
+)
 
 __all__ = [
     "DocumentTypeCreate",
@@ -26,4 +29,6 @@ __all__ = [
     "HtmlTemplateListItem",
     "StaticPdfAssetDetail",
     "StaticPdfAssetListItem",
+    "DocumentIssuanceOut",
 ]
+

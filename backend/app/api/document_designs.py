@@ -1,17 +1,26 @@
+import io
+import os
+import uuid
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Body, Depends, HTTPException, Response
+from fastapi.responses import StreamingResponse
 from sqlalchemy import func
 from sqlalchemy.orm import Session as SQLAlchemySession, joinedload, selectinload
 
 from app.api.document_types import require_document_type
 from app.auth.dependencies import get_current_user
+from app.config import settings
 from app.db import get_db
 from app.models.content_template import HtmlTemplate
 from app.models.document_design import DocumentDesign, DocumentDesignPage
 from app.models.document_type import DocumentType
+from app.models.document_issuance import DocumentIssuance
 from app.models.static_pdf_asset import StaticPdfAsset
 from app.models.user import User
+from app.schemas.document_issuance import DocumentIssuanceOut
+from app.services.pdf_generator import generate_composed_pdf
+
 from app.schemas.document_design import (
     AddStaticPdfPage,
     AddTemplatePage,
@@ -438,3 +447,56 @@ def discard_document_design_draft(
     db.delete(design)
     db.commit()
     return Response(status_code=204)
+
+
+@router.post("/{design_id}/generate", response_model=DocumentIssuanceOut, status_code=201)
+def generate_document(
+    design_id: UUID,
+    payload: dict = Body(default={}),
+    user: User = Depends(get_current_user),
+    db: SQLAlchemySession = Depends(get_db),
+) -> DocumentIssuance:
+    design = _require_design(db, design_id)
+    if design.status == "draft":
+        raise HTTPException(status_code=400, detail="Cannot generate documents from a draft design")
+
+    # Generate PDF bytes
+    pdf_bytes = generate_composed_pdf(design, payload, db, mock_fallback=False)
+
+    # Ensure output directory exists
+    os.makedirs(settings.issuance_storage_root, exist_ok=True)
+
+    issuance_id = uuid.uuid4()
+    filename = f"{issuance_id}.pdf"
+    file_path = os.path.join(settings.issuance_storage_root, filename)
+
+    with open(file_path, "wb") as f:
+        f.write(pdf_bytes)
+
+    issuance = DocumentIssuance(
+        id=issuance_id,
+        design_version_id=design.id,
+        file_path=file_path,
+        user_id=user.id,
+        input_data=payload,
+    )
+    db.add(issuance)
+    db.commit()
+    db.refresh(issuance)
+    return issuance
+
+
+@router.post("/{design_id}/preview")
+def preview_document(
+    design_id: UUID,
+    payload: dict = Body(default={}),
+    user: User = Depends(get_current_user),
+    db: SQLAlchemySession = Depends(get_db),
+) -> StreamingResponse:
+    design = _require_design(db, design_id)
+    if design.status not in ("draft", "active"):
+        raise HTTPException(status_code=400, detail="Preview only allowed for draft or active designs")
+
+    pdf_bytes = generate_composed_pdf(design, payload, db, mock_fallback=True)
+    return StreamingResponse(io.BytesIO(pdf_bytes), media_type="application/pdf")
+
