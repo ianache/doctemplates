@@ -1,7 +1,7 @@
 import io
 import os
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from jinja2.sandbox import SandboxedEnvironment
 from xhtml2pdf import pisa
 from pypdf import PdfReader, PdfWriter
@@ -117,7 +117,7 @@ def validate_and_coerce_payload(
                 elif field.type == "boolean":
                     coerced[field.name] = True
                 elif field.type == "date":
-                    coerced[field.name] = datetime.utcnow().strftime("%Y-%m-%d")
+                    coerced[field.name] = datetime.now(timezone.utc).strftime("%Y-%m-%d")
                 else:
                     coerced[field.name] = None
             else:
