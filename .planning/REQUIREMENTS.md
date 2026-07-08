@@ -25,8 +25,8 @@ Requirements for initial release (MVP1). Each maps to roadmap phases.
 
 ### Versioning
 
-- [ ] **VERSION-01**: User can edit an existing document design, creating a new version rather than overwriting
-- [ ] **VERSION-02**: User can view the version history of a document design
+- [x] **VERSION-01**: User can edit an existing document design, creating a new version rather than overwriting
+- [x] **VERSION-02**: User can view the version history of a document design
 
 ### Generation
 
@@ -81,12 +81,13 @@ Explicitly excluded from MVP1. Documented to prevent scope creep.
 | VALID-01 | Phase 3 | Pending |
 | DESIGN-01 | Phase 4 | Pending |
 | DESIGN-02 | Phase 4 | Pending |
-| VERSION-01 | Phase 5 | Pending |
-| VERSION-02 | Phase 5 | Pending |
+| VERSION-01 | Phase 5 | Complete |
+| VERSION-02 | Phase 5 | Complete |
 | GEN-01 | Phase 6 | Pending |
 | GEN-02 | Phase 6 | Pending |
 
 **Coverage:**
+
 - v1 requirements: 13 total
 - Mapped to phases: 13
 - Unmapped: 0 ✓
