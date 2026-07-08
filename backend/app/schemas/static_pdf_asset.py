@@ -10,6 +10,8 @@ class StaticPdfAssetListItem(BaseModel):
     id: UUID
     filename: str
     page_count: int
+    document_type_id: UUID | None = None
+    document_type_name: str | None = None
     created_by_email: str
     created_at: datetime
 
@@ -25,6 +27,8 @@ class StaticPdfAssetDetail(BaseModel):
     page_start: int | None
     page_end: int | None
     file_size: int
+    document_type_id: UUID | None = None
+    document_type_name: str | None = None
     created_by_email: str
     created_at: datetime
     download_url: str

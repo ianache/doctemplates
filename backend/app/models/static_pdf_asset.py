@@ -18,7 +18,11 @@ class StaticPdfAsset(Base):
     page_start: Mapped[int | None]
     page_end: Mapped[int | None]
     file_size: Mapped[int]
+    document_type_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("document_types.id"), nullable=True
+    )
     created_by_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
+    document_type: Mapped["DocumentType | None"] = relationship()
     created_by: Mapped["User"] = relationship()

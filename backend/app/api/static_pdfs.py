@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session as SQLAlchemySession, joinedload
 from app.auth.dependencies import get_current_user
 from app.config import settings
 from app.db import get_db
+from app.models.document_type import DocumentType
 from app.models.static_pdf_asset import StaticPdfAsset
 from app.models.user import User
 from app.schemas.static_pdf_asset import StaticPdfAssetDetail, StaticPdfAssetListItem
@@ -26,6 +27,8 @@ def _detail(asset: StaticPdfAsset) -> StaticPdfAssetDetail:
         page_start=asset.page_start,
         page_end=asset.page_end,
         file_size=asset.file_size,
+        document_type_id=asset.document_type_id,
+        document_type_name=asset.document_type.name if asset.document_type else None,
         created_by_email=asset.created_by.email,
         created_at=asset.created_at,
         download_url=f"/api/content/static-pdfs/{asset.id}/download",
@@ -37,9 +40,16 @@ def upload_static_pdf_asset(
     file: UploadFile = File(...),
     page_start: int | None = Form(default=None),
     page_end: int | None = Form(default=None),
+    document_type_id: UUID | None = Form(default=None),
     user: User = Depends(get_current_user),
     db: SQLAlchemySession = Depends(get_db),
 ) -> StaticPdfAssetDetail:
+    document_type = None
+    if document_type_id is not None:
+        document_type = db.query(DocumentType).filter(DocumentType.id == document_type_id).first()
+        if document_type is None:
+            raise HTTPException(status_code=404, detail="Document type not found")
+
     (
         asset_id,
         original_filename,
@@ -66,6 +76,7 @@ def upload_static_pdf_asset(
         page_start=stored_page_start,
         page_end=stored_page_end,
         file_size=file_size,
+        document_type=document_type,
         created_by=user,
     )
     db.add(asset)
@@ -77,20 +88,28 @@ def upload_static_pdf_asset(
 
 @router.get("", response_model=list[StaticPdfAssetListItem])
 def list_static_pdf_assets(
+    document_type_id: UUID | None = None,
     user: User = Depends(get_current_user),
     db: SQLAlchemySession = Depends(get_db),
 ) -> list[StaticPdfAssetListItem]:
-    assets = (
+    query = (
         db.query(StaticPdfAsset)
-        .options(joinedload(StaticPdfAsset.created_by))
+        .options(joinedload(StaticPdfAsset.created_by), joinedload(StaticPdfAsset.document_type))
         .order_by(StaticPdfAsset.created_at.desc())
-        .all()
     )
+    if document_type_id is not None:
+        query = query.filter(
+            (StaticPdfAsset.document_type_id.is_(None))
+            | (StaticPdfAsset.document_type_id == document_type_id)
+        )
+    assets = query.all()
     return [
         StaticPdfAssetListItem(
             id=asset.id,
             filename=asset.original_filename,
             page_count=asset.page_count,
+            document_type_id=asset.document_type_id,
+            document_type_name=asset.document_type.name if asset.document_type else None,
             created_by_email=asset.created_by.email,
             created_at=asset.created_at,
         )
@@ -106,7 +125,7 @@ def get_static_pdf_asset(
 ) -> StaticPdfAssetDetail:
     asset = (
         db.query(StaticPdfAsset)
-        .options(joinedload(StaticPdfAsset.created_by))
+        .options(joinedload(StaticPdfAsset.created_by), joinedload(StaticPdfAsset.document_type))
         .filter(StaticPdfAsset.id == asset_id)
         .first()
     )

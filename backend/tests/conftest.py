@@ -32,6 +32,7 @@ def test_engine():
     that actually depend on `db_session`/`client`.
     """
     engine = create_engine(settings.test_database_url)
+    Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     yield engine
     engine.dispose()
