@@ -3,6 +3,7 @@ import { apiFetch } from "./api";
 export interface HtmlTemplateListItem {
   id: string;
   name: string;
+  document_type_id: string;
   document_type_name: string;
   token_count: number;
   created_by_email: string;
@@ -95,8 +96,9 @@ export async function createHtmlTemplate(
   );
 }
 
-export async function listStaticPdfAssets(): Promise<StaticPdfAssetListItem[]> {
-  return jsonOrError(await apiFetch("/api/content/static-pdfs"));
+export async function listStaticPdfAssets(documentTypeId?: string): Promise<StaticPdfAssetListItem[]> {
+  const query = documentTypeId ? `?document_type_id=${encodeURIComponent(documentTypeId)}` : "";
+  return jsonOrError(await apiFetch(`/api/content/static-pdfs${query}`));
 }
 
 export async function getStaticPdfAsset(id: string): Promise<StaticPdfAssetDetail | null> {

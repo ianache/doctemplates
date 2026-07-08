@@ -78,6 +78,7 @@ def list_html_templates(
         HtmlTemplateListItem(
             id=template.id,
             name=template.name,
+            document_type_id=template.document_type_id,
             document_type_name=template.document_type.name,
             token_count=len(template.token_names or []),
             created_by_email=template.created_by.email,

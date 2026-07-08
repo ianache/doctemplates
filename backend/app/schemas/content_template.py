@@ -15,6 +15,7 @@ class HtmlTemplateListItem(BaseModel):
 
     id: UUID
     name: str
+    document_type_id: UUID
     document_type_name: str
     token_count: int
     created_by_email: str
