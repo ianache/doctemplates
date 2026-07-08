@@ -12,6 +12,7 @@ import StaticPdfDetailPage from "./pages/content/StaticPdfDetailPage";
 import DocumentDesignListPage from "./pages/document-designs/DocumentDesignListPage";
 import DocumentDesignCreatePage from "./pages/document-designs/DocumentDesignCreatePage";
 import DocumentDesignDetailPage from "./pages/document-designs/DocumentDesignDetailPage";
+import VersionHistoryPage from "./pages/document-designs/VersionHistoryPage";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <Route path="document-designs" element={<DocumentDesignListPage />} />
         <Route path="document-designs/new" element={<DocumentDesignCreatePage />} />
         <Route path="document-designs/:id" element={<DocumentDesignDetailPage />} />
+        <Route path="document-designs/:id/versions" element={<VersionHistoryPage />} />
         <Route path="content" element={<ContentLibraryPage />}>
           <Route path="templates/new" element={<HtmlTemplateCreatePage />} />
           <Route path="templates/:id" element={<HtmlTemplateDetailPage />} />

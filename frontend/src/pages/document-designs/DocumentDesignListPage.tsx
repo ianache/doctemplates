@@ -92,14 +92,29 @@ export default function DocumentDesignListPage() {
               {items.map((item) => (
                 <tr key={item.id} className="border-t border-outline-variant">
                   <td className="px-md py-sm text-sm font-bold text-primary">
-                    <Link to={`/document-designs/${item.id}`} className="hover:underline">
-                      {item.name}
-                    </Link>
+                    <div className="flex flex-col">
+                      <Link to={`/document-designs/${item.id}`} className="hover:underline">
+                        {item.name}
+                      </Link>
+                      {item.version_number !== null && (
+                        <span className="text-[11px] font-normal text-on-surface-variant">
+                          Version {item.version_number}
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-md py-sm text-sm text-on-surface">
                     {item.document_type_name}
                   </td>
-                  <td className="px-md py-sm text-sm text-on-surface">{item.status}</td>
+                  <td className="px-md py-sm text-sm">
+                    <span className={`inline-block rounded bg-surface-container px-sm py-xs text-[11px] font-bold uppercase ${
+                      item.status === "active" || item.status === "draft"
+                        ? "text-primary"
+                        : "text-on-surface-variant"
+                    }`}>
+                      {item.status}
+                    </span>
+                  </td>
                   <td className="px-md py-sm text-sm text-on-surface">{item.page_count}</td>
                   <td className="px-md py-sm text-sm text-on-surface">{item.created_by_email}</td>
                   <td className="px-md py-sm text-sm text-on-surface">

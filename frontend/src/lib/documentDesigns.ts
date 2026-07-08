@@ -19,7 +19,9 @@ export interface DocumentDesignListItem {
   id: string;
   name: string;
   description: string | null;
-  status: DesignStatus;
+  status: DesignStatus | "superseded";
+  version_group_id: string | null;
+  version_number: number | null;
   document_type_id: string;
   document_type_name: string;
   page_count: number;
@@ -144,4 +146,26 @@ export async function deleteDesignPage(designId: string, pageId: string): Promis
 
 export async function activateDocumentDesign(id: string): Promise<DocumentDesignDetail> {
   return jsonOrError(await apiFetch(`/api/document-designs/${id}/activate`, { method: "POST" }));
+}
+
+export async function forkDocumentDesignVersion(designId: string): Promise<DocumentDesignDetail> {
+  return jsonOrError(
+    await apiFetch(`/api/document-designs/${designId}/versions`, {
+      method: "POST",
+    }),
+  );
+}
+
+export async function listDocumentDesignVersions(designId: string): Promise<DocumentDesignListItem[]> {
+  return jsonOrError(await apiFetch(`/api/document-designs/${designId}/versions`));
+}
+
+export async function discardDocumentDesignDraft(designId: string): Promise<void> {
+  const res = await apiFetch(`/api/document-designs/${designId}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    throw new Error(readErrorMessage(body, res.status));
+  }
 }
