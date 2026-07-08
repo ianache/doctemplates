@@ -56,16 +56,16 @@ Exceptions: none. (`sm: 12px` is the one platform-wide non-4/8/16 exception, alr
 
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
-| Body | 14px (`body-md`, Inter) | 400 | 20px (1.43) |
+| Body | 14px (`body-md`, Inter) | 400 / 700 | 20px (1.43) |
 | Label | 11px (`label-caps`, Inter, uppercase, +0.05em tracking) | 700 | 16px (1.45) |
-| Heading | 24px (page titles) / 18px (card/modal sub-headings — matches `DesignPageCard`/`AddContentModal` precedent), Hanken Grotesk | 700 | 32px / 28px |
+| Heading | 24px (page titles only), Hanken Grotesk | 700 | 32px (1.33) |
 | Code | 12px (`code-sm`, JetBrains Mono) | 400 | 18px (1.5) |
 
-**Weight set: exactly {400, 700}** — same platform-local convention as Phases 1–3 (Inter 400 for Body/Code, 700 for Label and Hanken Grotesk headings).
+**Weight set: exactly {400, 700}** — same platform-local convention as Phases 1–3 (Inter 400 for Body, 700 for Label, bold Body, and Hanken Grotesk headings).
 
 **Usage mapping for this phase's screens:**
 - Page titles ("Version History", `{design name}`) → Heading (24px/700)
-- Card-level sub-headings (e.g. read-only banner heading, discard-draft modal title) → Heading (18px/700), matching the existing `DesignPageCard`/`AddContentModal` precedent
+- Card-level sub-headings (e.g. read-only banner heading, discard-draft modal title) → **Body, bold** (14px/700) — reuses the existing Body role at its bold weight rather than introducing a new heading size; keeps the phase's declared type scale at 4 sizes total
 - Table column headers, version badges ("Current" / "Superseded" / "Draft"), status pills → Label (11px/700 uppercase)
 - Body copy, notice/error banners, metadata values, empty-state copy → Body (14px/400)
 - Code role is reserved but not required this phase — only use it if the executor surfaces a raw version/design id for debugging; do not invent a new use for it.
@@ -112,7 +112,7 @@ Accent reserved for: "Edit Design" button, "Current" badge, "Version History" na
 | Empty state — version history (defensive; should not normally occur, a design always has ≥1 version) | Heading: "No versions found." Body: "This design has no recorded versions yet." |
 | Error state — version history load failure | "We couldn't load version history. Try again." |
 | Error state — edit/fork failure | "We couldn't create a new version. Try again." |
-| Destructive action — discard an in-progress draft version | Button: **"Discard Draft Version"**. Confirmation modal title: "Discard this draft?" Body: "Changes since version {n} will be lost. Version {n} itself stays intact and remains the current version." Buttons: "Cancel" / "Discard Draft" (destructive, error-red) |
+| Destructive action — discard an in-progress draft version | Button: **"Discard Draft Version"**. Confirmation modal title: "Discard this draft?" Body: "Changes since version {n} will be lost. Version {n} itself stays intact and remains the current version." Buttons: "Keep Editing" / "Discard Draft" (destructive, error-red) |
 
 **Language:** English for all UI chrome/copy, matching every prior phase's precedent.
 
@@ -131,9 +131,9 @@ Accent reserved for: "Edit Design" button, "Current" badge, "Version History" na
 
 - **Detail page (current version) changes:** Extend the existing `DocumentDesignDetailPage.tsx` action row (currently just "Activate") with two additions, in this order left-to-right: "Edit Design" (primary, accent) and "Version History" (secondary, outline — same visual weight as the existing "Add PDF" button). Only show "Edit Design" when the design being viewed *is* the current version. Do not show it on a read-only past-version view.
 - **Editing flow:** Clicking "Edit Design" immediately creates a new draft version (a full clone of the current version's pages) and navigates the user into that draft's detail/designer page — i.e. the exact same `DocumentDesignDetailPage` UI Phase 4 already built (page stack, drag-and-drop, inspector, Add Template/Add PDF, Activate). No new designer chrome is introduced. Show the "New draft created…" notice (see Copywriting Contract) using the existing notice-banner classes (`mt-md flex ... rounded border border-outline-variant bg-surface-container-lowest p-sm text-sm text-on-surface`) once, on arrival.
-- **Discard draft:** While editing an un-activated draft version (i.e. a version created via "Edit Design" that hasn't been activated), show a "Discard Draft Version" destructive button near "Activate". Clicking it opens a confirmation modal reusing the exact modal shell already established in `AddContentModal.tsx` (`fixed inset-0 z-50 flex items-center justify-center bg-black/30`, card `w-full max-w-xl rounded border border-outline-variant bg-surface-container-lowest p-lg shadow-xl`), with the copy from the Copywriting Contract above. Confirming returns the user to the version history page (the draft is gone; the current version is untouched).
+- **Discard draft:** While editing an un-activated draft version (i.e. a version created via "Edit Design" that hasn't been activated), show a "Discard Draft Version" destructive button near "Activate". Clicking it opens a confirmation modal reusing the exact modal shell already established in `AddContentModal.tsx` (`fixed inset-0 z-50 flex items-center justify-center bg-black/30`, card `w-full max-w-xl rounded border border-outline-variant bg-surface-container-lowest p-lg shadow-xl`), with its title set in Body/bold (14px/700, per the Typography table above — not the 18px heading size `AddContentModal.tsx` itself uses, to keep this phase's declared type scale at 4 sizes) and the remaining copy from the Copywriting Contract above. Confirming returns the user to the version history page (the draft is gone; the current version is untouched).
 - **Version History page (new):** A dedicated route (e.g. `/document-designs/{id}/versions`), reached via the "Version History" button on the detail page — not a tab, consistent with the platform's existing list/detail page-per-route pattern (no tabbed interfaces exist anywhere else in the app). Layout: page header (Heading + helper text, matching `DocumentDesignListPage`'s header treatment) with a "Back to Design" link. Below it, a single table reusing the exact table chrome from `DocumentDesignListPage.tsx` (`rounded border border-outline-variant bg-surface-container-lowest`, `bg-surface-container` header row, `text-[11px] font-bold uppercase text-secondary` column labels). Rows sorted newest-first. The current version's row uses the "Current" badge; every other row uses "Superseded."
-- **Read-only past-version view:** Reuse `DocumentDesignDetailPage` for viewing a past version, but strip all mutating affordances: no drag handles, no "Remove" buttons on page cards, no Add Template/Add PDF buttons, no Activate/Edit Design/Discard buttons, no inspector edit form (render inspector fields as plain read-only text). Show the read-only banner (see Copywriting Contract) at the top, directly under the page title, using the same notice-banner visual treatment as elsewhere. Provide a "View current version" link inside that banner back to the live detail page.
+- **Read-only past-version view:** Reuse `DocumentDesignDetailPage` for viewing a past version, but strip all mutating affordances: no drag handles, no "Remove" buttons on page cards, no Add Template/Add PDF buttons, no Activate/Edit Design/Discard buttons, no inspector edit form (render inspector fields as plain read-only text). Show the read-only banner (see Copywriting Contract) at the top, directly under the page title, set in Body/bold (14px/700) per the Typography table above, using the same notice-banner visual treatment as elsewhere. Provide a "View current version" link inside that banner back to the live detail page.
 - **Icons:** Material Symbols Outlined only, consistent sizing with existing usage (`history` for the Version History button/page, `edit` for Edit Design, `delete` for Discard Draft Version — reusing the same `delete` icon already used for page removal in `DesignPageCard.tsx`).
 
 ---
