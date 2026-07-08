@@ -198,6 +198,7 @@ We will add endpoints to `backend/app/api/document_designs.py` (or introduce a d
 | **Data Validation & Coercion** | **HIGH** | Simple schema validation loop with explicit parser rules. |
 | **Database & Disk Persistence** | **HIGH** | Simple database tracking table and standard path storage. |
 
-### Open Questions
-1.  **Strict Mode for Extra Fields**: Decisions dictate that extra fields in the payload are ignored rather than rejected [CITED: 06-CONTEXT.md]. Should we log a warning when extra fields are received so integrations are aware of potential field mismatches?
-2.  **Superseded Version Generation**: Is generation allowed on `superseded` versions of a design, or only on the single current `active` version? (We recommend allowing `superseded` versions as well, to support retro-generation/re-generation of past document revisions, but blocking `draft` versions).
+## Open Questions (RESOLVED)
+
+1.  **Strict Mode for Extra Fields**: RESOLVED: Yes, log a warning when extra fields are received in the payload, but do not reject the request (ignore extra fields).
+2.  **Superseded Version Generation**: RESOLVED: Yes, allow PDF generation for both `active` and `superseded` versions of a design to support historical reprints, but strictly block `draft` versions with `400 Bad Request`.
