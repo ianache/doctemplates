@@ -30,8 +30,8 @@ Requirements for initial release (MVP1). Each maps to roadmap phases.
 
 ### Generation
 
-- [ ] **GEN-01**: API generates a final merged PDF from a document design + caller-supplied data (fills template tokens, merges pages in order)
-- [ ] **GEN-02**: API generates a preview PDF from mock/sample data without persisting an issuance record
+- [x] **GEN-01**: API generates a final merged PDF from a document design + caller-supplied data (fills template tokens, merges pages in order)
+- [x] **GEN-02**: API generates a preview PDF from mock/sample data without persisting an issuance record
 
 ### Validation
 
@@ -83,8 +83,8 @@ Explicitly excluded from MVP1. Documented to prevent scope creep.
 | DESIGN-02 | Phase 4 | Complete |
 | VERSION-01 | Phase 5 | Complete |
 | VERSION-02 | Phase 5 | Complete |
-| GEN-01 | Phase 6 | Pending |
-| GEN-02 | Phase 6 | Pending |
+| GEN-01 | Phase 6 | Complete |
+| GEN-02 | Phase 6 | Complete |
 
 **Coverage:**
 
