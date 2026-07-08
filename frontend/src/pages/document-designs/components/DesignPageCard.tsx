@@ -8,6 +8,7 @@ interface DesignPageCardProps {
   selected: boolean;
   onSelect: (pageId: string) => void;
   onRemove: (page: DocumentDesignPage) => void;
+  readOnly?: boolean;
 }
 
 function labelFor(page: DocumentDesignPage) {
@@ -34,34 +35,40 @@ export default function DesignPageCard({
   selected,
   onSelect,
   onRemove,
+  readOnly = false,
 }: DesignPageCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: page.id,
+    disabled: readOnly,
   });
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
+  const style = readOnly
+    ? undefined
+    : {
+        transform: CSS.Transform.toString(transform),
+        transition,
+      };
 
   return (
     <div
-      ref={setNodeRef}
+      ref={readOnly ? undefined : setNodeRef}
       style={style}
       className={`rounded border bg-surface-container-lowest px-md py-sm ${
         selected ? "border-primary" : "border-outline-variant"
-      } ${isDragging ? "opacity-70 shadow-lg" : ""}`}
+      } ${!readOnly && isDragging ? "opacity-70 shadow-lg" : ""}`}
     >
       <div className="flex items-start gap-md">
-        <button
-          type="button"
-          aria-label="Drag page"
-          className="mt-xs cursor-grab text-secondary active:cursor-grabbing"
-          {...attributes}
-          {...listeners}
-        >
-          <span className="material-symbols-outlined text-[20px]">drag_indicator</span>
-        </button>
+        {!readOnly && (
+          <button
+            type="button"
+            aria-label="Drag page"
+            className="mt-xs cursor-grab text-secondary active:cursor-grabbing"
+            {...attributes}
+            {...listeners}
+          >
+            <span className="material-symbols-outlined text-[20px]">drag_indicator</span>
+          </button>
+        )}
 
         <button type="button" className="min-w-0 flex-1 text-left" onClick={() => onSelect(page.id)}>
           <p className="text-[11px] font-bold uppercase text-secondary">
@@ -73,14 +80,16 @@ export default function DesignPageCard({
           <p className="mt-xs truncate text-sm text-on-surface-variant">{metadataFor(page)}</p>
         </button>
 
-        <button
-          type="button"
-          aria-label="Remove page"
-          className="rounded border border-outline-variant px-xs py-xs text-error hover:border-error"
-          onClick={() => onRemove(page)}
-        >
-          <span className="material-symbols-outlined text-[18px]">delete</span>
-        </button>
+        {!readOnly && (
+          <button
+            type="button"
+            aria-label="Remove page"
+            className="rounded border border-outline-variant px-xs py-xs text-error hover:border-error"
+            onClick={() => onRemove(page)}
+          >
+            <span className="material-symbols-outlined text-[18px]">delete</span>
+          </button>
+        )}
       </div>
     </div>
   );
