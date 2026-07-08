@@ -26,6 +26,7 @@ class Settings(BaseSettings):
 
     frontend_origin: str
     content_storage_root: str = "../.content-storage"
+    issuance_storage_root: str = "../.content-storage/issuances"
 
 
 settings = Settings()
