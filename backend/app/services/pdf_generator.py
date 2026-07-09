@@ -393,14 +393,160 @@ def expand_flat_dict(flat: dict[str, any]) -> dict[str, any]:
     return nested
 
 
+from jinja2.runtime import Context
+
+class RecursiveCaseInsensitiveDict:
+    def __init__(self, data: dict):
+        self._data = data
+        self._keys_lower = {k.lower(): k for k in data.keys()}
+
+    def __getattribute__(self, name: str) -> any:
+        if name.startswith("__") and name not in (
+            "__init__",
+            "__repr__",
+            "__getitem__",
+            "__setitem__",
+            "__delitem__",
+            "__contains__",
+            "__len__",
+            "__iter__",
+            "__getattr__",
+            "__getattribute__",
+        ):
+            raise AttributeError(f"Access to private attribute '{name}' is blocked.")
+        return super().__getattribute__(name)
+
+    def __getattr__(self, name: str) -> any:
+        try:
+            return self[name]
+        except KeyError as e:
+            raise AttributeError(str(e))
+
+    def __getitem__(self, key: str) -> any:
+        if not isinstance(key, str):
+            return self._data[key]
+        if key.startswith("__"):
+            raise KeyError(f"Private keys are protected: '{key}'")
+        lk = key.lower()
+        if lk in self._keys_lower:
+            orig_key = self._keys_lower[lk]
+            val = self._data[orig_key]
+            return self._wrap_value(val)
+        raise KeyError(key)
+
+    def get(self, key: str, default: any = None) -> any:
+        try:
+            return self[key]
+        except KeyError:
+            return default
+
+    def __contains__(self, key: str) -> bool:
+        if not isinstance(key, str):
+            return key in self._data
+        return key.lower() in self._keys_lower
+
+    def _wrap_value(self, val: any) -> any:
+        if isinstance(val, dict):
+            return RecursiveCaseInsensitiveDict(val)
+        elif isinstance(val, list):
+            return RecursiveCaseInsensitiveList(val)
+        return val
+
+    def keys(self):
+        return self._data.keys()
+
+    def items(self):
+        return [(k, self._wrap_value(v)) for k, v in self._data.items()]
+
+    def values(self):
+        return [self._wrap_value(v) for v in self._data.values()]
+
+    def __repr__(self) -> str:
+        return f"RecursiveCaseInsensitiveDict({self._data!r})"
+
+
+class RecursiveCaseInsensitiveList:
+    def __init__(self, data: list):
+        self._data = data
+
+    def __getattribute__(self, name: str) -> any:
+        if name.startswith("__") and name not in (
+            "__init__",
+            "__repr__",
+            "__getitem__",
+            "__setitem__",
+            "__delitem__",
+            "__contains__",
+            "__len__",
+            "__iter__",
+            "__getattr__",
+            "__getattribute__",
+        ):
+            raise AttributeError(f"Access to private attribute '{name}' is blocked.")
+        return super().__getattribute__(name)
+
+    def __getitem__(self, idx: int) -> any:
+        if isinstance(idx, str) and idx.startswith("__"):
+            raise KeyError(f"Private keys are protected: '{idx}'")
+        val = self._data[idx]
+        if isinstance(val, dict):
+            return RecursiveCaseInsensitiveDict(val)
+        elif isinstance(val, list):
+            return RecursiveCaseInsensitiveList(val)
+        return val
+
+    def __getattr__(self, name: str) -> any:
+        raise AttributeError(f"'RecursiveCaseInsensitiveList' object has no attribute '{name}'")
+
+    def __len__(self) -> int:
+        return len(self._data)
+
+    def __iter__(self):
+        for val in self._data:
+            if isinstance(val, dict):
+                yield RecursiveCaseInsensitiveDict(val)
+            elif isinstance(val, list):
+                yield RecursiveCaseInsensitiveList(val)
+            else:
+                yield val
+
+    def __repr__(self) -> str:
+        return f"RecursiveCaseInsensitiveList({self._data!r})"
+
+
+class CaseInsensitiveContext(Context):
+    def resolve_or_missing(self, key):
+        lk = key.lower()
+        matching_key = next((k for k in self.parent.keys() if k.lower() == lk), None)
+        if matching_key is not None:
+            val = self.parent[matching_key]
+        else:
+            matching_key = next((k for k in self.vars.keys() if k.lower() == lk), None)
+            if matching_key is not None:
+                val = self.vars[matching_key]
+            else:
+                return super().resolve_or_missing(key)
+        
+        if isinstance(val, dict):
+            return RecursiveCaseInsensitiveDict(val)
+        elif isinstance(val, list):
+            return RecursiveCaseInsensitiveList(val)
+        return val
+
+
+class CaseInsensitiveSandboxedEnvironment(SandboxedEnvironment):
+    context_class = CaseInsensitiveContext
+
+
 def render_html_page_to_pdf(html_content: str, context: dict) -> bytes:
     """Renders a Jinja2 template and compiles it to PDF bytes using xhtml2pdf."""
-    env = SandboxedEnvironment(autoescape=True)
+    env = CaseInsensitiveSandboxedEnvironment(autoescape=True)
     env.filters["date_format"] = date_format_filter
 
     try:
         template = env.from_string(html_content)
-        rendered_html = template.render(**context)
+        wrapped_context = context if isinstance(context, RecursiveCaseInsensitiveDict) else RecursiveCaseInsensitiveDict(context)
+        rendered_html = template.render(wrapped_context)
     except Exception as e:
         raise HTTPException(
             status_code=400,

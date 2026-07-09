@@ -235,7 +235,7 @@ def test_generate_validation(client: TestClient, db_session: SQLAlchemySession, 
     response = client.post(f"/api/document-designs/{active_design.id}/generate", json=invalid_payload)
     assert response.status_code == 400
 
-    # 5. Extra fields in payload are ignored (D-06) -> 201
+    # 5. Extra fields in payload are strictly rejected (D-06) -> 400
     extra_payload = {
         "cliente.nombre": "Jane Doe",
         "cliente.edad": 35,
@@ -244,12 +244,8 @@ def test_generate_validation(client: TestClient, db_session: SQLAlchemySession, 
         "ignored_extra_field": "some_value"
     }
     response = client.post(f"/api/document-designs/{active_design.id}/generate", json=extra_payload)
-    assert response.status_code == 201
-    data = response.json()
-    # verify extra field doesn't break generation
-    saved_path = Path(data["file_path"])
-    if saved_path.exists():
-        saved_path.unlink()
+    assert response.status_code == 400
+    assert "Unknown property" in response.text
 
 
 def test_preview(client: TestClient, db_session: SQLAlchemySession):

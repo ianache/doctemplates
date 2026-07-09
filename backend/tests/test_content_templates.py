@@ -117,3 +117,48 @@ def test_create_template_requires_auth(client: TestClient, db_session: SQLAlchem
     )
 
     assert response.status_code == 401
+
+
+def test_create_template_case_insensitive_and_fallback(
+    client: TestClient, db_session: SQLAlchemySession
+) -> None:
+    user = _auth_client(client, db_session)
+    
+    # Create DocumentType with list field
+    document_type = DocumentType(
+        name="Contract",
+        description="Contract desc",
+        created_by=user,
+        fields=[
+            DocumentTypeField(name="cliente.nombre", type="string", position=0),
+            DocumentTypeField(name="cliente.contactos[].nombre", type="string", position=1),
+        ],
+    )
+    db_session.add(document_type)
+    db_session.commit()
+    db_session.refresh(document_type)
+
+    # 1. Test case variations: Cliente.Nombre and cliente.nombre
+    response1 = client.post(
+        "/api/content/templates",
+        json={
+            "document_type_id": str(document_type.id),
+            "name": "Case template",
+            "html": "<p>{{Cliente.Nombre}}</p>",
+        },
+    )
+    assert response1.status_code == 201
+    assert response1.json()["token_names"] == ["Cliente.Nombre"]
+
+    # 2. Test loop variable fallback: c.nombre
+    response2 = client.post(
+        "/api/content/templates",
+        json={
+            "document_type_id": str(document_type.id),
+            "name": "Loop template",
+            "html": "<p>{% for c in cliente.contactos %}{{c.nombre}}{% endfor %}</p>",
+        },
+    )
+    assert response2.status_code == 201
+    assert response2.json()["token_names"] == ["c.nombre"]
+
