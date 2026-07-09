@@ -21,11 +21,14 @@ Operational users can visually compose a document design (templates + fixed cont
 - ✓ Users can visually design a document (drag-and-drop canvas) by composing ordered pages — Phase 4
 - ✓ Users can reorder pages in the designer; order is preserved through to generation — Phase 4
 - ✓ Users can edit an existing document design, creating a new version (version history preserved) — Phase 5
+- ✓ API endpoint generates a final merged PDF from a document design + caller-supplied data (fills template tokens, merges with static pages in order) — Phase 6
+- ✓ Preview endpoint generates a PDF from mock/sample data without persisting an issuance — Phase 6
 
 ### Active
 
-- [ ] API endpoint generates a final merged PDF from a document design + caller-supplied data (fills template tokens, merges with static pages in order)
-- [ ] Preview endpoint generates a PDF from mock/sample data without persisting an issuance
+- [ ] Support nested objects (e.g. `cliente.direccion.calle`) in Document Type schemas, validation, and template rendering
+- [ ] Support lists of objects (e.g. `cliente.contactos[].nombre`) in Document Type schemas, validation, and template rendering
+- [ ] Implement case-insensitive token and payload key matching across the platform
 
 ### Out of Scope
 
@@ -81,4 +84,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-08 after Phase 5*
+*Last updated: 2026-07-09 after Milestone v1.0*
