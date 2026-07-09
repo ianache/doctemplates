@@ -172,3 +172,99 @@ def test_get_document_type_not_found(client: TestClient, db_session: SQLAlchemyS
     _auth_client(client, db_session)
     response = client.get("/api/document-types/00000000-0000-0000-0000-000000000000")
     assert response.status_code == 404
+
+
+def test_create_document_type_invalid_paths(client: TestClient, db_session: SQLAlchemySession) -> None:
+    _auth_client(client, db_session)
+    
+    # 1. Invalid regex patterns (empty segments, double brackets)
+    for bad_name in ["cliente..nombre", "cliente.contactos[][].nombre", "cliente.", ".nombre", "cliente.contactos[].nombre[]"]:
+        response = client.post(
+            "/api/document-types",
+            json={
+                "name": "Invalid Path Schema",
+                "fields": [
+                    {"name": bad_name, "type": "string"}
+                ],
+            },
+        )
+        assert response.status_code == 422
+
+    # 2. Depth limit exceeded (> 5 levels)
+    response = client.post(
+        "/api/document-types",
+        json={
+            "name": "Deep Schema",
+            "fields": [
+                {"name": "a.b.c.d.e.f", "type": "string"}
+            ],
+        },
+    )
+    assert response.status_code == 422
+    assert "Field path depth cannot exceed 5 levels" in response.text
+
+
+def test_create_document_type_structural_conflicts(client: TestClient, db_session: SQLAlchemySession) -> None:
+    _auth_client(client, db_session)
+
+    # Conflict: leaf/parent mismatch (cliente is both leaf and object parent)
+    response = client.post(
+        "/api/document-types",
+        json={
+            "name": "Leaf Parent Conflict Schema",
+            "fields": [
+                {"name": "cliente", "type": "string"},
+                {"name": "cliente.nombre", "type": "string"}
+            ],
+        },
+    )
+    assert response.status_code == 422
+    assert "declared as both an object and a non-object/leaf" in response.text
+
+    # Conflict: list/object mismatch (contactos is object parent in one, list parent in another)
+    response = client.post(
+        "/api/document-types",
+        json={
+            "name": "List Object Conflict Schema",
+            "fields": [
+                {"name": "cliente.contactos.nombre", "type": "string"},
+                {"name": "cliente.contactos[].nombre", "type": "string"}
+            ],
+        },
+    )
+    assert response.status_code == 422
+    assert "declared as both a list and a non-list" in response.text
+
+    # Conflict: duplicate names case-insensitively
+    response = client.post(
+        "/api/document-types",
+        json={
+            "name": "Case Duplication Conflict Schema",
+            "fields": [
+                {"name": "cliente.Nombre", "type": "string"},
+                {"name": "cliente.nombre", "type": "string"}
+            ],
+        },
+    )
+    assert response.status_code == 422
+    assert "Field names must be unique within a document type" in response.text
+
+
+def test_create_document_type_valid_nested(client: TestClient, db_session: SQLAlchemySession) -> None:
+    _auth_client(client, db_session)
+
+    response = client.post(
+        "/api/document-types",
+        json={
+            "name": "Valid Nested Schema",
+            "fields": [
+                {"name": "cliente.direccion.calle", "type": "string"},
+                {"name": "cliente.contactos[].nombre", "type": "string"},
+                {"name": "cliente.contactos[].edad", "type": "number"}
+            ],
+        },
+    )
+    assert response.status_code == 201
+    body = response.json()
+    assert len(body["fields"]) == 3
+
