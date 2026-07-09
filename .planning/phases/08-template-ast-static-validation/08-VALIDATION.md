@@ -19,16 +19,16 @@ created: 2026-07-09
 |----------|-------|
 | **Framework** | pytest |
 | **Config file** | backend/pyproject.toml |
-| **Quick run command** | `uv run pytest backend/tests/test_document_types.py` |
-| **Full suite command** | `uv run pytest` |
+| **Quick run command** | `cd backend && uv run pytest tests/test_document_types.py` |
+| **Full suite command** | `cd backend && uv run pytest` |
 | **Estimated runtime** | ~5 seconds |
 
 ---
 
 ## Sampling Rate
 
-- **After every task commit:** Run `uv run pytest backend/tests/test_document_types.py`
-- **After every plan wave:** Run `uv run pytest`
+- **After every task commit:** Run `cd backend && uv run pytest tests/test_document_types.py`
+- **After every plan wave:** Run `cd backend && uv run pytest`
 - **Before `/gsd-verify-work`:** Full suite must be green
 - **Max feedback latency:** 5 seconds
 
