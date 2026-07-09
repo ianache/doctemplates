@@ -95,8 +95,23 @@ This section maps v2.0 requirements to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
+| NEST-01 | Phase 7 | Proposed |
+| NEST-02 | Phase 7 | Proposed |
+| NEST-03 | Phase 7 | Proposed |
+| CASE-01 | Phase 7 | Proposed |
+| CASE-02 | Phase 7 | Proposed |
+| CASE-03 | Phase 7 | Proposed |
+| AST-01 | Phase 8 | Proposed |
+| AST-02 | Phase 8 | Proposed |
+| SRCH-01 | Phase 9 | Proposed |
+| SRCH-02 | Phase 9 | Proposed |
+| SRCH-03 | Phase 9 | Proposed |
+| SRCH-04 | Phase 9 | Proposed |
+| SRCH-05 | Phase 9 | Proposed |
+| COMPUI-01 | Phase 10 | Proposed |
+| COMPUI-02 | Phase 10 | Proposed |
 
 **Coverage:**
-- Active requirements: 14 total
-- Mapped to phases: 0
-- Unmapped: 14
+- Active requirements: 15 total
+- Mapped to phases: 15
+- Unmapped: 0
