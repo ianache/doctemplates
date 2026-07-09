@@ -10,30 +10,37 @@
 Requirements implemented and validated in the v1.0 milestone.
 
 ### Document Types
+
 - [x] **DOCTYPE-01**: Admin/operational user can define a new document type with its own allowed data schema (tokens/fields).
 - [x] **DOCTYPE-02**: User can list/view existing document types and their schemas.
 
 ### Designer
+
 - [x] **DESIGN-01**: User can visually design a document (drag-and-drop canvas) by composing an ordered sequence of pages, scoped to a chosen document type.
 - [x] **DESIGN-02**: User can reorder pages in the designer; the resulting order is preserved through to generation.
 
 ### Content
+
 - [x] **CONTENT-01**: A page can be a dynamic HTML template containing tokens restricted to the document type's allowed schema.
 - [x] **CONTENT-02**: A page can be a static PDF (or a specific page extracted from one), uploaded through the UI.
 - [x] **CONTENT-03**: Uploaded static PDFs are stored by the platform and referenceable by document designs.
 
 ### Versioning
+
 - [x] **VERSION-01**: User can edit an existing document design, creating a new version rather than overwriting.
 - [x] **VERSION-02**: User can view the version history of a document design.
 
 ### Generation
+
 - [x] **GEN-01**: API generates a final merged PDF from a document design + caller-supplied data (fills template tokens, merges pages in order).
 - [x] **GEN-02**: API generates a preview PDF from mock/sample data without persisting an issuance record.
 
 ### Validation
+
 - [x] **VALID-01**: Using a token outside a document type's allowed schema is rejected with a clear error (e.g. 400 Bad Request) rather than silently ignored.
 
 ### Auth
+
 - [x] **AUTH-01**: Multi-user access is gated behind an OAuth2/OIDC login flow (generic identity provider integration, not custom-built credentials).
 
 ---
@@ -43,16 +50,18 @@ Requirements implemented and validated in the v1.0 milestone.
 New requirements introduced in Milestone v2.0.
 
 ### Nested Data & Case-Insensitivity (Backend Core)
-- [ ] **NEST-01**: Support nested objects (e.g., `cliente.direccion.calle`) in Document Type schemas and API validation.
-- [ ] **NEST-02**: Support lists of objects (e.g., `cliente.contactos[].nombre`) using bracket wildcard notation in schemas and API validation.
-- [ ] **NEST-03**: Validate API payload against nested object and list schemas, rejecting unknown or mismatched fields with `400 Bad Request`.
-- [ ] **CASE-01**: Implement case-insensitive matching for API payload keys and schema properties.
-- [ ] **CASE-02**: Detect case-insensitive key collisions (e.g., `Name` and `name` in the same object) in payloads and reject with `400 Bad Request`.
-- [ ] **CASE-03**: Render Jinja2 template tokens case-insensitively (e.g., `{{Cliente.Codigo}}` resolves to `cliente.codigo`).
+
+- [x] **NEST-01**: Support nested objects (e.g., `cliente.direccion.calle`) in Document Type schemas and API validation.
+- [x] **NEST-02**: Support lists of objects (e.g., `cliente.contactos[].nombre`) using bracket wildcard notation in schemas and API validation.
+- [x] **NEST-03**: Validate API payload against nested object and list schemas, rejecting unknown or mismatched fields with `400 Bad Request`.
+- [x] **CASE-01**: Implement case-insensitive matching for API payload keys and schema properties.
+- [x] **CASE-02**: Detect case-insensitive key collisions (e.g., `Name` and `name` in the same object) in payloads and reject with `400 Bad Request`.
+- [x] **CASE-03**: Render Jinja2 template tokens case-insensitively (e.g., `{{Cliente.Codigo}}` resolves to `cliente.codigo`).
 - [ ] **AST-01**: Parse Jinja2 templates using AST to extract referenced token paths (including nested objects and list fields).
 - [ ] **AST-02**: Statically validate extracted template token paths against the Document Type schema before template/design activation.
 
 ### Search Documents Library (Backend & Frontend Integration)
+
 - [ ] **SRCH-01**: Retrieve and filter generated documents (`issuances`) by design name, ID, status, or date range (AND condition).
 - [ ] **SRCH-02**: View the content of a selected generated document (displaying metadata and PDF content).
 - [ ] **SRCH-03**: Track and display a technical audit log (tracelog) timeline of document activities (generation, download, share).
@@ -60,6 +69,7 @@ New requirements introduced in Milestone v2.0.
 - [ ] **SRCH-05**: Implement a "Share" feature that copies the document's direct URL to the clipboard (public access in this MVP).
 
 ### UI/UX Improvements for Complex Fields
+
 - [ ] **COMPUI-01**: Support viewing, adding, and managing complex schema fields (nested objects/lists) in the Document Types UI.
 - [ ] **COMPUI-02**: Support previsualizing designs with complex nested/array data in the visual editor.
 
@@ -112,6 +122,7 @@ This section maps v2.0 requirements to roadmap phases.
 | COMPUI-02 | Phase 10 | Proposed |
 
 **Coverage:**
+
 - Active requirements: 15 total
 - Mapped to phases: 15
 - Unmapped: 0
