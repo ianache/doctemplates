@@ -78,3 +78,4 @@ class DocumentDesignDetail(BaseModel):
     created_by_email: str
     created_at: datetime
     pages: list[DocumentDesignPageOut]
+    warnings: list[str] = []

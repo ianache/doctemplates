@@ -35,6 +35,7 @@ from app.services.design_validation import (
     assert_no_duplicate_static_pdf,
     assert_static_pdf_compatible,
     assert_template_compatible,
+    get_design_warnings,
     static_pdf_snapshot,
     template_snapshot,
     validate_design_activation,
@@ -84,8 +85,11 @@ def _page_out(page: DocumentDesignPage) -> DocumentDesignPageOut:
     )
 
 
-def _detail(design: DocumentDesign) -> DocumentDesignDetail:
+def _detail(design: DocumentDesign, db: SQLAlchemySession = None) -> DocumentDesignDetail:
     ordered_pages = sorted(design.pages, key=lambda page: page.position)
+    warnings = []
+    if design.status == "draft":
+        warnings = get_design_warnings(design, db)
     return DocumentDesignDetail(
         id=design.id,
         name=design.name,
@@ -98,6 +102,7 @@ def _detail(design: DocumentDesign) -> DocumentDesignDetail:
         created_by_email=design.created_by.email,
         created_at=design.created_at,
         pages=[_page_out(page) for page in ordered_pages],
+        warnings=warnings,
     )
 
 
@@ -119,7 +124,7 @@ def create_document_design(
     db.add(design)
     db.commit()
     db.refresh(design)
-    return _detail(design)
+    return _detail(design, db)
 
 
 @router.get("", response_model=list[DocumentDesignListItem])
@@ -162,7 +167,7 @@ def get_document_design(
     user: User = Depends(get_current_user),
     db: SQLAlchemySession = Depends(get_db),
 ) -> DocumentDesignDetail:
-    return _detail(_require_design(db, design_id))
+    return _detail(_require_design(db, design_id), db)
 
 
 @router.post("/{design_id}/pages/template", response_model=DocumentDesignPageOut, status_code=201)
@@ -245,7 +250,7 @@ def reorder_design_pages(
     for position, page_id in enumerate(payload.page_ids):
         pages_by_id[page_id].position = position
     db.commit()
-    return _detail(design)
+    return _detail(design, db)
 
 
 @router.patch("/{design_id}/pages/{page_id}", response_model=DocumentDesignPageOut)
@@ -322,7 +327,7 @@ def activate_document_design(
 
     db.commit()
     db.refresh(design)
-    return _detail(design)
+    return _detail(design, db)
 
 
 @router.post("/{design_id}/versions", response_model=DocumentDesignDetail, status_code=201)
@@ -346,7 +351,7 @@ def fork_document_design_version(
         .first()
     )
     if existing_draft is not None:
-        return _detail(existing_draft)
+        return _detail(existing_draft, db)
 
     next_version = (
         db.query(func.max(DocumentDesign.version_number))
@@ -390,11 +395,11 @@ def fork_document_design_version(
             .first()
         )
         if existing_draft is not None:
-            return _detail(existing_draft)
+            return _detail(existing_draft, db)
         raise
 
     db.refresh(draft)
-    return _detail(draft)
+    return _detail(draft, db)
 
 
 @router.get("/{design_id}/versions", response_model=list[DocumentDesignListItem])

@@ -54,18 +54,19 @@ def assert_no_duplicate_static_pdf(design: DocumentDesign, asset: StaticPdfAsset
         raise HTTPException(status_code=400, detail="PDF asset already exists in this design")
 
 
-def validate_design_activation(design: DocumentDesign, db: SQLAlchemySession) -> None:
-    if not design.name or not design.document_type_id:
-        raise HTTPException(status_code=400, detail="Design name and document type are required")
-    if not design.pages:
-        raise HTTPException(status_code=400, detail="Active designs require at least one page")
+def get_design_warnings(design: DocumentDesign, db: SQLAlchemySession = None) -> list[str]:
+    from app.services.content_validation import get_ancestor_paths, extract_template_tokens_ast_warnings
 
     allowed_tokens = {field.name for field in design.document_type.fields}
-    invalid_tokens: set[str] = set()
+    valid_ancestors = set()
+    for token in allowed_tokens:
+        valid_ancestors.update(get_ancestor_paths(token))
+
+    warnings = []
 
     template_page_ids = {page.content_id for page in design.pages if page.block_type == "html_template"}
     templates_by_id = {}
-    if template_page_ids:
+    if db is not None and template_page_ids:
         templates = db.query(HtmlTemplate).filter(HtmlTemplate.id.in_(template_page_ids)).all()
         templates_by_id = {template.id: template for template in templates}
 
@@ -73,15 +74,38 @@ def validate_design_activation(design: DocumentDesign, db: SQLAlchemySession) ->
         if page.block_type != "html_template":
             continue
 
+        html = None
         template = templates_by_id.get(page.content_id)
         if template is not None:
-            token_names = list(template.token_names or [])
+            html = template.html
         else:
-            token_names = list((page.snapshot or {}).get("token_names") or [])
-        invalid_tokens.update(token for token in token_names if token not in allowed_tokens)
+            snapshot = page.snapshot or {}
+            html = snapshot.get("html")
 
-    if invalid_tokens:
+        if html:
+            page_warnings = extract_template_tokens_ast_warnings(html, valid_ancestors)
+            warnings.extend(page_warnings)
+
+    return sorted(list(set(warnings)))
+
+
+def validate_design_activation(design: DocumentDesign, db: SQLAlchemySession) -> None:
+    if not design.name or not design.document_type_id:
+        raise HTTPException(status_code=400, detail="Design name and document type are required")
+    if not design.pages:
+        raise HTTPException(status_code=400, detail="Active designs require at least one page")
+
+    warnings = get_design_warnings(design, db)
+    if warnings:
+        invalid_tokens = []
+        for warning in warnings:
+            if warning.startswith("Token '") and warning.endswith("' is not declared in schema"):
+                token = warning[7:-27]
+                invalid_tokens.append(token)
+            else:
+                invalid_tokens.append(warning)
+
         raise HTTPException(
             status_code=400,
-            detail=f"Invalid template tokens: {', '.join(sorted(invalid_tokens))}",
+            detail=f"Invalid template tokens: {', '.join(sorted(list(set(invalid_tokens))))}",
         )
