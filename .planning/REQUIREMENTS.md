@@ -1,97 +1,102 @@
 # Requirements: DocManagement Platform
 
-**Defined:** 2026-07-05
+**Last Updated:** 2026-07-09 after Milestone v1.0
 **Core Value:** Operational users can visually compose a document design (templates + fixed content, in order) and reliably generate a correct final PDF from it via API, without engineering involvement per document type.
 
-## v1 Requirements
+---
 
-Requirements for initial release (MVP1). Each maps to roadmap phases.
+## v1 Requirements (Completed)
+
+Requirements implemented and validated in the v1.0 milestone.
 
 ### Document Types
-
-- [x] **DOCTYPE-01**: Admin/operational user can define a new document type with its own allowed data schema (tokens/fields)
-- [x] **DOCTYPE-02**: User can list/view existing document types and their schemas
+- [x] **DOCTYPE-01**: Admin/operational user can define a new document type with its own allowed data schema (tokens/fields).
+- [x] **DOCTYPE-02**: User can list/view existing document types and their schemas.
 
 ### Designer
-
-- [x] **DESIGN-01**: User can visually design a document (drag-and-drop canvas) by composing an ordered sequence of pages, scoped to a chosen document type
-- [x] **DESIGN-02**: User can reorder pages in the designer; the resulting order is preserved through to generation
+- [x] **DESIGN-01**: User can visually design a document (drag-and-drop canvas) by composing an ordered sequence of pages, scoped to a chosen document type.
+- [x] **DESIGN-02**: User can reorder pages in the designer; the resulting order is preserved through to generation.
 
 ### Content
-
-- [x] **CONTENT-01**: A page can be a dynamic HTML template containing tokens restricted to the document type's allowed schema
-- [x] **CONTENT-02**: A page can be a static PDF (or a specific page extracted from one), uploaded through the UI
-- [x] **CONTENT-03**: Uploaded static PDFs are stored by the platform and referenceable by document designs
+- [x] **CONTENT-01**: A page can be a dynamic HTML template containing tokens restricted to the document type's allowed schema.
+- [x] **CONTENT-02**: A page can be a static PDF (or a specific page extracted from one), uploaded through the UI.
+- [x] **CONTENT-03**: Uploaded static PDFs are stored by the platform and referenceable by document designs.
 
 ### Versioning
-
-- [x] **VERSION-01**: User can edit an existing document design, creating a new version rather than overwriting
-- [x] **VERSION-02**: User can view the version history of a document design
+- [x] **VERSION-01**: User can edit an existing document design, creating a new version rather than overwriting.
+- [x] **VERSION-02**: User can view the version history of a document design.
 
 ### Generation
-
-- [x] **GEN-01**: API generates a final merged PDF from a document design + caller-supplied data (fills template tokens, merges pages in order)
-- [x] **GEN-02**: API generates a preview PDF from mock/sample data without persisting an issuance record
+- [x] **GEN-01**: API generates a final merged PDF from a document design + caller-supplied data (fills template tokens, merges pages in order).
+- [x] **GEN-02**: API generates a preview PDF from mock/sample data without persisting an issuance record.
 
 ### Validation
-
-- [x] **VALID-01**: Using a token outside a document type's allowed schema is rejected with a clear error (e.g. 400 Bad Request) rather than silently ignored or leaking data
+- [x] **VALID-01**: Using a token outside a document type's allowed schema is rejected with a clear error (e.g. 400 Bad Request) rather than silently ignored.
 
 ### Auth
+- [x] **AUTH-01**: Multi-user access is gated behind an OAuth2/OIDC login flow (generic identity provider integration, not custom-built credentials).
 
-- [x] **AUTH-01**: Multi-user access is gated behind an OAuth2/OIDC login flow (generic identity provider integration, not custom-built credentials)
+---
 
-## v2 Requirements
+## v2.0 Requirements (Active)
 
-Deferred to future release. Tracked but not in current roadmap.
+New requirements introduced in Milestone v2.0.
 
-### Data Integration
+### Nested Data & Case-Insensitivity (Backend Core)
+- [ ] **NEST-01**: Support nested objects (e.g., `cliente.direccion.calle`) in Document Type schemas and API validation.
+- [ ] **NEST-02**: Support lists of objects (e.g., `cliente.contactos[].nombre`) using bracket wildcard notation in schemas and API validation.
+- [ ] **NEST-03**: Validate API payload against nested object and list schemas, rejecting unknown or mismatched fields with `400 Bad Request`.
+- [ ] **CASE-01**: Implement case-insensitive matching for API payload keys and schema properties.
+- [ ] **CASE-02**: Detect case-insensitive key collisions (e.g., `Name` and `name` in the same object) in payloads and reject with `400 Bad Request`.
+- [ ] **CASE-03**: Render Jinja2 template tokens case-insensitively (e.g., `{{Cliente.Codigo}}` resolves to `cliente.codigo`).
+- [ ] **AST-01**: Parse Jinja2 templates using AST to extract referenced token paths (including nested objects and list fields).
+- [ ] **AST-02**: Statically validate extracted template token paths against the Document Type schema before template/design activation.
 
-- **DATA-01**: Platform resolves token data from external systems by reference ID, instead of requiring the API caller to supply all data directly
+### Search Documents Library (Backend & Frontend Integration)
+- [ ] **SRCH-01**: Retrieve and filter generated documents (`issuances`) by design name, ID, status, or date range (AND condition).
+- [ ] **SRCH-02**: View the content of a selected generated document (displaying metadata and PDF content).
+- [ ] **SRCH-03**: Track and display a technical audit log (tracelog) timeline of document activities (generation, download, share).
+- [ ] **SRCH-04**: Allow downloading the PDF file from the document detail view.
+- [ ] **SRCH-05**: Implement a "Share" feature that copies the document's direct URL to the clipboard (public access in this MVP).
 
-### Output
+### UI/UX Improvements for Complex Fields
+- [ ] **COMPUI-01**: Support viewing, adding, and managing complex schema fields (nested objects/lists) in the Document Types UI.
+- [ ] **COMPUI-02**: Support previsualizing designs with complex nested/array data in the visual editor.
 
-- **OUTPUT-01**: Support non-PDF output formats
+---
 
-### Access Control
+## Future Requirements (Deferred)
 
-- **AUTH-02**: Fine-grained roles/permissions per document type or design (beyond basic authenticated access)
+Deferred to future releases. Tracked but not in the current roadmap.
+
+- **DATA-01**: Platform resolves token data from external systems by reference ID, instead of requiring the API caller to supply all data directly.
+- **OUTPUT-01**: Support non-PDF output formats.
+- **AUTH-02**: Fine-grained roles/permissions per document type or design.
+- **SEC-01**: Document access protection and access restrictions on shared links.
+
+---
 
 ## Out of Scope
 
-Explicitly excluded from MVP1. Documented to prevent scope creep.
+Explicitly excluded from Milestone v2.0 to prevent scope creep.
 
 | Feature | Reason |
 |---------|--------|
-| Platform-side resolution of real operational data | MVP1 requires the API caller to supply all data directly; external data integration is deferred (see DATA-01) |
-| Non-PDF output formats | MVP1 is PDF-only (see OUTPUT-01) |
-| Hardcoded Sales Channel / Service (B2C Básico vs B2B Flota) business rule | Becomes an example document type configured through the general DOCTYPE mechanism, not bespoke code |
-| Custom-built auth (email/password, owned credentials) | MVP1 integrates an existing OAuth2/OIDC identity provider instead |
+| Platform-side resolution of real operational data | Defer to future (DATA-01). Caller must supply all nested/list data in payload. |
+| Non-PDF output formats | PDF-only format is maintained (OUTPUT-01). |
+| Custom-built auth | Authentication is strictly OIDC-based. |
+| Shared link access control | Shared links are public and open in this MVP for simplicity (SEC-01). |
+
+---
 
 ## Traceability
 
+This section maps v2.0 requirements to roadmap phases.
+
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | Phase 1 | Complete |
-| DOCTYPE-01 | Phase 2 | Complete |
-| DOCTYPE-02 | Phase 2 | Complete |
-| CONTENT-01 | Phase 3 | Complete |
-| CONTENT-02 | Phase 3 | Complete |
-| CONTENT-03 | Phase 3 | Complete |
-| VALID-01 | Phase 3 | Complete |
-| DESIGN-01 | Phase 4 | Complete |
-| DESIGN-02 | Phase 4 | Complete |
-| VERSION-01 | Phase 5 | Complete |
-| VERSION-02 | Phase 5 | Complete |
-| GEN-01 | Phase 6 | Complete |
-| GEN-02 | Phase 6 | Complete |
 
 **Coverage:**
-
-- v1 requirements: 13 total
-- Mapped to phases: 13
-- Unmapped: 0 ✓
-
----
-*Requirements defined: 2026-07-05*
-*Last updated: 2026-07-05 after roadmap creation (6 phases, full coverage)*
+- Active requirements: 14 total
+- Mapped to phases: 0
+- Unmapped: 14
