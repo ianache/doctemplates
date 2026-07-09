@@ -85,15 +85,29 @@ def test_validate_and_coerce_payload():
         "cliente.edad": "25.5",
         "es_premium": "yes",
         "fecha_registro": "2026-01-01",
-        "extra_field": "ignore me",
     }
     res = validate_and_coerce_payload(payload, fields, mock_fallback=False)
     assert res == {
-        "cliente.nombre": "Alice",
-        "cliente.edad": 25.5,
+        "cliente": {
+            "nombre": "Alice",
+            "edad": 25.5,
+        },
         "es_premium": True,
         "fecha_registro": "2026-01-01",
     }
+
+    # Unknown property rejection (D-06)
+    bad_payload_extra = {
+        "cliente.nombre": "Alice",
+        "cliente.edad": "25.5",
+        "es_premium": "yes",
+        "fecha_registro": "2026-01-01",
+        "extra_field": "ignore me",
+    }
+    with pytest.raises(HTTPException) as exc_info:
+        validate_and_coerce_payload(bad_payload_extra, fields, mock_fallback=False)
+    assert exc_info.value.status_code == 400
+    assert "Unknown property" in str(exc_info.value.detail)
 
     # Missing fields without fallback -> 400
     bad_payload = {
@@ -105,10 +119,42 @@ def test_validate_and_coerce_payload():
 
     # Missing fields with fallback -> mock values generated
     mock_res = validate_and_coerce_payload(bad_payload, fields, mock_fallback=True)
-    assert mock_res["cliente.nombre"] == "Alice"
-    assert mock_res["cliente.edad"] == 123.45
+    assert mock_res["cliente"]["nombre"] == "Alice"
+    assert mock_res["cliente"]["edad"] == 123.45
     assert mock_res["es_premium"] is True
     assert len(mock_res["fecha_registro"]) == 10  # YYYY-MM-DD
+
+    # Case-insensitive key collisions (D-03/D-04)
+    collision_payload = {
+        "invoice": {
+            "Num": "123",
+            "num": "456"
+        }
+    }
+    collision_fields = [
+        DocumentTypeField(name="invoice.num", type="string", position=0)
+    ]
+    with pytest.raises(HTTPException) as exc_info:
+        validate_and_coerce_payload(collision_payload, collision_fields, mock_fallback=False)
+    assert exc_info.value.status_code == 400
+    details = exc_info.value.detail
+    assert isinstance(details, list)
+    assert details[0]["type"] == "casing_collision"
+    assert details[0]["loc"] == ["invoice", "Num"]
+
+    # Permissive lists (D-05) - list field is defined in schema but omitted from payload
+    list_fields = [
+        DocumentTypeField(name="cliente.contactos[].nombre", type="string", position=0)
+    ]
+    list_payload = {
+        "cliente": {}
+    }
+    res_list = validate_and_coerce_payload(list_payload, list_fields, mock_fallback=False)
+    assert res_list == {
+        "cliente": {
+            "contactos": []
+        }
+    }
 
 
 def test_render_html_page_to_pdf():

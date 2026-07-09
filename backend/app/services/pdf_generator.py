@@ -95,45 +95,290 @@ def coerce_value(val: any, field_type: str, field_name: str) -> any:
         return val
 
 
+import re
+
+class SchemaNode:
+    def __init__(self, node_type: str, field_type: str = None, name: str = None, description: str = None):
+        self.node_type = node_type  # "leaf", "object", "list"
+        self.field_type = field_type  # "string", "number", "date", "boolean" (only if leaf)
+        self.name = name  # original name/casing of the field segment
+        self.description = description
+        self.children = {}  # key: lowercase name -> SchemaNode (if object)
+        self.element_node = None  # SchemaNode (if list)
+
+
+def build_schema_tree(schema_fields: list[DocumentTypeField]) -> SchemaNode:
+    root = SchemaNode("object")
+    
+    for field in schema_fields:
+        segments = field.name.split(".")
+        current = root
+        
+        for idx, segment in enumerate(segments):
+            is_last = (idx == len(segments) - 1)
+            
+            if segment.endswith("[]"):
+                name = segment[:-2]
+                lk_name = name.lower()
+                is_list = True
+            else:
+                name = segment
+                lk_name = name.lower()
+                is_list = False
+                
+            if is_last:
+                current.children[lk_name] = SchemaNode(
+                    "leaf",
+                    field_type=field.type,
+                    name=name,
+                    description=field.description
+                )
+            else:
+                if lk_name in current.children:
+                    existing = current.children[lk_name]
+                    if is_list:
+                        current = existing.element_node
+                    else:
+                        current = existing
+                else:
+                    if is_list:
+                        element_node = SchemaNode("object", name=name)
+                        list_node = SchemaNode("list", name=name)
+                        list_node.element_node = element_node
+                        current.children[lk_name] = list_node
+                        current = element_node
+                    else:
+                        obj_node = SchemaNode("object", name=name)
+                        current.children[lk_name] = obj_node
+                        current = obj_node
+    return root
+
+
+def check_casing_collisions(payload: any, path: list = None) -> list[dict]:
+    if path is None:
+        path = []
+    errors = []
+    if isinstance(payload, dict):
+        seen = {}
+        for key in payload.keys():
+            lk = key.lower()
+            seen.setdefault(lk, []).append(key)
+        
+        for lk, keys in seen.items():
+            if len(keys) > 1:
+                errors.append({
+                    "loc": path + [keys[0]],
+                    "msg": f"Casing collision detected for key '{lk}': {', '.join(keys)}",
+                    "type": "casing_collision",
+                    "ctx": {"conflicting_keys": keys}
+                })
+        
+        for key, val in payload.items():
+            errors.extend(check_casing_collisions(val, path + [key]))
+            
+    elif isinstance(payload, list):
+        for idx, item in enumerate(payload):
+            errors.extend(check_casing_collisions(item, path + [idx]))
+            
+    return errors
+
+
+PATH_PART_RE = re.compile(r"([^.\[]+)(?:\[(\d+)\])?")
+
+def parse_path(path_str: str) -> list[tuple]:
+    parts = path_str.split(".")
+    steps = []
+    for part in parts:
+        match = PATH_PART_RE.match(part)
+        if not match:
+            raise ValueError(f"Invalid path segment: '{part}'")
+        name = match.group(1)
+        idx_str = match.group(2)
+        if idx_str is not None:
+            steps.append(("dict", name))
+            steps.append(("list_idx", int(idx_str)))
+        else:
+            steps.append(("dict", name))
+    return steps
+
+
+def set_nested_value(root: any, steps: list[tuple], value: any) -> any:
+    current = root
+    for i, step in enumerate(steps):
+        is_last = (i == len(steps) - 1)
+        step_type = step[0]
+        
+        if step_type == "dict":
+            key = step[1]
+            if is_last:
+                if isinstance(current, dict):
+                    if key in current and isinstance(current[key], dict) and isinstance(value, dict):
+                        def merge_dicts(dest, src):
+                            for k, v in src.items():
+                                if k in dest and isinstance(dest[k], dict) and isinstance(v, dict):
+                                    merge_dicts(dest[k], v)
+                                else:
+                                    dest[k] = v
+                        merge_dicts(current[key], value)
+                    else:
+                        current[key] = value
+                else:
+                    raise ValueError("Expected dictionary structure but found primitive/list")
+            else:
+                next_step_type = steps[i+1][0]
+                if next_step_type == "dict":
+                    if key not in current:
+                        current[key] = {}
+                    elif not isinstance(current[key], dict):
+                        current[key] = {}
+                    current = current[key]
+                elif next_step_type == "list_idx":
+                    if key not in current:
+                        current[key] = []
+                    elif not isinstance(current[key], list):
+                        current[key] = []
+                    current = current[key]
+        
+        elif step_type == "list_idx":
+            idx = step[1]
+            if is_last:
+                while len(current) <= idx:
+                    current.append(None)
+                current[idx] = value
+            else:
+                while len(current) <= idx:
+                    current.append(None)
+                
+                next_step_type = steps[i+1][0]
+                if current[idx] is None:
+                    if next_step_type == "dict":
+                        current[idx] = {}
+                    elif next_step_type == "list_idx":
+                        current[idx] = []
+                current = current[idx]
+
+
+def expand_payload(payload: dict) -> dict:
+    expanded = {}
+    for k, v in payload.items():
+        steps = parse_path(k)
+        set_nested_value(expanded, steps, v)
+    return expanded
+
+
+def validate_payload_against_schema(
+    payload: any,
+    schema_node: SchemaNode,
+    mock_fallback: bool = False,
+    depth: int = 0,
+    parent_path: list = None
+) -> any:
+    if parent_path is None:
+        parent_path = []
+        
+    if depth > 5:
+        raise HTTPException(
+            status_code=400,
+            detail="Recursion depth limit of 5 levels exceeded in payload validation."
+        )
+        
+    if schema_node.node_type == "leaf":
+        if payload is None:
+            if mock_fallback:
+                if schema_node.field_type == "string":
+                    return f"{schema_node.name}_val"
+                elif schema_node.field_type == "number":
+                    return 123.45
+                elif schema_node.field_type == "boolean":
+                    return True
+                elif schema_node.field_type == "date":
+                    return datetime.now(timezone.utc).strftime("%Y-%m-%d")
+                return None
+            else:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Missing required field '{'.'.join(str(p) for p in parent_path)}' in payload."
+                )
+        
+        try:
+            return coerce_value(payload, schema_node.field_type, ".".join(str(p) for p in parent_path))
+        except ValueError as e:
+            raise HTTPException(
+                status_code=400,
+                detail=str(e)
+            )
+            
+    elif schema_node.node_type == "object":
+        if payload is None:
+            payload = {}
+                
+        if not isinstance(payload, dict):
+            raise HTTPException(
+                status_code=400,
+                detail=f"Expected dictionary structure at '{'.'.join(str(p) for p in parent_path)}' but found primitive/list."
+            )
+            
+        for k in payload.keys():
+            if k.lower() not in schema_node.children:
+                prop_path = ".".join(str(p) for p in parent_path + [k])
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Unknown property '{k}' at location '{prop_path}'"
+                )
+                
+        coerced_dict = {}
+        for child_lk, child_node in schema_node.children.items():
+            matching_key = next((k for k in payload.keys() if k.lower() == child_lk), None)
+            
+            if matching_key is None:
+                if child_node.node_type == "list":
+                    coerced_dict[child_node.name] = []
+                else:
+                    if mock_fallback:
+                        coerced_dict[child_node.name] = validate_payload_against_schema(
+                            None, child_node, mock_fallback=True, depth=depth+1, parent_path=parent_path + [child_node.name]
+                        )
+                    else:
+                        raise HTTPException(
+                            status_code=400,
+                            detail=f"Missing required field '{'.'.join(str(p) for p in parent_path + [child_node.name])}' in payload."
+                        )
+            else:
+                coerced_dict[matching_key] = validate_payload_against_schema(
+                    payload[matching_key], child_node, mock_fallback, depth=depth+1, parent_path=parent_path + [matching_key]
+                )
+        return coerced_dict
+        
+    elif schema_node.node_type == "list":
+        if payload is None:
+            return []
+            
+        if not isinstance(payload, list):
+            raise HTTPException(
+                status_code=400,
+                detail=f"Expected list structure at '{'.'.join(str(p) for p in parent_path)}' but found primitive/dict."
+            )
+            
+        coerced_list = []
+        for idx, item in enumerate(payload):
+            coerced_item = validate_payload_against_schema(
+                item, schema_node.element_node, mock_fallback, depth=depth+1, parent_path=parent_path + [idx]
+            )
+            coerced_list.append(coerced_item)
+        return coerced_list
+
+
 def validate_and_coerce_payload(
     payload: dict,
     schema_fields: list[DocumentTypeField],
     mock_fallback: bool = False
 ) -> dict:
-    """Validates payload against schema fields.
-    
-    If mock_fallback is True, missing fields are populated with mock values.
-    Otherwise, missing fields raise HTTP 400. Extra fields are ignored.
-    """
-    coerced = {}
-    for field in schema_fields:
-        found, val = get_payload_value(payload, field.name)
-        if not found:
-            if mock_fallback:
-                if field.type == "string":
-                    coerced[field.name] = f"{field.name}_val"
-                elif field.type == "number":
-                    coerced[field.name] = 123.45
-                elif field.type == "boolean":
-                    coerced[field.name] = True
-                elif field.type == "date":
-                    coerced[field.name] = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-                else:
-                    coerced[field.name] = None
-            else:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Missing required field '{field.name}' in payload."
-                )
-        else:
-            try:
-                coerced[field.name] = coerce_value(val, field.type, field.name)
-            except ValueError as e:
-                raise HTTPException(
-                    status_code=400,
-                    detail=str(e)
-                )
-    return coerced
+    expanded = expand_payload(payload)
+    collisions = check_casing_collisions(expanded)
+    if collisions:
+        raise HTTPException(status_code=400, detail=collisions)
+    schema_tree = build_schema_tree(schema_fields)
+    return validate_payload_against_schema(expanded, schema_tree, mock_fallback)
 
 
 def expand_flat_dict(flat: dict[str, any]) -> dict[str, any]:
@@ -198,10 +443,7 @@ def generate_composed_pdf(
 ) -> bytes:
     """Composes a single merged PDF from a design, its pages, and client data."""
     # 1. Validate and coerce payload fields
-    coerced_payload = validate_and_coerce_payload(payload, design.document_type.fields, mock_fallback)
-
-    # 2. Expand dot notation to nested dictionaries for Jinja context
-    expanded_payload = expand_flat_dict(coerced_payload)
+    expanded_payload = validate_and_coerce_payload(payload, design.document_type.fields, mock_fallback)
 
     # 3. Pre-fetch templates and static assets to minimize DB calls in rendering loop
     template_page_ids = {page.content_id for page in design.pages if page.block_type == "html_template"}
