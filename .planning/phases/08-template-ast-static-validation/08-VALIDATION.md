@@ -19,16 +19,16 @@ created: 2026-07-09
 |----------|-------|
 | **Framework** | pytest |
 | **Config file** | backend/pyproject.toml |
-| **Quick run command** | `cd backend && uv run pytest tests/test_document_types.py` |
-| **Full suite command** | `cd backend && uv run pytest` |
+| **Quick run command** | `uv run --directory backend pytest tests/test_template_ast_validation.py` |
+| **Full suite command** | `uv run --directory backend pytest` |
 | **Estimated runtime** | ~5 seconds |
 
 ---
 
 ## Sampling Rate
 
-- **After every task commit:** Run `cd backend && uv run pytest tests/test_document_types.py`
-- **After every plan wave:** Run `cd backend && uv run pytest`
+- **After every task commit:** Run `uv run --directory backend pytest tests/test_template_ast_validation.py`
+- **After every plan wave:** Run `uv run --directory backend pytest`
 - **Before `/gsd-verify-work`:** Full suite must be green
 - **Max feedback latency:** 5 seconds
 
@@ -38,9 +38,9 @@ created: 2026-07-09
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 08-01-01 | 01   | 1    | AST-01      | T-08-02    | Jinja2 AST NodeVisitor scope-aware extractor | unit | `cd backend && uv run python -c "import app.services.content_validation"` | ✅ | ⬜ pending |
-| 08-01-02 | 01   | 1    | AST-02      | T-08-03    | Route integration for design validation & status-based gates | integration | `cd backend && uv run python -c "import app.api.document_designs, app.schemas.document_design, app.services.design_validation"` | ✅ | ⬜ pending |
-| 08-01-03 | 01   | 1    | AST-01, AST-02 | T-08-02, T-08-03 | Comprehensive test suite for AST scope-aware mapping, globals, and API responses | integration | `cd backend && uv run pytest tests/test_template_ast_validation.py` | ❌ W0 | ⬜ pending |
+| 08-01-01 | 01   | 1    | AST-01      | T-08-02    | Jinja2 AST NodeVisitor scope-aware extractor | unit | `uv run --directory backend python -c "import app.services.content_validation"` | ✅ | ⬜ pending |
+| 08-01-02 | 01   | 1    | AST-02      | T-08-03    | Route integration for design validation & status-based gates | integration | `uv run --directory backend python -c "import app.api.document_designs, app.schemas.document_design, app.services.design_validation"` | ✅ | ⬜ pending |
+| 08-01-03 | 01   | 1    | AST-01, AST-02 | T-08-02, T-08-03 | Comprehensive test suite for AST scope-aware mapping, globals, and API responses | integration | `uv run --directory backend pytest tests/test_template_ast_validation.py` | ❌ W0 | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
