@@ -40,7 +40,7 @@ created: 2026-07-09
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
 | 08-01-01 | 01   | 1    | AST-01      | T-08-02    | Jinja2 AST NodeVisitor scope-aware extractor | unit | `cd backend && uv run python -c "import app.services.content_validation"` | ✅ | ⬜ pending |
 | 08-01-02 | 01   | 1    | AST-02      | T-08-03    | Route integration for design validation & status-based gates | integration | `cd backend && uv run python -c "import app.api.document_designs, app.schemas.document_design, app.services.design_validation"` | ✅ | ⬜ pending |
-| 08-01-03 | 01   | 1    | AST-01, AST-02 | T-08-02, T-08-03 | Comprehensive test suite for AST scope-aware mapping, globals, and API responses | integration | `cd backend && uv run pytest backend/tests/test_template_ast_validation.py` | ❌ W0 | ⬜ pending |
+| 08-01-03 | 01   | 1    | AST-01, AST-02 | T-08-02, T-08-03 | Comprehensive test suite for AST scope-aware mapping, globals, and API responses | integration | `cd backend && uv run pytest tests/test_template_ast_validation.py` | ❌ W0 | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
