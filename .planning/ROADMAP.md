@@ -204,9 +204,16 @@ Plans:
 **UI hint**: yes
 
 Plans:
+**Wave 1**
 
 - [ ] 09-01-PLAN.md - Backend: DocumentTracelog persistence and generation-event logging
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 09-02-PLAN.md - Backend: issuance search, detail, tracelog, download, share, and signed public download APIs
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 09-03-PLAN.md - Frontend: Documents Library navigation, search listing, detail preview, download, share, and timeline
 
 ### Phase 10: Complex Schema UI & Nested Data Previsualization
