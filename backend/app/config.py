@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     test_database_url: str
 
     session_secret: str
+    secret_key: str | None = None
     session_cookie_name: str = "docmanagement_session"
     session_ttl_seconds: int = 604800
 
