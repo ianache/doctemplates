@@ -16,6 +16,7 @@ from app.models.content_template import HtmlTemplate
 from app.models.document_design import DocumentDesign, DocumentDesignPage
 from app.models.document_type import DocumentType
 from app.models.document_issuance import DocumentIssuance
+from app.models.document_tracelog import DocumentTracelog
 from app.models.static_pdf_asset import StaticPdfAsset
 from app.models.user import User
 from app.schemas.document_issuance import DocumentIssuanceOut
@@ -484,8 +485,18 @@ def generate_document(
         file_path=file_path,
         user_id=user.id,
         input_data=payload,
+        status="success",
     )
-    db.add(issuance)
+    tracelog = DocumentTracelog(
+        issuance=issuance,
+        user_id=user.id,
+        event_type="generation",
+        metadata_={
+            "source": "POST /api/document-designs/{design_id}/generate",
+            "design_id": str(design.id),
+        },
+    )
+    db.add_all([issuance, tracelog])
     db.commit()
     db.refresh(issuance)
     return issuance
@@ -504,5 +515,4 @@ def preview_document(
 
     pdf_bytes = generate_composed_pdf(design, payload, db, mock_fallback=True)
     return Response(content=pdf_bytes, media_type="application/pdf")
-
 
