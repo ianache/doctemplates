@@ -193,8 +193,9 @@ export default function DateRange({
     onToChange("");
   };
 
-  const CELL = "flex h-9 items-center justify-center";
+  const CELL = "h-9 flex items-center justify-center";
   const DAY_BTN = "h-8 w-8 flex items-center justify-center rounded text-body-sm transition-colors select-none";
+  const GRID_STYLE = { display: "grid", gridTemplateColumns: "repeat(7, 1fr)" } as const;
 
   return (
     <div ref={containerRef} className={cn("relative", className)}>
@@ -248,7 +249,7 @@ export default function DateRange({
             </button>
           </div>
 
-          <div className="grid grid-cols-7">
+          <div className="mb-xs" style={GRID_STYLE}>
             {WEEKDAYS.map((wd, i) => (
               <div key={i} className={cn(CELL, "text-label-caps text-secondary")}>
                 {wd}
@@ -256,7 +257,7 @@ export default function DateRange({
             ))}
           </div>
 
-          <div className="grid grid-cols-7">
+          <div style={GRID_STYLE}>
             {cells.map((d, i) => (
               <div
                 key={i}
