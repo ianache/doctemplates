@@ -13,6 +13,8 @@ import DocumentDesignListPage from "./pages/document-designs/DocumentDesignListP
 import DocumentDesignCreatePage from "./pages/document-designs/DocumentDesignCreatePage";
 import DocumentDesignDetailPage from "./pages/document-designs/DocumentDesignDetailPage";
 import VersionHistoryPage from "./pages/document-designs/VersionHistoryPage";
+import DocumentLibraryPage from "./pages/document-issuances/DocumentLibraryPage";
+import DocumentIssuanceDetailPage from "./pages/document-issuances/DocumentIssuanceDetailPage";
 
 function App() {
   return (
@@ -27,6 +29,8 @@ function App() {
         <Route path="document-designs/new" element={<DocumentDesignCreatePage />} />
         <Route path="document-designs/:id" element={<DocumentDesignDetailPage />} />
         <Route path="document-designs/:id/versions" element={<VersionHistoryPage />} />
+        <Route path="document-issuances" element={<DocumentLibraryPage />} />
+        <Route path="document-issuances/:id" element={<DocumentIssuanceDetailPage />} />
         <Route path="content" element={<ContentLibraryPage />}>
           <Route path="templates/new" element={<HtmlTemplateCreatePage />} />
           <Route path="templates/:id" element={<HtmlTemplateDetailPage />} />
