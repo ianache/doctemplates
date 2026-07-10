@@ -33,11 +33,11 @@ def test_jinja_token_extractor_loops_and_nesting():
     parsed = env.parse(html)
     extractor = JinjaTokenExtractor()
     extractor.visit(parsed)
-    assert "cliente" in extractor.extracted_tokens
     assert "cliente.contactos" in extractor.extracted_tokens
-    assert "cliente.contactos[]" in extractor.extracted_tokens
     assert "cliente.contactos[].nombre" in extractor.extracted_tokens
     assert "cliente.contactos[].telefono" in extractor.extracted_tokens
+    assert "cliente" not in extractor.extracted_tokens
+    assert "cliente.contactos[]" not in extractor.extracted_tokens
 
     # Local assignments (set)
     html = "{% set alias = cliente %}{{ alias.nombre }}"
