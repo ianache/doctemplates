@@ -200,8 +200,14 @@ Plans:
   4. Users can copy the public direct URL of the document to the clipboard via a "Share" button.
   5. The details page displays a chronological timeline (audit tracelog) recording creation, download, and share events for that document.
 
-**Plans**: TBD
+**Plans**: 3 plans
 **UI hint**: yes
+
+Plans:
+
+- [ ] 09-01-PLAN.md - Backend: DocumentTracelog persistence and generation-event logging
+- [ ] 09-02-PLAN.md - Backend: issuance search, detail, tracelog, download, share, and signed public download APIs
+- [ ] 09-03-PLAN.md - Frontend: Documents Library navigation, search listing, detail preview, download, share, and timeline
 
 ### Phase 10: Complex Schema UI & Nested Data Previsualization
 
@@ -231,5 +237,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 6. Generation & Preview API | 2/2 | Complete | 2026-07-08 |
 | 7. Backend Core (Nested Data & Case-Insensitive Matching) | 1/1 | Complete   | 2026-07-09 |
 | 8. Template AST & Static Validation | 1/1 | Complete    | 2026-07-10 |
-| 9. Search Documents Library & Audit Trace | 0/0 | Proposed | |
+| 9. Search Documents Library & Audit Trace | 0/3 | Proposed | |
 | 10. Complex Schema UI & Nested Data Previsualization | 0/0 | Proposed | |
