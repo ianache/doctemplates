@@ -10,7 +10,7 @@ class DocumentTracelogOut(BaseModel):
     issuance_id: UUID
     event_type: str
     user_id: UUID | None
-    metadata: dict = Field(validation_alias="metadata_")
+    metadata: dict = Field(validation_alias="metadata_", serialization_alias="metadata")
     created_at: datetime
 
 
@@ -24,3 +24,22 @@ class DocumentIssuanceOut(BaseModel):
     input_data: dict
     status: str
     created_at: datetime
+
+
+class DocumentIssuanceLibraryItem(BaseModel):
+    id: UUID
+    design_version_id: UUID
+    design_name: str
+    status: str
+    design_status: str
+    design_version_number: int | None
+    user_id: UUID
+    generated_by_email: str
+    input_data: dict
+    created_at: datetime
+    preview_url: str
+    download_url: str
+
+
+class DocumentIssuanceShareOut(BaseModel):
+    public_url: str
