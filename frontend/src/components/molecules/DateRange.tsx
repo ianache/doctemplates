@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import Icon from "../atoms/Icon";
 import { cn } from "../../lib/cn";
 
 export interface DateRangeProps {
@@ -14,7 +13,7 @@ export interface DateRangeProps {
   className?: string;
 }
 
-const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"];
+const WEEKDAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 const MONTHS = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December",
@@ -69,6 +68,7 @@ function buildMonthGrid(year: number, month: number): (Date | null)[] {
   for (let i = 0; i < startWeekday; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(new Date(year, month, d));
   while (cells.length % 7 !== 0) cells.push(null);
+  while (cells.length < 42) cells.push(null);
   return cells;
 }
 
@@ -83,8 +83,7 @@ export default function DateRange({
   to,
   onFromChange,
   onToChange,
-  fromLabel = "Date From",
-  toLabel = "Date To",
+  fromLabel = "Date Range",
   maxDays = 7,
   className,
 }: DateRangeProps) {
@@ -171,20 +170,22 @@ export default function DateRange({
     return maxDays > 0 && diff >= maxDays;
   };
 
-  const dayClass = (d: Date | null): string => {
-    if (!d) return "text-transparent";
-    const base = "h-8 w-8 flex items-center justify-center rounded text-body-sm transition-colors cursor-pointer select-none";
-    if (isDisabled(d)) return cn(base, "text-secondary opacity-30 cursor-not-allowed");
-    if (rangeStart && sameDay(d, rangeStart)) return cn(base, "bg-primary text-on-primary font-bold");
-    if (rangeEnd && sameDay(d, rangeEnd)) return cn(base, "bg-primary text-on-primary font-bold");
-    if (rangeStart && rangeEnd && isBetween(d, rangeStart, rangeEnd)) return cn(base, "bg-primary/20 text-primary");
-    return cn(base, "text-on-surface hover:bg-surface-container-high");
+  const getDayClasses = (d: Date): string => {
+    const isStart = rangeStart && sameDay(d, rangeStart);
+    const isEnd = rangeEnd && sameDay(d, rangeEnd);
+    const isMid = rangeStart && rangeEnd && isBetween(d, rangeStart, rangeEnd);
+    const disabled = isDisabled(d);
+
+    if (disabled) return "text-secondary opacity-30 cursor-not-allowed";
+    if (isStart || isEnd) return "bg-primary text-on-primary font-bold";
+    if (isMid) return "bg-primary/20 text-primary";
+    return "text-on-surface hover:bg-surface-container-high";
   };
 
   const displayText = from && to
-    ? `${formatDisplay(from)} — ${formatDisplay(to)}`
+    ? `${formatDisplay(from)}  —  ${formatDisplay(to)}`
     : from
-      ? `${formatDisplay(from)} — ...`
+      ? `${formatDisplay(from)}  —  Select end...`
       : "Select date range";
 
   const handleClear = () => {
@@ -192,36 +193,39 @@ export default function DateRange({
     onToChange("");
   };
 
+  const CELL = "flex h-9 w-9 items-center justify-center";
+  const DAY_BTN = "h-8 w-8 flex items-center justify-center rounded text-body-sm transition-colors select-none";
+
   return (
     <div ref={containerRef} className={cn("relative", className)}>
-      <div className="flex items-end gap-sm">
-        <label className="block flex-1">
-          <span className="mb-1 block text-label-caps text-secondary">{fromLabel}</span>
-          <button
-            type="button"
-            className="w-full rounded border border-outline-variant bg-surface-container-lowest py-2 pl-9 pr-3 text-left text-body-md focus:border-primary focus:ring-0"
-            onClick={() => setOpen((v) => !v)}
-          >
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-sm text-secondary">
-              calendar_month
-            </span>
+      <label className="mb-1 block text-label-caps text-secondary">{fromLabel}</label>
+      <div className="flex gap-sm">
+        <button
+          type="button"
+          className="relative flex h-[42px] w-full items-center rounded border border-outline-variant bg-surface-container-lowest pl-9 pr-3 text-left text-body-md focus:border-primary focus:ring-0"
+          onClick={() => setOpen((v) => !v)}
+        >
+          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-sm text-secondary">
+            calendar_month
+          </span>
+          <span className={cn(from || to ? "text-on-surface" : "text-secondary")}>
             {displayText}
-          </button>
-        </label>
+          </span>
+        </button>
         {from || to ? (
           <button
             type="button"
-            className="flex h-[42px] items-center justify-center rounded border border-outline-variant bg-surface-container px-sm text-secondary hover:bg-surface-container-high"
+            className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded border border-outline-variant bg-surface-container text-secondary hover:bg-surface-container-high"
             onClick={handleClear}
             aria-label="Clear dates"
           >
-            <Icon name="close" className="text-sm" />
+            <span className="material-symbols-outlined text-sm">close</span>
           </button>
         ) : null}
       </div>
-      <span className="mb-1 mt-1 block text-label-caps text-secondary">{toLabel}</span>
+
       {open ? (
-        <div className="absolute z-50 mt-xs w-[320px] rounded-lg border border-outline-variant bg-surface-container-lowest p-md shadow-lg">
+        <div className="absolute left-0 top-full z-50 mt-xs w-fit rounded-lg border border-outline-variant bg-surface-container-lowest p-md shadow-lg">
           <div className="mb-md flex items-center justify-between">
             <button
               type="button"
@@ -229,7 +233,7 @@ export default function DateRange({
               onClick={goPrevMonth}
               aria-label="Previous month"
             >
-              <Icon name="chevron_left" className="text-sm" />
+              <span className="material-symbols-outlined text-sm">chevron_left</span>
             </button>
             <span className="font-headings text-headline-md font-bold text-on-surface">
               {MONTHS[viewMonth]} {viewYear}
@@ -240,44 +244,52 @@ export default function DateRange({
               onClick={goNextMonth}
               aria-label="Next month"
             >
-              <Icon name="chevron_right" className="text-sm" />
+              <span className="material-symbols-outlined text-sm">chevron_right</span>
             </button>
           </div>
-          <div className="mb-xs grid grid-cols-7">
+
+          <div className="grid grid-cols-7">
             {WEEKDAYS.map((wd, i) => (
-              <div key={i} className="flex h-8 items-center justify-center text-label-caps text-secondary">
+              <div key={i} className={cn(CELL, "text-label-caps text-secondary")}>
                 {wd}
               </div>
             ))}
           </div>
+
           <div className="grid grid-cols-7">
             {cells.map((d, i) => (
               <div
                 key={i}
-                className="flex justify-center"
+                className={CELL}
                 onMouseEnter={() => d && setHoverDate(d)}
                 onMouseLeave={() => setHoverDate(null)}
               >
                 {d ? (
                   <button
                     type="button"
-                    className={dayClass(d)}
+                    className={cn(DAY_BTN, getDayClasses(d))}
                     disabled={isDisabled(d)}
                     onClick={() => handleDayClick(d)}
                   >
                     {d.getDate()}
                   </button>
-                ) : (
-                  <span className="h-8 w-8" />
-                )}
+                ) : null}
               </div>
             ))}
           </div>
-          {maxDays > 0 ? (
-            <p className="mt-md text-body-sm text-secondary">
-              Max {maxDays} days
+
+          <div className="mt-md flex items-center justify-between border-t border-outline-variant pt-md">
+            <p className="text-body-sm text-secondary">
+              {maxDays > 0 ? `Max ${maxDays} days` : ""}
             </p>
-          ) : null}
+            <button
+              type="button"
+              className="rounded px-sm py-1 text-label-caps text-primary hover:bg-surface-container"
+              onClick={handleClear}
+            >
+              Clear
+            </button>
+          </div>
         </div>
       ) : null}
     </div>
