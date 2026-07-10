@@ -193,7 +193,7 @@ export default function DateRange({
     onToChange("");
   };
 
-  const CELL = "flex h-9 w-9 items-center justify-center";
+  const CELL = "flex h-9 items-center justify-center";
   const DAY_BTN = "h-8 w-8 flex items-center justify-center rounded text-body-sm transition-colors select-none";
 
   return (
@@ -225,7 +225,7 @@ export default function DateRange({
       </div>
 
       {open ? (
-        <div className="absolute left-0 top-full z-50 mt-xs w-fit rounded-lg border border-outline-variant bg-surface-container-lowest p-md shadow-lg">
+        <div className="absolute left-0 top-full z-50 mt-xs w-[284px] rounded-lg border border-outline-variant bg-surface-container-lowest p-md shadow-lg">
           <div className="mb-md flex items-center justify-between">
             <button
               type="button"
