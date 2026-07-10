@@ -1,11 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
+import PageHeader from "../../components/PageHeader";
+import PagedTable from "../../components/organisms/PagedTable";
+import type { Column } from "../../components/organisms/PagedTable";
 import { type DocumentTypeListItem, listDocumentTypes } from "../../lib/documentTypes";
+
+const PAGE_SIZE = 10;
 
 export default function DocumentTypeListPage() {
   const [items, setItems] = useState<DocumentTypeListItem[] | null>(null);
   const [error, setError] = useState(false);
+  const [query, setQuery] = useState("");
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     let cancelled = false;
@@ -21,87 +28,123 @@ export default function DocumentTypeListPage() {
     };
   }, []);
 
+  useEffect(() => {
+    setPage(1);
+  }, [query]);
+
+  const filtered = useMemo(() => {
+    if (!items) return null;
+    if (!query.trim()) return items;
+    const q = query.toLowerCase();
+    return items.filter(
+      (it) =>
+        it.name.toLowerCase().includes(q) ||
+        (it.description ?? "").toLowerCase().includes(q) ||
+        (it.created_by_email ?? "").toLowerCase().includes(q),
+    );
+  }, [items, query]);
+
+  const paged = useMemo(
+    () => filtered?.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE) ?? null,
+    [filtered, page],
+  );
+
+  const total = filtered?.length ?? 0;
+
+  const columns: Column<DocumentTypeListItem>[] = [
+    {
+      key: "name",
+      header: "Name",
+      render: (item) => (
+        <div className="flex items-center gap-3">
+          <span className="material-symbols-outlined text-primary">schema</span>
+          <Link
+            to={`/document-types/${item.id}`}
+            className="font-bold text-primary hover:underline"
+          >
+            {item.name}
+          </Link>
+        </div>
+      ),
+    },
+    { key: "description", header: "Description", render: (item) => item.description },
+    { key: "fields", header: "Fields", render: (item) => `${item.field_count} fields` },
+    { key: "created_by", header: "Created By", render: (item) => item.created_by_email },
+    {
+      key: "created_at",
+      header: "Created At",
+      render: (item) => new Date(item.created_at).toLocaleDateString(),
+    },
+  ];
+
   return (
     <section>
-      <div className="flex items-center justify-between gap-md">
-        <h1 className="font-headings text-[24px] font-bold leading-[32px] tracking-[-0.01em] text-on-surface">
-          Document Types
-        </h1>
-        <Link
-          to="/document-types/new"
-          className="rounded bg-primary px-lg py-sm text-sm font-bold text-white hover:bg-primary/90"
+      <PageHeader
+        breadcrumbs={[{ label: "Admin" }, { label: "Document Types" }]}
+        title="Document Types"
+        actions={
+          <Link
+            to="/document-types/new"
+            className="rounded bg-primary px-lg py-sm font-bold uppercase tracking-wide text-label-caps text-on-primary hover:opacity-90 active:scale-95"
+          >
+            New Document Type
+          </Link>
+        }
+      />
+
+      <div className="mb-lg flex flex-wrap items-end gap-md rounded-lg border border-outline-variant bg-surface-container-lowest p-md">
+        <div className="min-w-[200px] flex-1">
+          <label className="mb-1 block text-label-caps text-secondary">Search</label>
+          <div className="relative">
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-sm text-secondary">
+              search
+            </span>
+            <input
+              className="w-full rounded border border-outline-variant py-2 pl-9 pr-4 text-body-md focus:border-primary focus:ring-0"
+              placeholder="Enter name, description or author..."
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+          </div>
+        </div>
+        <button
+          className="rounded border border-outline-variant bg-surface-container px-md py-2 font-bold uppercase tracking-wide text-label-caps text-secondary hover:bg-surface-container-high active:scale-95"
+          type="button"
+          onClick={() => setQuery("")}
         >
-          New Document Type
-        </Link>
+          Reset
+        </button>
       </div>
 
-      <div className="mt-xl">
-        {error ? (
-          <p className="text-sm text-error">
-            We couldn't load document types. Please try again.
+      {error ? (
+        <p className="text-sm text-error">We couldn't load document types. Please try again.</p>
+      ) : filtered === null ? null : filtered.length === 0 ? (
+        <div className="flex flex-col items-center gap-md py-2xl text-center">
+          <span className="material-symbols-outlined text-[48px] text-secondary">folder_open</span>
+          <h2 className="font-headings text-[24px] font-bold text-on-surface">No document types yet</h2>
+          <p className="max-w-md text-sm leading-5 text-on-surface-variant">
+            Create your first document type to define the tokens templates and designs will be allowed to use.
           </p>
-        ) : items === null ? null : items.length === 0 ? (
-          <div className="flex flex-col items-center gap-md py-2xl text-center">
-            <span className="material-symbols-outlined text-[48px] text-secondary">
-              folder_open
-            </span>
-            <h2 className="font-headings text-[24px] font-bold text-on-surface">
-              No document types yet
-            </h2>
-            <p className="max-w-md text-sm leading-5 text-on-surface-variant">
-              Create your first document type to define the tokens templates and designs will be allowed to use.
-            </p>
-            <Link
-              to="/document-types/new"
-              className="rounded bg-primary px-lg py-sm text-sm font-bold text-white hover:bg-primary/90"
-            >
-              New Document Type
-            </Link>
-          </div>
-        ) : (
-          <table className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest">
-            <thead className="bg-surface-container">
-              <tr>
-                <th className="px-md py-sm text-left text-[11px] font-bold uppercase leading-[16px] tracking-[0.05em] text-secondary">
-                  Name
-                </th>
-                <th className="px-md py-sm text-left text-[11px] font-bold uppercase leading-[16px] tracking-[0.05em] text-secondary">
-                  Description
-                </th>
-                <th className="px-md py-sm text-left text-[11px] font-bold uppercase leading-[16px] tracking-[0.05em] text-secondary">
-                  Fields
-                </th>
-                <th className="px-md py-sm text-left text-[11px] font-bold uppercase leading-[16px] tracking-[0.05em] text-secondary">
-                  Created By
-                </th>
-                <th className="px-md py-sm text-left text-[11px] font-bold uppercase leading-[16px] tracking-[0.05em] text-secondary">
-                  Created At
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((item) => (
-                <tr key={item.id} className="border-t border-outline-variant">
-                  <td className="px-md py-sm text-sm">
-                    <Link
-                      to={`/document-types/${item.id}`}
-                      className="font-bold text-primary hover:underline"
-                    >
-                      {item.name}
-                    </Link>
-                  </td>
-                  <td className="px-md py-sm text-sm text-on-surface">{item.description}</td>
-                  <td className="px-md py-sm text-sm text-on-surface">{item.field_count} fields</td>
-                  <td className="px-md py-sm text-sm text-on-surface">{item.created_by_email}</td>
-                  <td className="px-md py-sm text-sm text-on-surface">
-                    {new Date(item.created_at).toLocaleDateString()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+          <Link
+            to="/document-types/new"
+            className="rounded bg-primary px-lg py-sm text-sm font-bold text-white hover:bg-primary/90"
+          >
+            New Document Type
+          </Link>
+        </div>
+      ) : (
+        <PagedTable
+          columns={columns}
+          rows={paged ?? []}
+          rowKey={(item) => item.id}
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          itemName="document types"
+          onChangePage={setPage}
+        />
+      )}
     </section>
   );
 }
