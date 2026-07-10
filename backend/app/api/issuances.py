@@ -167,7 +167,14 @@ def preview_issuance(
     db: SQLAlchemySession = Depends(get_db),
 ):
     issuance = _require_issuance(db, issuance_id)
-    return _pdf_response(issuance)
+    file_path = Path(issuance.file_path)
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="Issued PDF file not found on disk")
+    return FileResponse(
+        file_path,
+        media_type="application/pdf",
+        headers={"Content-Disposition": "inline"},
+    )
 
 
 @router.get("/{issuance_id}/download")
