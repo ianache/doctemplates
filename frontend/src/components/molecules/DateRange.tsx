@@ -207,20 +207,18 @@ export default function DateRange({
   return (
     <div ref={containerRef} className={cn("relative", className)}>
       <label className="mb-1 block text-label-caps text-secondary">{fromLabel}</label>
-      <div className="flex gap-sm">
-        <button
-          type="button"
-          className="relative flex h-[42px] w-full items-center rounded border border-outline-variant bg-surface-container-lowest pl-9 pr-3 text-left text-body-md focus:border-primary focus:ring-0"
-          onClick={() => setOpen((v) => !v)}
-        >
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-sm text-secondary">
-            calendar_month
-          </span>
-          <span className={cn(from || to ? "text-on-surface" : "text-secondary")}>
-            {displayText}
-          </span>
-        </button>
-      </div>
+      <button
+        type="button"
+        className="relative flex w-full items-center rounded border border-outline-variant bg-surface-container-lowest py-2 pl-9 pr-3 text-left text-body-md focus:border-primary focus:ring-0"
+        onClick={() => setOpen((v) => !v)}
+      >
+        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-sm text-secondary">
+          calendar_month
+        </span>
+        <span className={cn(from || to ? "text-on-surface" : "text-secondary")}>
+          {displayText}
+        </span>
+      </button>
 
       {open ? (
         <div className="absolute left-0 top-full z-50 mt-xs w-[284px] rounded-lg border border-outline-variant bg-surface-container-lowest p-md shadow-lg">
