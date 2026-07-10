@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import { Link } from "react-router-dom";
 
 import PageHeader from "../../components/PageHeader";
+import DateRange from "../../components/molecules/DateRange";
 import {
   listDocumentIssuances,
   type DocumentIssuanceFilters,
@@ -123,22 +124,14 @@ export default function DocumentLibraryPage() {
             <option value="failure">Failure</option>
           </select>
         </div>
-        <div className="w-48">
-          <label className="mb-1 block text-label-caps text-secondary">Date From</label>
-          <input
-            className="w-full rounded border border-outline-variant py-2 pl-3 pr-3 text-body-md focus:border-primary focus:ring-0"
-            type="date"
-            value={filters.created_from ?? ""}
-            onChange={(event) => updateFilter("created_from", event.target.value)}
-          />
-        </div>
-        <div className="w-48">
-          <label className="mb-1 block text-label-caps text-secondary">Date To</label>
-          <input
-            className="w-full rounded border border-outline-variant py-2 pl-3 pr-3 text-body-md focus:border-primary focus:ring-0"
-            type="date"
-            value={filters.created_to ?? ""}
-            onChange={(event) => updateFilter("created_to", event.target.value)}
+        <div className="min-w-[260px] flex-1">
+          <DateRange
+            from={filters.created_from ?? ""}
+            to={filters.created_to ?? ""}
+            onFromChange={(v) => updateFilter("created_from", v)}
+            onToChange={(v) => updateFilter("created_to", v)}
+            fromLabel="Date From"
+            toLabel="Date To"
           />
         </div>
         <div className="flex gap-sm">
