@@ -57,8 +57,8 @@ New requirements introduced in Milestone v2.0.
 - [x] **CASE-01**: Implement case-insensitive matching for API payload keys and schema properties.
 - [x] **CASE-02**: Detect case-insensitive key collisions (e.g., `Name` and `name` in the same object) in payloads and reject with `400 Bad Request`.
 - [x] **CASE-03**: Render Jinja2 template tokens case-insensitively (e.g., `{{Cliente.Codigo}}` resolves to `cliente.codigo`).
-- [ ] **AST-01**: Parse Jinja2 templates using AST to extract referenced token paths (including nested objects and list fields).
-- [ ] **AST-02**: Statically validate extracted template token paths against the Document Type schema before template/design activation.
+- [x] **AST-01**: Parse Jinja2 templates using AST to extract referenced token paths (including nested objects and list fields).
+- [x] **AST-02**: Statically validate extracted template token paths against the Document Type schema before template/design activation.
 
 ### Search Documents Library (Backend & Frontend Integration)
 

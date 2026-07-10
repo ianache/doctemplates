@@ -22,7 +22,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 5: Versioning** - Editing a design creates a new version; history is preserved and viewable (completed 2026-07-08)
 - [x] **Phase 6: Generation & Preview API** - API generates final and preview PDFs from a design plus caller-supplied data (completed 2026-07-08)
 - [x] **Phase 7: Backend Core (Nested Data & Case-Insensitive Matching)** - Support nested objects, object lists, and case-insensitive matching in schema validation and template rendering (completed 2026-07-09)
-- [ ] **Phase 8: Template AST & Static Validation** - Extract referenced tokens via Jinja2 AST parsing and statically validate them against schemas before activation
+- [x] **Phase 8: Template AST & Static Validation** - Extract referenced tokens via Jinja2 AST parsing and statically validate them against schemas before activation (completed 2026-07-10)
 - [ ] **Phase 9: Search Documents Library & Audit Trace** - Retrieve, filter, view, download, and share generated documents with a detailed timeline audit log
 - [ ] **Phase 10: Complex Schema UI & Nested Data Previsualization** - UI management of nested schemas and interactive previsualization of nested data in the visual editor
 
@@ -181,7 +181,10 @@ Plans:
   2. The system rejects saving/activation of a template or document design if it references any token paths not present in the Document Type's schema.
   3. Valid template designs containing nested or wildcard array expressions (e.g., `cliente.contactos[].nombre`) pass validation and can be activated successfully.
 
-**Plans**: TBD
+**Plans**: 1/1 plans complete
+
+- [x] 08-01-PLAN.md
+
 **UI hint**: no
 
 ### Phase 9: Search Documents Library & Audit Trace
@@ -227,6 +230,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 5. Versioning | 3/3 | Complete | 2026-07-08 |
 | 6. Generation & Preview API | 2/2 | Complete | 2026-07-08 |
 | 7. Backend Core (Nested Data & Case-Insensitive Matching) | 1/1 | Complete   | 2026-07-09 |
-| 8. Template AST & Static Validation | 0/0 | Proposed | |
+| 8. Template AST & Static Validation | 1/1 | Complete   | 2026-07-10 |
 | 9. Search Documents Library & Audit Trace | 0/0 | Proposed | |
 | 10. Complex Schema UI & Nested Data Previsualization | 0/0 | Proposed | |
