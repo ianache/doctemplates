@@ -62,11 +62,11 @@ New requirements introduced in Milestone v2.0.
 
 ### Search Documents Library (Backend & Frontend Integration)
 
-- [ ] **SRCH-01**: Retrieve and filter generated documents (`issuances`) by design name, ID, status, or date range (AND condition).
-- [ ] **SRCH-02**: View the content of a selected generated document (displaying metadata and PDF content).
-- [ ] **SRCH-03**: Track and display a technical audit log (tracelog) timeline of document activities (generation, download, share).
-- [ ] **SRCH-04**: Allow downloading the PDF file from the document detail view.
-- [ ] **SRCH-05**: Implement a "Share" feature that copies the document's direct URL to the clipboard (public access in this MVP).
+- [x] **SRCH-01**: Retrieve and filter generated documents (`issuances`) by design name, ID, status, or date range (AND condition).
+- [x] **SRCH-02**: View the content of a selected generated document (displaying metadata and PDF content).
+- [x] **SRCH-03**: Track and display a technical audit log (tracelog) timeline of document activities (generation, download, share).
+- [x] **SRCH-04**: Allow downloading the PDF file from the document detail view.
+- [x] **SRCH-05**: Implement a "Share" feature that copies the document's direct URL to the clipboard (public access in this MVP).
 
 ### UI/UX Improvements for Complex Fields
 
