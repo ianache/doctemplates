@@ -88,6 +88,13 @@ export default function DateRange({
   className,
 }: DateRangeProps) {
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!from) {
+      onFromChange(toISODate(new Date()));
+    }
+  }, [from, onFromChange]);
+
   const [viewYear, setViewYear] = useState(() => {
     const d = parseISODate(from) ?? new Date();
     return d.getFullYear();
@@ -213,16 +220,6 @@ export default function DateRange({
             {displayText}
           </span>
         </button>
-        {from || to ? (
-          <button
-            type="button"
-            className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded border border-outline-variant bg-surface-container text-secondary hover:bg-surface-container-high"
-            onClick={handleClear}
-            aria-label="Clear dates"
-          >
-            <span className="material-symbols-outlined text-sm">close</span>
-          </button>
-        ) : null}
       </div>
 
       {open ? (
