@@ -5,6 +5,7 @@ from app.models.content_template import HtmlTemplate
 from app.models.static_pdf_asset import StaticPdfAsset
 from app.models.document_design import DocumentDesign, DocumentDesignPage
 from app.models.document_issuance import DocumentIssuance
+from app.models.document_tracelog import DocumentTracelog
 
 __all__ = [
     "User",
@@ -16,4 +17,5 @@ __all__ = [
     "DocumentDesign",
     "DocumentDesignPage",
     "DocumentIssuance",
+    "DocumentTracelog",
 ]

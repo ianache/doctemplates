@@ -1,12 +1,18 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import ForeignKey, JSON, func
+from sqlalchemy import CheckConstraint, ForeignKey, JSON, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db import Base
 
 
+ISSUANCE_STATUSES = ("success", "failure")
+
+
 class DocumentIssuance(Base):
     __tablename__ = "document_issuances"
+    __table_args__ = (
+        CheckConstraint(f"status IN {ISSUANCE_STATUSES!r}", name="ck_document_issuance_status"),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     design_version_id: Mapped[uuid.UUID] = mapped_column(
@@ -15,7 +21,14 @@ class DocumentIssuance(Base):
     file_path: Mapped[str]
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
     input_data: Mapped[dict] = mapped_column(JSON)
+    status: Mapped[str] = mapped_column(default="success")
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
     design_version: Mapped["DocumentDesign"] = relationship()
     user: Mapped["User"] = relationship()
+    tracelogs: Mapped[list["DocumentTracelog"]] = relationship(
+        back_populates="issuance",
+        cascade="all, delete-orphan",
+        order_by="DocumentTracelog.created_at",
+        passive_deletes=True,
+    )
