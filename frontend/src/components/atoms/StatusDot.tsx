@@ -1,4 +1,4 @@
-import { cn } from "./Icon";
+import { cn } from "../../lib/cn";
 
 export type StatusColor = "signed" | "draft" | "archived";
 

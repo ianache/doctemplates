@@ -1,6 +1,4 @@
-export function cn(...parts: (string | false | null | undefined)[]) {
-  return parts.filter(Boolean).join(" ");
-}
+import { cn } from "../../lib/cn";
 
 interface IconProps {
   name: string;

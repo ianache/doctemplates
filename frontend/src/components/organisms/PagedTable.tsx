@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { cn } from "../atoms/Icon";
+import { cn } from "../../lib/cn";
 import Pagination from "../molecules/Pagination";
 import TableHeader from "../molecules/TableHeader";
 

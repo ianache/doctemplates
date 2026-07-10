@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes } from "react";
 
-import { cn } from "./Icon";
+import { cn } from "../../lib/cn";
 
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { cn } from "./Icon";
+import { cn } from "../../lib/cn";
 
 interface BadgeProps {
   children: ReactNode;
