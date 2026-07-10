@@ -82,13 +82,11 @@ class JinjaTokenExtractor(NodeVisitor):
         path = self._get_full_path(node)
         if path:
             self.extracted_tokens.add(path)
-        self.visit(node.node)
 
     def visit_Getitem(self, node):
         path = self._get_full_path(node)
         if path:
             self.extracted_tokens.add(path)
-        self.visit(node.node)
         self.visit(node.arg)
 
     def visit_Call(self, node):

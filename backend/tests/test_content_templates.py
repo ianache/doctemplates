@@ -81,7 +81,7 @@ def test_create_list_and_detail_template(client: TestClient, db_session: SQLAlch
     created = create_response.json()
     assert created["name"] == "Main template"
     assert created["document_type_name"] == "Policy"
-    assert created["token_names"] == ["cliente.nombre", "cliente.edad"]
+    assert created["token_names"] == ["cliente.edad", "cliente.nombre"]
 
     list_response = client.get("/api/content/templates")
     assert list_response.status_code == 200
@@ -97,7 +97,7 @@ def test_create_list_and_detail_template(client: TestClient, db_session: SQLAlch
     assert detail_response.status_code == 200
     detail = detail_response.json()
     assert detail["html"] == "<p>{{cliente.nombre}}</p><p>{{cliente.edad}}</p>"
-    assert detail["token_names"] == ["cliente.nombre", "cliente.edad"]
+    assert detail["token_names"] == ["cliente.edad", "cliente.nombre"]
     assert detail["created_by_email"] == "content@example.com"
 
 
@@ -160,5 +160,5 @@ def test_create_template_case_insensitive_and_fallback(
         },
     )
     assert response2.status_code == 201
-    assert response2.json()["token_names"] == ["c.nombre"]
+    assert response2.json()["token_names"] == ["cliente.contactos", "cliente.contactos[].nombre"]
 
