@@ -2,12 +2,15 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { type DocumentTypeDetail, getDocumentType } from "../../lib/documentTypes";
+import { SchemaFieldTreeNode, buildSchemaFieldTree } from "../../lib/schemaFields";
 
 export default function DocumentTypeDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [documentType, setDocumentType] = useState<DocumentTypeDetail | null | undefined>(
     undefined,
   );
+
+  const [collapsedNodes, setCollapsedNodes] = useState<Set<string>>(() => new Set());
 
   useEffect(() => {
     if (!id) return;
@@ -41,11 +44,104 @@ export default function DocumentTypeDetailPage() {
     );
   }
 
+  const toggleNode = (nodeId: string) => {
+    setCollapsedNodes((prev) => {
+      const next = new Set(prev);
+      if (next.has(nodeId)) {
+        next.delete(nodeId);
+      } else {
+        next.add(nodeId);
+      }
+      return next;
+    });
+  };
+
+  const renderNode = (node: SchemaFieldTreeNode, depth: number) => {
+    const isCollapsed = collapsedNodes.has(node.id);
+    const isList = node.type === "list";
+    const isObject = node.type === "object";
+    const isLeaf = node.type === "leaf";
+
+    return (
+      <div key={node.id} className="mt-xs">
+        <div className="flex items-center gap-sm py-xs px-sm hover:bg-surface-container-low/50 rounded border border-transparent hover:border-outline-variant/30">
+          {/* Collapse Toggle Chevron */}
+          {!isLeaf ? (
+            <button
+              type="button"
+              onClick={() => toggleNode(node.id)}
+              className="material-symbols-outlined text-secondary hover:text-primary transition-colors text-lg focus:outline-none"
+            >
+              {isCollapsed ? "chevron_right" : "expand_more"}
+            </button>
+          ) : (
+            <div className="w-[18px]"></div>
+          )}
+
+          {/* Type Icon */}
+          <span className="material-symbols-outlined text-secondary text-lg">
+            {isList ? "list" : isObject ? (isCollapsed ? "folder" : "folder_open") : "description"}
+          </span>
+
+          {/* Segment Name & Details */}
+          {isLeaf ? (
+            <div className="flex flex-wrap items-center gap-md flex-1 min-w-0">
+              <span className="font-mono text-sm font-bold text-on-surface truncate">
+                {node.name}
+              </span>
+              <code className="text-[11px] text-secondary font-mono bg-surface-container px-1.5 py-0.5 rounded truncate" title="Canonical Path">
+                {node.fullPath}
+              </code>
+              <span className="rounded bg-surface-container-high px-2 py-0.5 text-[11px] font-bold uppercase text-on-surface-variant shrink-0 font-body-md">
+                {node.fieldType}
+              </span>
+              {node.description && (
+                <span className="text-sm text-on-surface-variant truncate" title={node.description}>
+                  — {node.description}
+                </span>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center gap-xs">
+              <span className="font-bold text-sm text-on-surface">{node.name}</span>
+              <span
+                className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-tighter ${
+                  isList
+                    ? "bg-surface-container-highest text-primary border border-outline-variant"
+                    : "bg-secondary-container text-on-secondary-container"
+                }`}
+              >
+                {isList ? "List" : "Object"}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Recursive Child Nodes Container */}
+        {!isLeaf && !isCollapsed && (
+          <div className="ml-lg border-l border-outline-variant/60 pl-sm space-y-xs">
+            {node.children.map((child) => renderNode(child, depth + 1))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const tree = buildSchemaFieldTree(documentType.fields);
+
   return (
     <section>
-      <h1 className="font-headings text-[24px] font-bold leading-[32px] tracking-[-0.01em] text-on-surface">
-        {documentType.name}
-      </h1>
+      <div className="flex items-center justify-between">
+        <h1 className="font-headings text-[24px] font-bold leading-[32px] tracking-[-0.01em] text-on-surface">
+          {documentType.name}
+        </h1>
+        <Link
+          to="/document-types"
+          className="text-sm font-bold text-primary hover:underline flex items-center gap-xs"
+        >
+          <span className="material-symbols-outlined text-sm">arrow_back</span> Back to List
+        </Link>
+      </div>
       <p className="mt-xs text-sm leading-5 text-on-surface-variant">{documentType.description}</p>
 
       <div className="mt-md flex justify-between border-b border-outline-variant/30 pb-xs text-sm">
@@ -59,23 +155,23 @@ export default function DocumentTypeDetailPage() {
         </span>
       </div>
 
-      <div className="mt-xl rounded-lg border border-outline-variant bg-surface-container-lowest">
-        {documentType.fields.map((field, index) => (
-          <div
-            key={field.id}
-            className={`flex items-center gap-md px-md py-sm ${
-              index > 0 ? "border-t border-outline-variant" : ""
-            }`}
-          >
-            <code className="font-mono text-[12px] leading-[18px] text-on-surface">
-              {field.name}
-            </code>
-            <span className="rounded bg-surface-container px-2 py-0.5 text-[11px] font-bold uppercase text-on-surface-variant">
-              {field.type}
-            </span>
-            <span className="text-sm text-on-surface-variant">{field.description}</span>
-          </div>
-        ))}
+      {/* Collapsible Schema Tree Display */}
+      <div className="mt-xl rounded-lg border border-outline-variant bg-surface-container-lowest p-md">
+        <div className="border-b border-outline-variant pb-sm mb-sm bg-white p-xs">
+          <h3 className="font-label-caps text-label-caps text-secondary uppercase">
+            Document Fields Schema
+          </h3>
+        </div>
+
+        <div className="space-y-xs">
+          {tree.length === 0 ? (
+            <p className="text-sm text-on-surface-variant py-md text-center">
+              No fields defined for this document type.
+            </p>
+          ) : (
+            tree.map((node) => renderNode(node, 0))
+          )}
+        </div>
       </div>
     </section>
   );
