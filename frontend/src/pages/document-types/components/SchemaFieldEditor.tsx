@@ -1,14 +1,15 @@
 import { useState } from "react";
-import { Control, UseFormRegister, useWatch } from "react-hook-form";
-import { DocumentTypeFieldIn, FieldType } from "../../../lib/documentTypes";
-import { SchemaFieldTreeNode, buildSchemaFieldTree } from "../../../lib/schemaFields";
+import { useWatch } from "react-hook-form";
+import type { DocumentTypeFieldIn, FieldType } from "../../../lib/documentTypes";
+import { buildSchemaFieldTree } from "../../../lib/schemaFields";
+import type { SchemaFieldTreeNode } from "../../../lib/schemaFields";
 
 interface SchemaFieldEditorProps {
-  append: (value: DocumentTypeFieldIn) => void;
+  append: (value: any) => void;
   remove: (index: number) => void;
-  update: (index: number, value: DocumentTypeFieldIn) => void;
-  register: UseFormRegister<any>;
-  control: Control<any>;
+  update: (index: number, value: any) => void;
+  register: any;
+  control: any;
 }
 
 export function SchemaFieldEditor({

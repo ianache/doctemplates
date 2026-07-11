@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { type DocumentTypeDetail, getDocumentType } from "../../lib/documentTypes";
-import { SchemaFieldTreeNode, buildSchemaFieldTree } from "../../lib/schemaFields";
+import { buildSchemaFieldTree } from "../../lib/schemaFields";
+import type { SchemaFieldTreeNode } from "../../lib/schemaFields";
 
 export default function DocumentTypeDetailPage() {
   const { id } = useParams<{ id: string }>();

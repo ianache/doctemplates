@@ -9,7 +9,7 @@ import { validateSchemaFields, normalizeSchemaFields } from "../../lib/schemaFie
 type FieldRow = {
   name: string;
   type: FieldType;
-  description: string;
+  description: string | null;
 };
 
 type FormValues = {
@@ -35,7 +35,7 @@ export default function DocumentTypeCreatePage() {
     },
   });
 
-  const { fields, append, remove, update } = useFieldArray({ control, name: "fields" });
+  const { append, remove, update } = useFieldArray({ control, name: "fields" });
 
   const onSubmit = handleSubmit(async (values) => {
     setSubmitError(null);

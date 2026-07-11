@@ -1,4 +1,4 @@
-import { FieldType, DocumentTypeFieldIn } from "./documentTypes";
+import type { FieldType, DocumentTypeFieldIn } from "./documentTypes";
 
 export interface SchemaFieldTreeNode {
   id: string;
@@ -8,6 +8,7 @@ export interface SchemaFieldTreeNode {
   description: string | null;
   children: SchemaFieldTreeNode[];
   fullPath: string;
+  fieldIndex?: number;
 }
 
 /**
@@ -19,7 +20,8 @@ export function buildSchemaFieldTree(fields: DocumentTypeFieldIn[]): SchemaField
   const root: SchemaFieldTreeNode[] = [];
   let idCounter = 1;
 
-  for (const field of fields) {
+  for (let index = 0; index < fields.length; index++) {
+    const field = fields[index];
     const trimmedName = field.name.trim();
     if (!trimmedName) continue;
 
@@ -53,6 +55,7 @@ export function buildSchemaFieldTree(fields: DocumentTypeFieldIn[]): SchemaField
           description: isLast ? field.description : null,
           children: [],
           fullPath: pathAccumulator,
+          fieldIndex: isLast ? index : undefined,
         };
         currentLevel.push(node);
       } else {
@@ -61,10 +64,12 @@ export function buildSchemaFieldTree(fields: DocumentTypeFieldIn[]): SchemaField
           node.type = "leaf";
           node.fieldType = field.type;
           node.description = field.description;
+          node.fieldIndex = index;
         } else if (node.type === "leaf") {
           // Re-classify leaf node as intermediate parent if subpaths are added
           node.type = isList ? "list" : "object";
           delete node.fieldType;
+          delete node.fieldIndex;
           node.description = null;
         }
       }
@@ -212,4 +217,63 @@ export function normalizeSchemaFields(fields: DocumentTypeFieldIn[]): DocumentTy
     type: field.type,
     description: field.description?.trim() || null,
   }));
+}
+
+function getSampleValue(type: FieldType): any {
+  switch (type) {
+    case "number":
+      return 123.45;
+    case "boolean":
+      return true;
+    case "date":
+      return "2026-07-10";
+    case "string":
+    default:
+      return "sample";
+  }
+}
+
+/**
+ * Generates a nested/array mock JSON object from flat schema fields.
+ * e.g., cliente.direccion.calle -> { cliente: { direccion: { calle: "sample" } } }
+ * e.g., cliente.contactos[].nombre -> { cliente: { contactos: [{ nombre: "sample" }] } }
+ */
+export function generateMockDataFromFields(fields: DocumentTypeFieldIn[]): Record<string, any> {
+  const result: Record<string, any> = {};
+
+  for (const field of fields) {
+    const trimmedName = field.name.trim();
+    if (!trimmedName) continue;
+
+    const segments = trimmedName.split(".");
+    let current: any = result;
+
+    for (let i = 0; i < segments.length; i++) {
+      const segment = segments[i];
+      const isLast = i === segments.length - 1;
+      const isList = segment.endsWith("[]");
+      const cleanName = isList ? segment.slice(0, -2) : segment;
+
+      if (isLast) {
+        current[cleanName] = getSampleValue(field.type);
+      } else {
+        if (isList) {
+          if (!current[cleanName]) {
+            current[cleanName] = [];
+          }
+          if (current[cleanName].length === 0) {
+            current[cleanName].push({});
+          }
+          current = current[cleanName][0];
+        } else {
+          if (!current[cleanName]) {
+            current[cleanName] = {};
+          }
+          current = current[cleanName];
+        }
+      }
+    }
+  }
+
+  return result;
 }
