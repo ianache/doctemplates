@@ -336,16 +336,16 @@ export default function HtmlTemplateCreatePage() {
           css,
           mock_data: parsedMock,
         });
-        navigate(`/content/templates/${id}`);
+        navigate("/content/templates");
       } else {
-        const created = await createHtmlTemplate({
+        await createHtmlTemplate({
           document_type_id: documentTypeId,
           name,
           html,
           css,
           mock_data: parsedMock,
         });
-        navigate(`/content/templates/${created.id}`);
+        navigate("/content/templates");
       }
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : "We couldn't save this template.");
