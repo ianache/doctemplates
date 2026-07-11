@@ -21,15 +21,15 @@ import {
   addStaticPdfDesignPage,
   addTemplateDesignPage,
   deleteDesignPage,
+  discardDocumentDesignDraft,
+  forkDocumentDesignVersion,
   getDocumentDesign,
+  listDocumentDesignVersions,
   reorderDesignPages,
   updateDesignPage,
-  forkDocumentDesignVersion,
-  discardDocumentDesignDraft,
-  listDocumentDesignVersions,
   type DocumentDesignDetail,
-  type DocumentDesignPage,
   type DocumentDesignListItem,
+  type DocumentDesignPage,
 } from "../../lib/documentDesigns";
 import AddContentModal from "./components/AddContentModal";
 import DesignPageCard from "./components/DesignPageCard";
@@ -37,6 +37,32 @@ import DesignPageInspector from "./components/DesignPageInspector";
 
 function sortPages(pages: DocumentDesignPage[]) {
   return [...pages].sort((a, b) => a.position - b.position);
+}
+
+function pageLabel(page: DocumentDesignPage | null) {
+  if (!page) return "No page selected";
+  if (page.title) return page.title;
+  if (page.block_type === "html_template") return String(page.snapshot.name ?? "HTML template");
+  return String(page.snapshot.filename ?? "Static PDF");
+}
+
+function pageMetadata(page: DocumentDesignPage | null) {
+  if (!page) return "Select a fragment from the stack";
+  if (page.block_type === "html_template") {
+    const tokens = Array.isArray(page.snapshot.token_names) ? page.snapshot.token_names : [];
+    return tokens.length ? `${tokens.length} token${tokens.length === 1 ? "" : "s"}` : "No tokens";
+  }
+
+  const pageCount = Number(page.snapshot.page_count ?? 0);
+  const pageStart = page.snapshot.page_start;
+  const pageEnd = page.snapshot.page_end;
+  const range = pageStart && pageEnd ? `, pages ${pageStart}-${pageEnd}` : "";
+  return `${pageCount} page${pageCount === 1 ? "" : "s"}${range}`;
+}
+
+function statusLabel(status: string) {
+  if (status === "active") return "Current";
+  return status;
 }
 
 export default function DocumentDesignDetailPage() {
@@ -87,8 +113,9 @@ export default function DocumentDesignDetailPage() {
 
   useEffect(() => {
     if (location.state?.justForked && location.state?.sourceVersion !== undefined) {
-      setNotice(`New draft created from version ${location.state.sourceVersion}. Changes here won't affect the current version until you activate this one.`);
-      // Clear navigation state
+      setNotice(
+        `New draft created from version ${location.state.sourceVersion}. Changes here won't affect the current version until you activate this one.`,
+      );
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
@@ -195,11 +222,12 @@ export default function DocumentDesignDetailPage() {
       const updated = await activateDocumentDesign(design.id);
       setDesign(updated);
       if (updated.version_number && updated.version_number > 1) {
-        setNotice(`Version ${updated.version_number} is now current. Version ${updated.version_number - 1} has been preserved in version history.`);
+        setNotice(
+          `Version ${updated.version_number} is now current. Version ${updated.version_number - 1} has been preserved in version history.`,
+        );
       } else {
         setNotice("Design activated.");
       }
-      // Refresh version history
       const hist = await listDocumentDesignVersions(updated.id);
       setVersions(hist);
     } catch (err) {
@@ -256,178 +284,232 @@ export default function DocumentDesignDetailPage() {
   }
 
   return (
-    <section>
-      <div className="flex flex-wrap items-start justify-between gap-md">
-        <div>
-          <h1 className="font-headings text-[24px] font-bold leading-[32px] text-on-surface">
-            {design.name}
-          </h1>
-          <p className="mt-xs text-sm leading-5 text-on-surface-variant">
-            {design.description || "No description"}
-          </p>
-        </div>
-        <div className="flex items-center gap-sm">
-          {design.status === "draft" && (
-            <>
-              <span className="rounded bg-surface-container px-sm py-xs text-sm font-bold text-primary uppercase">
-                Draft
-              </span>
+    <section className="-m-lg grid min-h-[calc(100vh-4rem)] grid-cols-1 overflow-hidden bg-surface-container lg:grid-cols-[360px_minmax(0,1fr)_320px] xl:grid-cols-[400px_minmax(0,1fr)_340px]">
+      <aside className="flex min-h-0 flex-col border-r border-outline-variant bg-surface-bright">
+        <div className="border-b border-outline-variant p-lg">
+          <div className="flex items-start justify-between gap-md">
+            <div className="min-w-0">
+              <h1 className="truncate font-headings text-headline-lg font-bold text-on-surface">
+                {design.name}
+              </h1>
+              <p className="mt-xs line-clamp-2 text-body-sm text-on-surface-variant">
+                {design.description || "No description"}
+              </p>
+            </div>
+            <span className="shrink-0 rounded bg-surface-container-high px-sm py-xs text-label-caps font-bold uppercase text-primary">
+              {statusLabel(design.status)}
+            </span>
+          </div>
+
+          <div className="mt-lg grid grid-cols-2 gap-md text-body-sm">
+            <div>
+              <p className="font-label-caps text-on-surface-variant">Document Type</p>
+              <p className="mt-base font-bold text-on-surface">{design.document_type_name}</p>
+            </div>
+            <div>
+              <p className="font-label-caps text-on-surface-variant">Created By</p>
+              <p className="mt-base truncate text-on-surface">{design.created_by_email}</p>
+            </div>
+            <div>
+              <p className="font-label-caps text-on-surface-variant">Created At</p>
+              <p className="mt-base text-on-surface">{new Date(design.created_at).toLocaleDateString()}</p>
+            </div>
+            <div>
+              <p className="font-label-caps text-on-surface-variant">Fragments</p>
+              <p className="mt-base text-on-surface">{pages.length}</p>
+            </div>
+          </div>
+
+          <div className="mt-lg flex flex-wrap gap-sm">
+            {design.status === "draft" ? (
+              <>
+                <button
+                  type="button"
+                  className="rounded border border-error px-md py-xs text-body-sm font-bold text-error hover:bg-error/10"
+                  onClick={() => setShowDiscardModal(true)}
+                >
+                  Discard
+                </button>
+                <button
+                  type="button"
+                  className="rounded bg-primary px-md py-xs text-body-sm font-bold text-white hover:bg-primary/90"
+                  onClick={handleActivate}
+                >
+                  Activate
+                </button>
+              </>
+            ) : null}
+            {design.status === "active" ? (
               <button
                 type="button"
-                className="rounded border border-error px-md py-xs text-sm font-bold text-error hover:bg-error/10"
-                onClick={() => setShowDiscardModal(true)}
-              >
-                Discard Draft Version
-              </button>
-              <button
-                type="button"
-                className="rounded bg-primary px-md py-xs text-sm font-bold text-white hover:bg-primary/90"
-                onClick={handleActivate}
-              >
-                Activate
-              </button>
-            </>
-          )}
-          {design.status === "active" && (
-            <>
-              <span className="rounded bg-surface-container px-sm py-xs text-sm font-bold text-primary uppercase">
-                Current
-              </span>
-              <button
-                type="button"
-                className="rounded bg-primary px-md py-xs text-sm font-bold text-white hover:bg-primary/90"
+                className="rounded bg-primary px-md py-xs text-body-sm font-bold text-white hover:bg-primary/90"
                 onClick={handleEditDesign}
               >
                 Edit Design
               </button>
-            </>
-          )}
-          {design.status === "superseded" && (
-            <span className="rounded bg-surface-container px-sm py-xs text-sm font-bold text-on-surface-variant uppercase">
-              Superseded
-            </span>
-          )}
-          <Link
-            to={`/document-designs/${design.id}/versions`}
-            className="rounded border border-primary px-md py-xs text-sm font-bold text-primary hover:bg-primary/10"
-          >
-            Version History
-          </Link>
-        </div>
-      </div>
-
-      {design.status === "superseded" && activeVersion && (
-        <div className="mt-md flex items-center justify-between gap-sm rounded border border-outline-variant bg-surface-container-lowest p-sm text-sm font-bold text-on-surface">
-          <span>
-            You're viewing version {design.version_number} — a past version and read-only.{" "}
-            <Link to={`/document-designs/${activeVersion.id}`} className="text-primary hover:underline font-bold ml-xs">
-              [View current version]
+            ) : null}
+            <Link
+              to={`/document-designs/${design.id}/versions`}
+              className="rounded border border-primary px-md py-xs text-body-sm font-bold text-primary hover:bg-primary/10"
+            >
+              Version History
             </Link>
-          </span>
-        </div>
-      )}
+          </div>
 
-      <div className="mt-md grid gap-sm border-b border-outline-variant pb-md text-sm md:grid-cols-2">
-        <div className="flex justify-between gap-md">
-          <span className="text-on-surface-variant">Document Type</span>
-          <span className="font-bold text-on-surface">{design.document_type_name}</span>
-        </div>
-        <div className="flex justify-between gap-md">
-          <span className="text-on-surface-variant">Created By</span>
-          <span className="text-on-surface">{design.created_by_email}</span>
-        </div>
-        <div className="flex justify-between gap-md">
-          <span className="text-on-surface-variant">Created At</span>
-          <span className="text-on-surface">{new Date(design.created_at).toLocaleDateString()}</span>
-        </div>
-        <div className="flex justify-between gap-md">
-          <span className="text-on-surface-variant">Pages</span>
-          <span className="text-on-surface">{pages.length}</span>
-        </div>
-      </div>
+          {design.status === "superseded" && activeVersion ? (
+            <div className="mt-md rounded border border-outline-variant bg-surface-container-lowest p-sm text-body-sm font-bold text-on-surface">
+              Past version.{" "}
+              <Link to={`/document-designs/${activeVersion.id}`} className="text-primary hover:underline">
+                View current version
+              </Link>
+            </div>
+          ) : null}
 
-      {error ? <p className="mt-md rounded border border-error/30 p-sm text-sm text-error">{error}</p> : null}
-      {notice ? (
-        <div className="mt-md flex flex-wrap items-center justify-between gap-sm rounded border border-outline-variant bg-surface-container-lowest p-sm text-sm text-on-surface">
-          <span>{notice}</span>
-          {pendingRemove ? (
-            <span className="flex gap-sm">
-              <button type="button" className="font-bold text-primary" onClick={undoRemove}>
-                Undo
-              </button>
-              <button type="button" className="font-bold text-error" onClick={confirmRemove}>
-                Confirm
-              </button>
-            </span>
+          {error ? <p className="mt-md rounded border border-error/30 p-sm text-body-sm text-error">{error}</p> : null}
+          {notice ? (
+            <div className="mt-md rounded border border-outline-variant bg-surface-container-lowest p-sm text-body-sm text-on-surface">
+              <div className="flex flex-wrap items-center justify-between gap-sm">
+                <span>{notice}</span>
+                {pendingRemove ? (
+                  <span className="flex gap-sm">
+                    <button type="button" className="font-bold text-primary" onClick={undoRemove}>
+                      Undo
+                    </button>
+                    <button type="button" className="font-bold text-error" onClick={confirmRemove}>
+                      Confirm
+                    </button>
+                  </span>
+                ) : null}
+              </div>
+            </div>
           ) : null}
         </div>
-      ) : null}
 
-      {!readOnly && (
-        <div className="mt-lg flex flex-wrap justify-end gap-sm">
-          <button
-            type="button"
-            className="rounded bg-primary px-md py-xs text-sm font-bold text-white hover:bg-primary/90"
-            onClick={() => setModalMode("template")}
-          >
-            Add Template
-          </button>
-          <button
-            type="button"
-            className="rounded border border-primary px-md py-xs text-sm font-bold text-primary hover:bg-primary/10"
-            onClick={() => setModalMode("pdf")}
-          >
-            Add PDF
-          </button>
-        </div>
-      )}
-
-      <div className="mt-lg grid gap-lg lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="space-y-sm">
-          {pages.length === 0 ? (
-            <div className="rounded border border-outline-variant bg-surface-container-lowest px-lg py-xl text-center">
-              <p className="font-headings text-[18px] font-bold text-on-surface">
-                Empty page stack
-              </p>
-              <p className="mt-xs text-sm text-on-surface-variant">
-                Add a template or static PDF page to start composing this design.
-              </p>
+        <div className="flex min-h-0 flex-1 flex-col p-md">
+          <div className="mb-md flex items-center justify-between gap-sm">
+            <div>
+              <h2 className="font-headings text-headline-md text-on-surface">Fragments</h2>
+              <p className="text-body-sm text-on-surface-variant">Ordered document body</p>
             </div>
-          ) : readOnly ? (
-            <div className="space-y-sm">
-              {pages.map((page) => (
-                <DesignPageCard
-                  key={page.id}
-                  page={page}
-                  selected={page.id === selectedPageId}
-                  onSelect={setSelectedPageId}
-                  onRemove={handleRemove}
-                  readOnly={true}
+            {!readOnly ? (
+              <div className="flex gap-xs">
+                <button
+                  type="button"
+                  className="rounded bg-primary px-sm py-xs text-label-caps font-bold text-white hover:bg-primary/90"
+                  onClick={() => setModalMode("template")}
+                >
+                  Template
+                </button>
+                <button
+                  type="button"
+                  className="rounded border border-primary px-sm py-xs text-label-caps font-bold text-primary hover:bg-primary/10"
+                  onClick={() => setModalMode("pdf")}
+                >
+                  PDF
+                </button>
+              </div>
+            ) : null}
+          </div>
+
+          <div className="min-h-0 flex-1 overflow-y-auto pr-xs">
+            {pages.length === 0 ? (
+              <div className="rounded border border-outline-variant bg-surface-container-lowest px-lg py-xl text-center">
+                <p className="font-headings text-headline-md font-bold text-on-surface">Empty fragment stack</p>
+                <p className="mt-xs text-body-sm text-on-surface-variant">
+                  Add a template or static PDF page to start composing this design.
+                </p>
+              </div>
+            ) : readOnly ? (
+              <div className="space-y-sm">
+                {pages.map((page) => (
+                  <DesignPageCard
+                    key={page.id}
+                    page={page}
+                    selected={page.id === selectedPageId}
+                    onSelect={setSelectedPageId}
+                    onRemove={handleRemove}
+                    readOnly={true}
+                  />
+                ))}
+              </div>
+            ) : (
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <SortableContext items={pages.map((page) => page.id)} strategy={verticalListSortingStrategy}>
+                  <div className="space-y-sm">
+                    {pages.map((page) => (
+                      <DesignPageCard
+                        key={page.id}
+                        page={page}
+                        selected={page.id === selectedPageId}
+                        onSelect={setSelectedPageId}
+                        onRemove={handleRemove}
+                        readOnly={false}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
+            )}
+          </div>
+        </div>
+      </aside>
+
+      <main className="flex min-h-[640px] flex-col overflow-hidden bg-surface-container">
+        <div className="flex items-center justify-between gap-md border-b border-outline-variant bg-surface px-lg py-md">
+          <div className="min-w-0">
+            <p className="font-label-caps text-on-surface-variant">
+              {selectedPage ? `Page ${selectedPage.position + 1}` : "Preview"}
+            </p>
+            <h2 className="truncate font-headings text-headline-md text-on-surface">{pageLabel(selectedPage)}</h2>
+          </div>
+          <span className="rounded border border-outline-variant bg-surface-container-low px-sm py-xs text-label-caps text-on-surface-variant">
+            {pageMetadata(selectedPage)}
+          </span>
+        </div>
+
+        <div className="page-canvas-bg flex min-h-0 flex-1 items-start justify-center overflow-auto p-xl">
+          <div className="flex min-h-[760px] w-full max-w-[595px] flex-col border border-outline-variant bg-white p-xl shadow-lg">
+            {selectedPage ? (
+              selectedPage.block_type === "html_template" && typeof selectedPage.snapshot.html === "string" ? (
+                <iframe
+                  title={`Preview ${pageLabel(selectedPage)}`}
+                  className="h-full min-h-[680px] w-full flex-1 border-0 bg-white"
+                  srcDoc={String(selectedPage.snapshot.html)}
                 />
-              ))}
-            </div>
-          ) : (
-            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-              <SortableContext items={pages.map((page) => page.id)} strategy={verticalListSortingStrategy}>
-                <div className="space-y-sm">
-                  {pages.map((page) => (
-                    <DesignPageCard
-                      key={page.id}
-                      page={page}
-                      selected={page.id === selectedPageId}
-                      onSelect={setSelectedPageId}
-                      onRemove={handleRemove}
-                      readOnly={false}
-                    />
-                  ))}
+              ) : (
+                <div className="flex flex-1 flex-col items-center justify-center gap-md text-center">
+                  <span className="material-symbols-outlined text-[56px] text-primary">picture_as_pdf</span>
+                  <div>
+                    <h3 className="font-headings text-headline-md text-on-surface">{pageLabel(selectedPage)}</h3>
+                    <p className="mt-xs text-body-sm text-on-surface-variant">{pageMetadata(selectedPage)}</p>
+                  </div>
                 </div>
-              </SortableContext>
-            </DndContext>
-          )}
-        </div>
+              )
+            ) : (
+              <div className="flex flex-1 flex-col items-center justify-center gap-md text-center">
+                <span className="material-symbols-outlined text-[56px] text-on-surface-variant">
+                  dashboard_customize
+                </span>
+                <div>
+                  <h3 className="font-headings text-headline-md text-on-surface">Select a fragment</h3>
+                  <p className="mt-xs text-body-sm text-on-surface-variant">
+                    The selected page preview appears here.
+                  </p>
+                </div>
+              </div>
+            )}
 
+            <div className="mt-auto flex justify-between border-t border-outline-variant pt-md text-[10px] text-on-surface-variant">
+              <span>Precision Archival</span>
+              <span>{selectedPage ? `Page ${selectedPage.position + 1} of ${pages.length}` : `${pages.length} pages`}</span>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <aside className="min-h-0 overflow-y-auto border-l border-outline-variant bg-surface p-md">
         <DesignPageInspector page={selectedPage} onSave={handleSavePage} readOnly={readOnly} />
-      </div>
+      </aside>
 
       {modalMode ? (
         <AddContentModal
@@ -440,7 +522,7 @@ export default function DocumentDesignDetailPage() {
         />
       ) : null}
 
-      {showDiscardModal && (
+      {showDiscardModal ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-md">
           <div className="w-full max-w-xl rounded border border-outline-variant bg-surface-container-lowest p-lg shadow-xl">
             <div className="flex items-center justify-between gap-md">
@@ -458,7 +540,9 @@ export default function DocumentDesignDetailPage() {
             </div>
 
             <p className="mt-md text-sm text-on-surface">
-              Changes since version {design.version_number ? design.version_number - 1 : 1} will be lost. Version {design.version_number ? design.version_number - 1 : 1} itself stays intact and remains the current version.
+              Changes since version {design.version_number ? design.version_number - 1 : 1} will be lost. Version{" "}
+              {design.version_number ? design.version_number - 1 : 1} itself stays intact and remains the current
+              version.
             </p>
 
             {error ? <p className="mt-md text-sm text-error">{error}</p> : null}
@@ -483,7 +567,7 @@ export default function DocumentDesignDetailPage() {
             </div>
           </div>
         </div>
-      )}
+      ) : null}
     </section>
   );
 }
