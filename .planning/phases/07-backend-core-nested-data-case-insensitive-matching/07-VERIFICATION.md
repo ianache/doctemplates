@@ -1,71 +1,110 @@
-# Phase 7 Verification Report: Backend Core (Nested Data & Case-Insensitive Matching)
+---
+phase: 07-backend-core-nested-data-case-insensitive-matching
+verified: 2026-07-11T03:12:51Z
+status: passed
+score: 9/9 must-haves verified
+overrides_applied: 0
+---
 
-**Phase Status: PASSED**
+# Phase 7: Backend Core Nested Data and Case-Insensitive Matching Verification Report
 
-## 1. Context & Objectives
-Phase 7 introduces support for nested dictionary structures and wildcard list-of-objects (`[]`) in Document Type field definitions and API validation. It also adds case-insensitive template token rendering and API input key matching, with strict collision detection and sandbox protection.
+**Phase Goal:** Support nested objects, object lists, and case-insensitive payload mapping and Jinja2 rendering on the backend.
+**Verified:** 2026-07-11T03:12:51Z
+**Status:** passed
+**Re-verification:** No - canonical initial verification. A prior non-canonical `07-VERIFICATION.md` existed, but it had no structured frontmatter or `gaps:` section.
 
-## 2. Success Criteria & Must-Haves Checklist
+## Goal Achievement
 
-| Success Criterion / Must-Have | Status | File & Line Reference | Notes |
-|:---|:---:|:---|:---|
-| **Collision Rejection:** Any generate request with case-insensitive casing collisions (e.g., `Name` vs `name`) is rejected with a structured `400 Bad Request`. | **PASSED** | [pdf_generator.py:L157-183](file:///D:/02-PERSONAL/01-PROJECTS/29-DocManagemet/backend/app/services/pdf_generator.py#L157-L183)<br>[pdf_generator.py:L371-383](file:///D:/02-PERSONAL/01-PROJECTS/29-DocManagemet/backend/app/services/pdf_generator.py#L371-L383) | Returns structured lists of error dicts with location (`loc`), collision detail (`type: "casing_collision"`), and context. |
-| **Unknown Attributes Rejection:** Any payload validation with unknown fields not declared in the Document Type schema is rejected with `400 Bad Request`. | **PASSED** | [pdf_generator.py:L321-328](file:///D:/02-PERSONAL/01-PROJECTS/29-DocManagemet/backend/app/services/pdf_generator.py#L321-L328) | Validates payload against the schema tree, raising a `400 HTTPException` listing the path of the unknown property. |
-| **Case-Insensitive Resolution:** Jinja2 template variables with casing variations (e.g., `{{Cliente.Nombre}}`) resolve and render correctly using the payload keys. | **PASSED** | [pdf_generator.py:L517-540](file:///D:/02-PERSONAL/01-PROJECTS/29-DocManagemet/backend/app/services/pdf_generator.py#L517-L540)<br>[pdf_generator.py:L398-466](file:///D:/02-PERSONAL/01-PROJECTS/29-DocManagemet/backend/app/services/pdf_generator.py#L398-L466) | Uses `CaseInsensitiveContext` subclassing `jinja2.runtime.Context` alongside custom recursive dict/list proxies. |
-| **List Permissiveness:** Omitted or empty list properties in the payload do not fail API validation. | **PASSED** | [pdf_generator.py:L334-336](file:///D:/02-PERSONAL/01-PROJECTS/29-DocManagemet/backend/app/services/pdf_generator.py#L334-L336)<br>[pdf_generator.py:L352-355](file:///D:/02-PERSONAL/01-PROJECTS/29-DocManagemet/backend/app/services/pdf_generator.py#L352-L355) | Automatically coerces missing lists to empty lists `[]` rather than raising a missing field error. |
-| **Original Casing Preservation:** The integrator's exact casing in the incoming payload is preserved in the database record (`document_issuances.input_data`). | **PASSED** | [document_designs.py:L476-486](file:///D:/02-PERSONAL/01-PROJECTS/29-DocManagemet/backend/app/api/document_designs.py#L476-L486) | Stores the raw unmodified `payload` in `input_data` instead of the coerced/expanded payload. |
+### Observable Truths
 
-## 3. Artifacts Verified
-The following artifacts configured or modified during this phase were reviewed and verified:
+| # | Truth | Status | Evidence |
+|---|-------|--------|----------|
+| 1 | The API parses and validates Document Type schemas containing nested structures and object lists. | VERIFIED | `DocumentTypeFieldIn.validate_name_path` enforces nested/list segment regex and max depth in `backend/app/schemas/document_type.py:10-36`; `DocumentTypeCreate.validate_schema_structure` detects leaf/object/list conflicts in `backend/app/schemas/document_type.py:50-96`. Tests cover invalid paths, conflicts, and valid `cliente.contactos[].nombre` schemas in `backend/tests/test_document_types.py`. |
+| 2 | PDF generation renders nested/list template tokens with case-insensitive resolving. | VERIFIED | `CaseInsensitiveContext`, recursive dict/list proxies, and `CaseInsensitiveSandboxedEnvironment` are wired into `render_html_page_to_pdf` in `backend/app/services/pdf_generator.py:521-553`. Integration test renders mixed-case `Cliente.Contactos` loop data and direct probe rendered `{{Cliente.Contactos[0].Nombre}}` to PDF. |
+| 3 | Payload validation detects case-insensitive key collisions at any level and rejects with clear `400 Bad Request`. | VERIFIED | `check_casing_collisions` recursively records `type: casing_collision` errors in `backend/app/services/pdf_generator.py:157-183`; `validate_and_coerce_payload` raises `HTTPException(status_code=400)` on collisions in `backend/app/services/pdf_generator.py:371-381`. Unit tests cover nested `Num`/`num`; direct probe also covered flat/nested mixed collision. |
+| 4 | PDF generation rejects unknown or mismatched payload fields according to schema. | VERIFIED | `validate_payload_against_schema` rejects unknown object keys, object/list shape mismatches, and type coercion failures in `backend/app/services/pdf_generator.py:303-360`. Unit tests cover unknown properties and direct probe covered dict passed to list field. |
+| 5 | Missing or empty list properties do not fail API validation. | VERIFIED | Missing schema list children are coerced to `[]` in `backend/app/services/pdf_generator.py:333-335`; explicit `None` lists return `[]` in `backend/app/services/pdf_generator.py:352-354`. Unit test asserts omitted `cliente.contactos` succeeds as an empty list. |
+| 6 | Original caller payload casing is preserved in persisted issuances. | VERIFIED | Generation route calls `generate_composed_pdf(design, payload, ...)` for validation/rendering, then persists `input_data=payload` in `backend/app/api/document_designs.py:458-487`. Integration test asserts DB `DocumentIssuance.input_data == payload` with mixed casing. |
+| 7 | Template validation accepts case variations against schema fields. | VERIFIED | `validate_template_tokens` lowercases allowed ancestor paths and extracted paths in `backend/app/services/content_validation.py:215-232` and following validation loop. Tests cover `{{Cliente.Nombre}}` against `cliente.nombre`. |
+| 8 | Template validation supports loop/list variable paths. | VERIFIED | `JinjaTokenExtractor.visit_For` maps loop target variables to `iter_path[]`; `get_ancestor_paths` admits wildcard/list ancestors in `backend/app/services/content_validation.py:197-219`. Tests cover `{% for c in cliente.contactos %}{{c.nombre}}{% endfor %}` mapping to `cliente.contactos[].nombre`. |
+| 9 | Proxy wrappers protect private double-underscore lookups. | VERIFIED | `RecursiveCaseInsensitiveDict` and `RecursiveCaseInsensitiveList` reject private dunder access in `backend/app/services/pdf_generator.py:398-489`. Tests assert `__class__`, `__dict__`, and `["__class__"]` are blocked. |
 
-* **[document_type.py](file:///D:/02-PERSONAL/01-PROJECTS/29-DocManagemet/backend/app/schemas/document_type.py):**
-  * Added path regex validation for parent segments: `^[a-zA-Z_][a-zA-Z0-9_]*(?:\[\])?$` and leaves: `^[a-zA-Z_][a-zA-Z0-9_]*$`.
-  * Implemented `DocumentTypeCreate.validate_schema_structure` model validator to construct the structural schema tree and detect leaf/parent or list/object conflicts at type creation.
-  * Restricted segment path depth to `5` levels to prevent DoS recursion issues.
-* **[pdf_generator.py](file:///D:/02-PERSONAL/01-PROJECTS/29-DocManagemet/backend/app/services/pdf_generator.py):**
-  * Added `SchemaNode` and `build_schema_tree` helper for building validation paths.
-  * Added `expand_payload` to expand flat dot-notation keys into canonical dictionaries.
-  * Implemented `check_casing_collisions` which compares lowercased keys at each tree level.
-  * Developed `RecursiveCaseInsensitiveDict` and `RecursiveCaseInsensitiveList` proxies.
-  * Subclassed `CaseInsensitiveContext` and `CaseInsensitiveSandboxedEnvironment`.
-* **[content_validation.py](file:///D:/02-PERSONAL/01-PROJECTS/29-DocManagemet/backend/app/services/content_validation.py):**
-  * Upgraded `validate_template_tokens` with case-insensitive token mapping and leaf-level matching for loop variables (fallback logic).
-* **[test_nested_case_insensitive.py](file:///D:/02-PERSONAL/01-PROJECTS/29-DocManagemet/backend/tests/test_nested_case_insensitive.py):**
-  * Created custom test suite asserting nested lists of objects, case-insensitive variable evaluations, raw payload casing database preservation, and private double-underscore proxy lookup protection.
+**Score:** 9/9 truths verified
 
-## 4. Key Links & Data Flow Trace
-The data flow trace highlights how a client request interacts with the newly added features:
-1. **API Entry `/api/document-designs/{design_id}/generate`:** Payload is received as a dictionary.
-2. **Payload Expansion (`expand_payload`):** Dict is transformed from a mix of dot-notation (`cliente.nombre`) and nested structure to a canonical nested JSON structure.
-3. **Collision Check (`check_casing_collisions`):** The expanded JSON is traversed recursively. If two keys lowercase to the same string within a single scope (e.g. `Name` and `name`), a validation list containing `casing_collision` structures is built and returned as a `400 Bad Request`.
-4. **Schema Tree Build & Coercion (`validate_payload_against_schema`):** The schema fields are parsed into a tree of `SchemaNode` items. The payload values are validated and coerced (e.g., matching string "123.45" to schema field type `number`). Unknown properties or structural mismatches trigger a `400 Bad Request`.
-5. **Database Persistence:** The original input `payload` is written to `document_issuances.input_data` in the database, preserving the caller's raw casing.
-6. **Dynamic Rendering:** The coerced payload is passed to `CaseInsensitiveSandboxedEnvironment`. When Jinja2 requests variable values, `CaseInsensitiveContext.resolve_or_missing` matches keys case-insensitively and returns `RecursiveCaseInsensitiveDict` and `RecursiveCaseInsensitiveList` wrappers.
+### Required Artifacts
 
-## 5. Behavioral Spot-Checks & Test Results
-A comprehensive execution of Phase 7 tests was conducted. All tests completed successfully:
+| Artifact | Expected | Status | Details |
+|---|---|---|---|
+| `backend/app/schemas/document_type.py` | Nested/list schema path validation and structural conflict detection | VERIFIED | Substantive implementation with regex validators, depth cap, case-insensitive field uniqueness, and schema tree conflict checks. Wired through `DocumentTypeCreate` in `backend/app/api/document_types.py`. |
+| `backend/app/services/pdf_generator.py` | Payload expansion, collision detection, schema validation, case-insensitive rendering proxies | VERIFIED | Substantive implementation. Wired through `generate_composed_pdf`, generation/preview API routes, and rendering path. |
+| `backend/app/services/content_validation.py` | Case-insensitive template token validation and list-loop path extraction | VERIFIED | Substantive AST/token implementation. Wired through template creation route in `backend/app/api/content_templates.py:49`. |
+| `backend/tests/test_document_types.py` | Schema path validation tests | VERIFIED | Focused tests passed. |
+| `backend/tests/test_pdf_generator.py` | Payload validation and generator tests | VERIFIED | Focused tests passed. |
+| `backend/tests/test_content_templates.py` | Template token validation tests | VERIFIED | Focused tests passed. |
+| `backend/tests/test_nested_case_insensitive.py` | Integration tests for nested/case-insensitive generation | VERIFIED | Focused tests passed. |
 
-```
-tests\test_pdf_generator.py .....                                        [ 26%]
-tests\test_document_types.py ..........                                  [ 78%]
-tests\test_content_templates.py ....                                     [100%]
-tests\test_nested_case_insensitive.py ..                                 [100%]
+### Key Link Verification
 
-================== 21 passed, 1 warning in ~147.35s ===================
-```
+| From | To | Via | Status | Details |
+|---|---|---|---|---|
+| `document_types.py` | `DocumentTypeCreate` validators | FastAPI request model | WIRED | Create endpoint accepts `payload: DocumentTypeCreate`, so Pydantic validators run before DB insert. |
+| `document_designs.py` | `generate_composed_pdf` | `generate_document` and `preview_document` | WIRED | Generation and preview routes call the PDF generator with the caller payload. |
+| `generate_composed_pdf` | `validate_and_coerce_payload` | first step in PDF composition | WIRED | Payload validation happens before rendering or persistence. |
+| `render_html_page_to_pdf` | `CaseInsensitiveSandboxedEnvironment` | environment construction | WIRED | Case-insensitive context is used for every HTML template render. |
+| `content_templates.py` | `validate_template_tokens` | template create endpoint | WIRED | Template save validates extracted tokens against document type fields. |
+| `generate_document` | `DocumentIssuance.input_data` | `input_data=payload` | WIRED | Raw input payload is persisted after successful generation. |
 
-* **Integration test coverage `test_nested_case_insensitive.py`**: Passed.
-* **Unit test coverage `test_pdf_generator.py`**: Passed.
-* **Unit test coverage `test_document_types.py`**: Passed.
-* **Unit test coverage `test_content_templates.py`**: Passed.
+### Data-Flow Trace (Level 4)
 
-## 6. Security Analysis (Threat Model Review)
-* **T-07-01 (Denial of Service / Stack Overflow):** The path depth limit is explicitly capped at `5` levels both at schema creation time (`DocumentTypeFieldIn.validate_name_path`) and during payload validation (`validate_payload_against_schema`).
-* **T-07-02 (Elevation of Privilege / Sandbox Escape):** The proxy dictionaries `RecursiveCaseInsensitiveDict` and lists `RecursiveCaseInsensitiveList` override `__getattribute__`, blocking any attributes starting with double-underscores (`__`) except those required for representation and standard protocols, throwing an `AttributeError`. This stops sandbox escape payloads looking for `__class__` or other dunder properties.
-* **T-07-03 (Tampering / Input Bypass):** Explicit case-insensitive checks are applied to all fields, preventing the bypass of schema controls via casing mutation.
+| Artifact | Data Variable | Source | Produces Real Data | Status |
+|---|---|---|---|---|
+| `backend/app/api/document_designs.py` | `payload` | Request body for `/api/document-designs/{design_id}/generate` | Yes | FLOWING - passed into `generate_composed_pdf`, then raw payload persisted to issuance. |
+| `backend/app/services/pdf_generator.py` | `expanded_payload` | `expand_payload(payload)` | Yes | FLOWING - merged flat/nested payload is collision checked and schema validated. |
+| `backend/app/services/pdf_generator.py` | `coerced_dict` / `coerced_list` | schema tree plus payload | Yes | FLOWING - recursive validator returns typed nested data to template rendering. |
+| `backend/app/services/content_validation.py` | `extractor.extracted_tokens` | Jinja2 AST parse of template HTML | Yes | FLOWING - unknown tokens trigger HTTP 400, valid tokens are stored on template records. |
 
-## 7. Gaps & Anti-Patterns Identified
-No gaps or anti-patterns were found:
-* All prints and debug statement logs have been cleaned.
-* No `TODO` or `FIXME` comments exist in the new files.
-* Test coverage is highly specific and thoroughly tests validation boundaries (e.g. invalid regexes, deep nesting, conflicts, empty lists, case mapping, and casing collisions).
+### Behavioral Spot-Checks
+
+| Behavior | Command | Result | Status |
+|---|---|---|---|
+| Focused Phase 7 backend tests | `rtk uv run pytest tests\test_document_types.py tests\test_pdf_generator.py tests\test_content_templates.py tests\test_nested_case_insensitive.py -q` from `backend/` | `22 passed, 1 warning in 155.44s` | PASS |
+| Flat/nested casing collision, list mismatch, case-insensitive render helper probe | `rtk uv run python -c "...validate_and_coerce_payload...render_html_page_to_pdf..."` from `backend/` | `ok` | PASS |
+
+### Probe Execution
+
+No phase-declared `scripts/*/tests/probe-*.sh` probes were present or required for this backend implementation phase.
+
+### Requirements Coverage
+
+| Requirement | Source Plan | Description | Status | Evidence |
+|---|---|---|---|---|
+| NEST-01 | `07-01-PLAN.md` | Support nested objects in Document Type schemas API validation. | SATISFIED | Nested path regex, structure tree validation, API create wiring, and passing tests. |
+| NEST-02 | `07-01-PLAN.md` | Support lists of objects using bracket wildcard notation in schemas API validation. | SATISFIED | Parent path regex permits `[]`, schema tree models list nodes, tests cover `cliente.contactos[].nombre`. |
+| NEST-03 | `07-01-PLAN.md` | Validate API payload nested object/list schemas and reject unknown or mismatched fields with `400 Bad Request`. | SATISFIED | Recursive schema validator rejects unknown keys, object/list shape mismatches, and type coercion failures. |
+| CASE-01 | `07-01-PLAN.md` | Implement case-insensitive matching of API payload keys to schema properties. | SATISFIED | Validator matches payload keys to schema child names via lowercase comparison. |
+| CASE-02 | `07-01-PLAN.md` | Detect case-insensitive key collisions and reject `400 Bad Request`. | SATISFIED | Recursive collision detector returns structured `casing_collision` details and tests pass. |
+| CASE-03 | `07-01-PLAN.md` | Render Jinja2 template tokens case-insensitively. | SATISFIED | Case-insensitive Jinja2 context and recursive proxies are used by render path; integration tests and probe passed. |
+
+No additional Phase 7 requirement IDs were found in `.planning/REQUIREMENTS.md` beyond these six.
+
+### Anti-Patterns Found
+
+| File | Line | Pattern | Severity | Impact |
+|---|---:|---|---|---|
+| `backend/app/services/pdf_generator.py` | 354 | `return []` | INFO | Benign implementation for missing/empty list support, not a stub. |
+| `backend/app/services/content_validation.py` | 36 | `return []` | INFO | Benign extractor default for no tokens, not a stub. |
+
+No `TODO`, `FIXME`, `XXX`, `PLACEHOLDER`, `coming soon`, or `not implemented` markers were found in the modified implementation/test files scanned.
+
+### Human Verification Required
+
+None. This phase is backend-only and the required behavior was verifiable through code inspection, wiring checks, direct helper probes, and tests.
+
+### Gaps Summary
+
+No blocking gaps found. The phase goal is achieved in the codebase: nested object/list schemas validate, payloads are mapped case-insensitively with collision and unknown-field rejection, Jinja2 rendering resolves mixed-case nested/list tokens, and raw payload casing is preserved in persisted issuances.
+
+---
+
+_Verified: 2026-07-11T03:12:51Z_
+_Verifier: the agent (gsd-verifier)_

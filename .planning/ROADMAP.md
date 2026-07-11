@@ -242,7 +242,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 4. Visual Designer | 3/3 | Complete | 2026-07-07 |
 | 5. Versioning | 3/3 | Complete | 2026-07-08 |
 | 6. Generation & Preview API | 2/2 | Complete | 2026-07-08 |
-| 7. Backend Core (Nested Data & Case-Insensitive Matching) | 1/1 | Complete   | 2026-07-09 |
+| 7. Backend Core (Nested Data & Case-Insensitive Matching) | 1/1 | Complete    | 2026-07-09 |
 | 8. Template AST & Static Validation | 1/1 | Complete    | 2026-07-10 |
 | 9. Search Documents Library & Audit Trace | 2/3 | In Progress|  |
 | 10. Complex Schema UI & Nested Data Previsualization | 0/0 | Proposed | |
