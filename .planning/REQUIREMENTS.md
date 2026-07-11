@@ -71,7 +71,7 @@ New requirements introduced in Milestone v2.0.
 ### UI/UX Improvements for Complex Fields
 
 - [x] **COMPUI-01**: Support viewing, adding, and managing complex schema fields (nested objects/lists) in the Document Types UI.
-- [ ] **COMPUI-02**: Support previsualizing designs with complex nested/array data in the visual editor.
+- [x] **COMPUI-02**: Support previsualizing designs with complex nested/array data in the visual editor.
 
 ---
 
@@ -119,7 +119,7 @@ This section maps v2.0 requirements to roadmap phases.
 | SRCH-04 | Phase 9 | Proposed |
 | SRCH-05 | Phase 9 | Proposed |
 | COMPUI-01 | Phase 10 | Complete |
-| COMPUI-02 | Phase 10 | Proposed |
+| COMPUI-02 | Phase 10 | Complete |
 
 **Coverage:**
 
