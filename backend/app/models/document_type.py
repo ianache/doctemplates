@@ -7,6 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db import Base
 
 ALLOWED_FIELD_TYPES = ("string", "number", "date", "boolean")
+ALLOWED_METADATA_TYPES = ("text", "number", "date", "datetime", "boolean")
 
 
 class DocumentType(Base):
@@ -23,6 +24,11 @@ class DocumentType(Base):
         back_populates="document_type",
         cascade="all, delete-orphan",
         order_by="DocumentTypeField.position",
+    )
+    metadata_definitions: Mapped[list["DocumentTypeMetadataDefinition"]] = relationship(
+        back_populates="document_type",
+        cascade="all, delete-orphan",
+        order_by="DocumentTypeMetadataDefinition.name",
     )
 
 
@@ -46,3 +52,24 @@ class DocumentTypeField(Base):
     position: Mapped[int]
 
     document_type: Mapped["DocumentType"] = relationship(back_populates="fields")
+
+
+class DocumentTypeMetadataDefinition(Base):
+    __tablename__ = "document_type_metadata_definitions"
+    __table_args__ = (
+        UniqueConstraint("document_type_id", "name", name="uq_document_type_metadata_name"),
+        CheckConstraint(
+            f"type IN {ALLOWED_METADATA_TYPES!r}",
+            name="ck_document_type_metadata_type",
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    document_type_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("document_types.id", ondelete="CASCADE")
+    )
+    name: Mapped[str]
+    type: Mapped[str]
+    required: Mapped[bool] = mapped_column(default=True)
+
+    document_type: Mapped["DocumentType"] = relationship(back_populates="metadata_definitions")

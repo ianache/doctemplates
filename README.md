@@ -11,6 +11,10 @@ uv --native-tls run uvicorn app.main:app --host 127.0.0.1 --port 8000
 rpm run dev
 ```
 
+```
+docker compose up backend frontend -d --force-recreate
+```
+
 # Usuarios:
 
 - alice@example.com / welcome1

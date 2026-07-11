@@ -414,6 +414,10 @@ class RecursiveCaseInsensitiveDict:
             "__getattribute__",
         ):
             raise AttributeError(f"Access to private attribute '{name}' is blocked.")
+        if not name.startswith("_"):
+            keys_lower = super().__getattribute__("_keys_lower")
+            if name.lower() in keys_lower:
+                return self[name]
         return super().__getattribute__(name)
 
     def __getattr__(self, name: str) -> any:

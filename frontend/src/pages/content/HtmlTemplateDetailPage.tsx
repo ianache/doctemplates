@@ -28,7 +28,7 @@ export default function HtmlTemplateDetailPage() {
           Return to the library to see all templates and PDFs.
         </p>
         <Link
-          to="/content"
+          to="/content/templates"
           className="mt-lg inline-block rounded bg-primary px-lg py-sm text-sm font-bold text-white hover:bg-primary/90"
         >
           Back to Content Library
@@ -45,7 +45,7 @@ export default function HtmlTemplateDetailPage() {
           <p className="mt-xs text-sm text-on-surface-variant">{template.document_type_name}</p>
         </div>
         <Link
-          to="/content"
+          to="/content/templates"
           className="rounded border border-outline-variant px-md py-xs text-sm font-bold text-on-surface hover:border-outline"
         >
           Back to Library

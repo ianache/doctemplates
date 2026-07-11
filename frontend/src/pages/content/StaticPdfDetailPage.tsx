@@ -29,7 +29,7 @@ export default function StaticPdfDetailPage() {
           Return to the library to see all templates and PDFs.
         </p>
         <Link
-          to="/content"
+          to="/content/static"
           className="mt-lg inline-block rounded bg-primary px-lg py-sm text-sm font-bold text-white hover:bg-primary/90"
         >
           Back to Content Library

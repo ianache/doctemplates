@@ -22,6 +22,7 @@ class DocumentIssuanceOut(BaseModel):
     file_path: str
     user_id: UUID
     input_data: dict
+    metadata_values: dict | None = None
     status: str
     created_at: datetime
 
@@ -36,6 +37,7 @@ class DocumentIssuanceLibraryItem(BaseModel):
     user_id: UUID
     generated_by_email: str
     input_data: dict
+    metadata_values: dict | None = None
     created_at: datetime
     preview_url: str
     download_url: str

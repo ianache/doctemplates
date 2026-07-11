@@ -14,7 +14,7 @@ from app.config import settings
 from app.db import get_db
 from app.models.content_template import HtmlTemplate
 from app.models.document_design import DocumentDesign, DocumentDesignPage
-from app.models.document_type import DocumentType
+from app.models.document_type import DocumentType, DocumentTypeMetadataDefinition
 from app.models.document_issuance import DocumentIssuance
 from app.models.document_tracelog import DocumentTracelog
 from app.models.static_pdf_asset import StaticPdfAsset
@@ -455,6 +455,114 @@ def discard_document_design_draft(
     return Response(status_code=204)
 
 
+from datetime import datetime
+
+def validate_metadata_values(
+    values: dict,
+    definitions: list[DocumentTypeMetadataDefinition]
+) -> dict:
+    """Validates metadata values against definitions.
+    Raises HTTPException 400 if validation fails.
+    Returns coerced metadata values dictionary.
+    """
+    coerced = {}
+    
+    # Case insensitive check for keys
+    values_lower = {k.lower(): (k, v) for k, v in values.items()}
+    
+    for def_ in definitions:
+        name_lower = def_.name.lower()
+        
+        # Check if present
+        if name_lower not in values_lower:
+            if def_.required:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Required metadata field '{def_.name}' is missing."
+                )
+            continue
+            
+        orig_key, val = values_lower[name_lower]
+        
+        if val is None or val == "":
+            if def_.required:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Required metadata field '{def_.name}' cannot be empty."
+                )
+            coerced[def_.name] = None
+            continue
+            
+        # Coerce based on type
+        t = def_.type
+        if t == "text":
+            coerced[def_.name] = str(val)
+        elif t == "number":
+            try:
+                if isinstance(val, bool):
+                    coerced[def_.name] = float(1 if val else 0)
+                else:
+                    coerced[def_.name] = float(val)
+            except (ValueError, TypeError):
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Metadata field '{def_.name}' must be a number."
+                )
+        elif t == "boolean":
+            if isinstance(val, bool):
+                coerced[def_.name] = val
+            elif str(val).lower() in ("true", "1", "yes", "on"):
+                coerced[def_.name] = True
+            elif str(val).lower() in ("false", "0", "no", "off"):
+                coerced[def_.name] = False
+            else:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Metadata field '{def_.name}' must be a boolean."
+                )
+        elif t == "date":
+            if isinstance(val, datetime):
+                coerced[def_.name] = val.date().isoformat()
+            elif isinstance(val, str):
+                try:
+                    datetime.strptime(val, "%Y-%m-%d")
+                    coerced[def_.name] = val
+                except ValueError:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Metadata field '{def_.name}' must be a date in YYYY-MM-DD format."
+                    )
+            else:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Metadata field '{def_.name}' must be a date."
+                )
+        elif t == "datetime":
+            if isinstance(val, datetime):
+                coerced[def_.name] = val.isoformat()
+            elif isinstance(val, str):
+                try:
+                    val_str = val
+                    if val_str.endswith("Z"):
+                        val_str = val_str[:-1] + "+00:00"
+                    datetime.fromisoformat(val_str)
+                    coerced[def_.name] = val
+                except Exception:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Metadata field '{def_.name}' must be a valid datetime (ISO 8601 format)."
+                    )
+            else:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Metadata field '{def_.name}' must be a datetime."
+                )
+        else:
+            coerced[def_.name] = val
+            
+    return coerced
+
+
 @router.post("/{design_id}/generate", response_model=DocumentIssuanceOut, status_code=201)
 def generate_document(
     design_id: UUID,
@@ -466,8 +574,19 @@ def generate_document(
     if design.status == "draft":
         raise HTTPException(status_code=400, detail="Cannot generate documents from a draft design")
 
+    # Split data and metadata
+    data = payload.get("data", payload) if isinstance(payload, dict) else {}
+    metadata = payload.get("metadata", {}) if isinstance(payload, dict) else {}
+    if not isinstance(data, dict):
+        data = {}
+    if not isinstance(metadata, dict):
+        metadata = {}
+
+    # Validate metadata
+    coerced_metadata = validate_metadata_values(metadata, design.document_type.metadata_definitions)
+
     # Generate PDF bytes
-    pdf_bytes = generate_composed_pdf(design, payload, db, mock_fallback=False)
+    pdf_bytes = generate_composed_pdf(design, data, db, mock_fallback=False)
 
     # Ensure output directory exists
     os.makedirs(settings.issuance_storage_root, exist_ok=True)
@@ -484,7 +603,8 @@ def generate_document(
         design_version_id=design.id,
         file_path=file_path,
         user_id=user.id,
-        input_data=payload,
+        input_data=data,
+        metadata_values=coerced_metadata,
         status="success",
     )
     tracelog = DocumentTracelog(
@@ -513,6 +633,17 @@ def preview_document(
     if design.status not in ("draft", "active"):
         raise HTTPException(status_code=400, detail="Preview only allowed for draft or active designs")
 
-    pdf_bytes = generate_composed_pdf(design, payload, db, mock_fallback=True)
+    # Split data and metadata
+    data = payload.get("data", payload) if isinstance(payload, dict) else {}
+    metadata = payload.get("metadata", {}) if isinstance(payload, dict) else {}
+    if not isinstance(data, dict):
+        data = {}
+    if not isinstance(metadata, dict):
+        metadata = {}
+
+    # Validate metadata
+    _ = validate_metadata_values(metadata, design.document_type.metadata_definitions)
+
+    pdf_bytes = generate_composed_pdf(design, data, db, mock_fallback=True)
     return Response(content=pdf_bytes, media_type="application/pdf")
 

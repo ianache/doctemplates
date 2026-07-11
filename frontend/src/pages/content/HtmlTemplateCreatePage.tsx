@@ -1,17 +1,24 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { listDocumentTypes, type DocumentTypeListItem } from "../../lib/documentTypes";
+import {
+  getDocumentType,
+  listDocumentTypes,
+  type DocumentTypeDetail,
+  type DocumentTypeListItem,
+} from "../../lib/documentTypes";
 import { createHtmlTemplate } from "../../lib/content";
 
 export default function HtmlTemplateCreatePage() {
   const navigate = useNavigate();
   const [documentTypes, setDocumentTypes] = useState<DocumentTypeListItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedDocumentType, setSelectedDocumentType] = useState<DocumentTypeDetail | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [documentTypeId, setDocumentTypeId] = useState("");
-  const [html, setHtml] = useState("<p>{{cliente.nombre}}</p>");
+  const [html, setHtml] = useState("");
+  const [htmlTouched, setHtmlTouched] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -28,6 +35,26 @@ export default function HtmlTemplateCreatePage() {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (!documentTypeId) {
+      setSelectedDocumentType(null);
+      return;
+    }
+
+    let cancelled = false;
+    getDocumentType(documentTypeId).then((detail) => {
+      if (cancelled) return;
+      setSelectedDocumentType(detail);
+      if (!htmlTouched && detail?.fields?.length) {
+        setHtml(`<p>{{${detail.fields[0].name}}}</p>`);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [documentTypeId, htmlTouched]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -77,7 +104,10 @@ export default function HtmlTemplateCreatePage() {
           Document Type
           <select
             value={documentTypeId}
-            onChange={(event) => setDocumentTypeId(event.target.value)}
+            onChange={(event) => {
+              setDocumentTypeId(event.target.value);
+              setHtmlTouched(false);
+            }}
             className="mt-xs w-full rounded border border-outline px-sm py-xs text-sm text-on-surface focus:border-primary focus:outline-none"
           >
             {loading ? <option>Loading...</option> : null}
@@ -94,11 +124,36 @@ export default function HtmlTemplateCreatePage() {
           HTML
           <textarea
             value={html}
-            onChange={(event) => setHtml(event.target.value)}
+            onChange={(event) => {
+              setHtml(event.target.value);
+              setHtmlTouched(true);
+            }}
             rows={12}
             className="mt-xs w-full rounded border border-outline px-sm py-xs font-mono text-sm text-on-surface focus:border-primary focus:outline-none"
           />
         </label>
+
+        <div className="rounded border border-outline-variant bg-surface-container-lowest px-md py-sm text-sm text-on-surface-variant">
+          <p className="text-[11px] font-bold uppercase tracking-[0.05em] text-secondary">
+            Allowed Tokens
+          </p>
+          {selectedDocumentType?.fields?.length ? (
+            <div className="mt-xs flex flex-wrap gap-xs">
+              {selectedDocumentType.fields.map((field) => (
+                <code
+                  key={field.id}
+                  className="rounded bg-surface-container px-2 py-0.5 text-[12px] text-on-surface"
+                >
+                  {`{{${field.name}}}`}
+                </code>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-xs">
+              Select a document type to see the tokens available for that template.
+            </p>
+          )}
+        </div>
 
         <div className="flex justify-end">
           <button

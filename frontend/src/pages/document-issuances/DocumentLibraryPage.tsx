@@ -32,6 +32,8 @@ const EMPTY_FILTERS: DocumentIssuanceFilters = {
   status: "",
   created_from: "",
   created_to: "",
+  metadata_key: "",
+  metadata_value: "",
 };
 
 function formatDate(value: string) {
@@ -123,6 +125,26 @@ export default function DocumentLibraryPage() {
             <option value="success">Success</option>
             <option value="failure">Failure</option>
           </select>
+        </div>
+        <div className="w-48">
+          <label className="mb-1 block text-label-caps text-secondary">Metadata Key</label>
+          <input
+            className="w-full rounded border border-outline-variant py-2 pl-3 pr-3 text-body-md focus:border-primary focus:ring-0"
+            value={filters.metadata_key ?? ""}
+            onChange={(event) => updateFilter("metadata_key", event.target.value)}
+            placeholder="e.g. department"
+            type="text"
+          />
+        </div>
+        <div className="w-48">
+          <label className="mb-1 block text-label-caps text-secondary">Metadata Value</label>
+          <input
+            className="w-full rounded border border-outline-variant py-2 pl-3 pr-3 text-body-md focus:border-primary focus:ring-0"
+            value={filters.metadata_value ?? ""}
+            onChange={(event) => updateFilter("metadata_value", event.target.value)}
+            placeholder="e.g. sales"
+            type="text"
+          />
         </div>
         <div className="min-w-[260px] flex-1">
           <DateRange

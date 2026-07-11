@@ -2,18 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { type CurrentUser, fetchCurrentUser, logout } from "../lib/api";
 
-interface NavItem {
-  to: string;
-  label: string;
-  icon: string;
-}
-
-const NAV_ITEMS: NavItem[] = [
-  { to: "/document-types", label: "Document Types", icon: "schema" },
-  { to: "/content", label: "Content Library", icon: "library_books" },
-  { to: "/document-designs", label: "Document Designs", icon: "dashboard_customize" },
-  { to: "/document-issuances", label: "Documents Library", icon: "folder_open" },
-];
 
 const ROUTE_LABELS: Record<string, string> = {
   "document-types": "Document Types",
@@ -24,6 +12,7 @@ const ROUTE_LABELS: Record<string, string> = {
   versions: "Version History",
   templates: "Templates",
   "static-pdfs": "Static PDFs",
+  static: "Static PDFs",
   upload: "Upload",
 };
 
@@ -56,6 +45,7 @@ export default function AuthenticatedShell() {
   const [loading, setLoading] = useState(true);
   const [collapsed, setCollapsed] = useState(false);
   const [hoverExpanded, setHoverExpanded] = useState(false);
+  const [contentMenuOpen, setContentMenuOpen] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -102,26 +92,116 @@ export default function AuthenticatedShell() {
         onMouseLeave={() => setHoverExpanded(false)}
       >
         <nav className="flex-1 space-y-1 overflow-y-auto overflow-x-hidden px-sm">
-          {NAV_ITEMS.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.to === "/content" || item.to === "/document-issuances"}
-              className={({ isActive }) =>
-                `flex items-center gap-3 rounded px-sm py-sm transition-colors ${
-                  isActive
-                    ? "bg-surface-container font-bold text-primary"
-                    : "text-secondary hover:bg-surface-container"
-                }`
-              }
-              title={item.label}
+          {/* Document Types */}
+          <NavLink
+            to="/document-types"
+            className={({ isActive }) =>
+              `flex items-center gap-3 rounded px-sm py-sm transition-colors ${
+                isActive
+                  ? "bg-surface-container font-bold text-primary"
+                  : "text-secondary hover:bg-surface-container"
+              }`
+            }
+            title="Document Types"
+          >
+            <span className="material-symbols-outlined shrink-0">schema</span>
+            <span className={`whitespace-nowrap transition-opacity duration-200 ${sidebarExpanded ? "opacity-100" : "w-0 overflow-hidden opacity-0"}`}>
+              Document Types
+            </span>
+          </NavLink>
+
+          {/* Content Library (Dropdown/Submenu) */}
+          <div className="space-y-1">
+            <button
+              onClick={() => sidebarExpanded && setContentMenuOpen(!contentMenuOpen)}
+              className={`w-full flex items-center justify-between rounded px-sm py-sm text-secondary hover:bg-surface-container transition-colors`}
+              title="Content Library"
+              type="button"
             >
-              <span className="material-symbols-outlined shrink-0">{item.icon}</span>
-              <span className={`whitespace-nowrap ${sidebarExpanded ? "opacity-100" : "opacity-0"}`}>
-                {item.label}
-              </span>
-            </NavLink>
-          ))}
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined shrink-0">library_books</span>
+                <span className={`whitespace-nowrap transition-opacity duration-200 ${sidebarExpanded ? "opacity-100" : "w-0 overflow-hidden opacity-0"}`}>
+                  Content Library
+                </span>
+              </div>
+              {sidebarExpanded && (
+                <span className="material-symbols-outlined text-sm transition-transform duration-200">
+                  {contentMenuOpen ? "expand_less" : "expand_more"}
+                </span>
+              )}
+            </button>
+
+            {/* Submenu Items */}
+            {sidebarExpanded && contentMenuOpen && (
+              <div className="pl-6 space-y-1">
+                <NavLink
+                  to="/content/templates"
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 rounded px-sm py-sm transition-colors ${
+                      isActive
+                        ? "bg-surface-container font-bold text-primary"
+                        : "text-secondary hover:bg-surface-container"
+                    }`
+                  }
+                  title="Templates"
+                >
+                  <span className="material-symbols-outlined text-[18px] shrink-0">description</span>
+                  <span className="text-body-sm whitespace-nowrap">Templates</span>
+                </NavLink>
+                <NavLink
+                  to="/content/static"
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 rounded px-sm py-sm transition-colors ${
+                      isActive
+                        ? "bg-surface-container font-bold text-primary"
+                        : "text-secondary hover:bg-surface-container"
+                    }`
+                  }
+                  title="Static PDFs"
+                >
+                  <span className="material-symbols-outlined text-[18px] shrink-0">picture_as_pdf</span>
+                  <span className="text-body-sm whitespace-nowrap">Static PDFs</span>
+                </NavLink>
+              </div>
+            )}
+          </div>
+
+          {/* Document Designs */}
+          <NavLink
+            to="/document-designs"
+            className={({ isActive }) =>
+              `flex items-center gap-3 rounded px-sm py-sm transition-colors ${
+                isActive
+                  ? "bg-surface-container font-bold text-primary"
+                  : "text-secondary hover:bg-surface-container"
+              }`
+            }
+            title="Document Designs"
+          >
+            <span className="material-symbols-outlined shrink-0">dashboard_customize</span>
+            <span className={`whitespace-nowrap transition-opacity duration-200 ${sidebarExpanded ? "opacity-100" : "w-0 overflow-hidden opacity-0"}`}>
+              Document Designs
+            </span>
+          </NavLink>
+
+          {/* Documents Library */}
+          <NavLink
+            to="/document-issuances"
+            end
+            className={({ isActive }) =>
+              `flex items-center gap-3 rounded px-sm py-sm transition-colors ${
+                isActive
+                  ? "bg-surface-container font-bold text-primary"
+                  : "text-secondary hover:bg-surface-container"
+              }`
+            }
+            title="Documents Library"
+          >
+            <span className="material-symbols-outlined shrink-0">folder_open</span>
+            <span className={`whitespace-nowrap transition-opacity duration-200 ${sidebarExpanded ? "opacity-100" : "w-0 overflow-hidden opacity-0"}`}>
+              Documents Library
+            </span>
+          </NavLink>
         </nav>
 
         <div className="space-y-1 border-t border-outline-variant px-sm pt-md">
@@ -232,7 +312,7 @@ export default function AuthenticatedShell() {
           </header>
 
           <div className="flex-1 overflow-y-auto p-lg">
-            <div className="mx-auto max-w-6xl">
+            <div className="w-full">
               <Outlet />
             </div>
           </div>

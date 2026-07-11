@@ -1,15 +1,4 @@
 services:
-  keycloak:
-    image: quay.io/keycloak/keycloak:26.6
-    command: start-dev --import-realm
-    environment:
-      KC_BOOTSTRAP_ADMIN_USERNAME: admin
-      KC_BOOTSTRAP_ADMIN_PASSWORD: change_me
-    ports:
-      - "127.0.0.1:8080:8080"
-    volumes:
-      - ./keycloak/import:/opt/keycloak/data/import
-
   postgres:
     image: postgres:16
     environment:
@@ -19,8 +8,66 @@ services:
     ports:
       - "127.0.0.1:5432:5432"
     volumes:
-      - ./postgres/init:/docker-entrypoint-initdb.d
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U docmanagement -d docmanagement"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.6
+    command: start-dev --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: change_me
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./keycloak/import:/opt/keycloak/data/import:ro
+      - keycloak-data:/opt/keycloak/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  backend:
+    build:
+      context: ./backend
+    environment:
+      OIDC_ISSUER: http://keycloak:8080/realms/docmanagement
+      OIDC_CLIENT_ID: docmanagement-backend
+      OIDC_CLIENT_SECRET: dev-backend-secret-change-in-prod
+      OIDC_API_AUDIENCE: docmanagement-backend
+      DATABASE_URL: postgresql+psycopg://docmanagement:change_me@postgres:5432/docmanagement
+      TEST_DATABASE_URL: postgresql+psycopg://docmanagement:change_me@postgres:5432/docmanagement_test
+      SESSION_SECRET: generate-with-openssl-rand-hex-32
+      SESSION_COOKIE_NAME: docmanagement_session
+      SESSION_TTL_SECONDS: 604800
+      FRONTEND_ORIGIN: http://localhost:5173
+      CONTENT_STORAGE_ROOT: /app/.content-storage
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - content-storage:/app/.content-storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      VITE_API_BASE_URL: http://localhost:8000
+    ports:
+      - "127.0.0.1:5173:5173"
+    depends_on:
+      backend:
+        condition: service_started
 
 volumes:
   pgdata:
+  keycloak-data:
+  content-storage:

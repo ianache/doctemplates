@@ -268,3 +268,58 @@ def test_create_document_type_valid_nested(client: TestClient, db_session: SQLAl
     body = response.json()
     assert len(body["fields"]) == 3
 
+
+def test_update_document_type(client: TestClient, db_session: SQLAlchemySession) -> None:
+    user = _auth_client(client, db_session)
+    
+    # 1. Create a Document Type
+    create_resp = client.post(
+        "/api/document-types",
+        json={
+            "name": "Original Name",
+            "description": "Original description",
+            "fields": [
+                {"name": "field1", "type": "string"},
+            ],
+            "metadata_definitions": [
+                {"name": "meta1", "type": "text", "required": True}
+            ]
+        },
+    )
+    assert create_resp.status_code == 201
+    dt_id = create_resp.json()["id"]
+    
+    # 2. Update it
+    update_resp = client.put(
+        f"/api/document-types/{dt_id}",
+        json={
+            "name": "Updated Name",
+            "description": "Updated description",
+            "fields": [
+                {"name": "field2", "type": "number"},
+                {"name": "field3", "type": "boolean"},
+            ],
+            "metadata_definitions": [
+                {"name": "meta2", "type": "number", "required": False}
+            ]
+        }
+    )
+    assert update_resp.status_code == 200
+    body = update_resp.json()
+    assert body["name"] == "Updated Name"
+    assert body["description"] == "Updated description"
+    assert len(body["fields"]) == 2
+    assert body["fields"][0]["name"] == "field2"
+    assert body["fields"][0]["type"] == "number"
+    assert len(body["metadata_definitions"]) == 1
+    assert body["metadata_definitions"][0]["name"] == "meta2"
+    assert body["metadata_definitions"][0]["type"] == "number"
+    assert body["metadata_definitions"][0]["required"] is False
+    
+    # 3. Verify in DB
+    dt = db_session.query(DocumentType).filter(DocumentType.id == dt_id).first()
+    assert dt is not None
+    assert dt.name == "Updated Name"
+    assert len(dt.fields) == 2
+    assert len(dt.metadata_definitions) == 1
+

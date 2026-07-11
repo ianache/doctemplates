@@ -12,6 +12,7 @@ from app.models.document_issuance import DocumentIssuance
 from app.services.pdf_generator import (
     validate_and_coerce_payload,
     generate_composed_pdf,
+    CaseInsensitiveSandboxedEnvironment,
     RecursiveCaseInsensitiveDict,
     RecursiveCaseInsensitiveList,
 )
@@ -135,3 +136,23 @@ def test_private_attribute_protection() -> None:
 
     with pytest.raises(AttributeError):
         _ = l.__dict__
+
+
+def test_payload_key_named_items_takes_precedence_over_dict_method() -> None:
+    env = CaseInsensitiveSandboxedEnvironment(autoescape=True)
+    template = env.from_string("{{ factura.items[0].descripcion }}")
+    context = RecursiveCaseInsensitiveDict(
+        {
+            "factura": {
+                "items": [
+                    {
+                        "cantidad": 1,
+                        "codigo": "PTN-0049",
+                        "descripcion": "GPS SATELITAL",
+                    }
+                ]
+            }
+        }
+    )
+
+    assert template.render(context) == "GPS SATELITAL"

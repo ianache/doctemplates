@@ -19,3 +19,7 @@ wheels/
 .design/
 .tokensave/
 backend/server*.log
+
+# Agent workflows
+.agents/
+.planning/

@@ -32,7 +32,7 @@ import {
   type DocumentDesignListItem,
   type DocumentDesignPage,
 } from "../../lib/documentDesigns";
-import { getDocumentType, type DocumentTypeField } from "../../lib/documentTypes";
+import { getDocumentType, type DocumentTypeField, type DocumentTypeMetadata } from "../../lib/documentTypes";
 import { generateMockDataFromFields } from "../../lib/schemaFields";
 import AddContentModal from "./components/AddContentModal";
 import DesignPageCard from "./components/DesignPageCard";
@@ -70,6 +70,59 @@ function statusLabel(status: string) {
   return status;
 }
 
+function mergeMockData(
+  loaded: Record<string, any>,
+  fields: DocumentTypeField[],
+  metadata: DocumentTypeMetadata[]
+): Record<string, any> {
+  const freshData = generateMockDataFromFields(fields);
+  const freshMetadata: Record<string, any> = {};
+  metadata.forEach((m) => {
+    if (m.type === "number") freshMetadata[m.name] = 123.45;
+    else if (m.type === "boolean") freshMetadata[m.name] = true;
+    else if (m.type === "date") freshMetadata[m.name] = new Date().toISOString().split("T")[0];
+    else if (m.type === "datetime") freshMetadata[m.name] = new Date().toISOString();
+    else freshMetadata[m.name] = "Sample Text";
+  });
+
+  const loadedIsStructured = loaded && typeof loaded.data === "object" && loaded.data !== null && !Array.isArray(loaded.data);
+  const needsStructure = metadata.length > 0;
+
+  if (needsStructure) {
+    const targetData = loadedIsStructured ? { ...loaded.data } : { ...loaded };
+    const targetMetadata = loadedIsStructured && typeof loaded.metadata === "object" && loaded.metadata !== null ? { ...loaded.metadata } : {};
+
+    // Remove metadata keys from targetData if they accidentally leaked there
+    metadata.forEach((m) => {
+      delete targetData[m.name];
+    });
+
+    // Fill missing data keys
+    Object.keys(freshData).forEach((key) => {
+      if (targetData[key] === undefined) {
+        targetData[key] = freshData[key];
+      }
+    });
+
+    // Fill missing metadata keys
+    Object.keys(freshMetadata).forEach((key) => {
+      if (targetMetadata[key] === undefined) {
+        targetMetadata[key] = freshMetadata[key];
+      }
+    });
+
+    return { data: targetData, metadata: targetMetadata };
+  } else {
+    const targetData = loadedIsStructured ? { ...loaded.data } : { ...loaded };
+    Object.keys(freshData).forEach((key) => {
+      if (targetData[key] === undefined) {
+        targetData[key] = freshData[key];
+      }
+    });
+    return targetData;
+  }
+}
+
 export default function DocumentDesignDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -86,6 +139,7 @@ export default function DocumentDesignDetailPage() {
   const [discarding, setDiscarding] = useState(false);
 
   const [docTypeFields, setDocTypeFields] = useState<DocumentTypeField[]>([]);
+  const [metadataDefs, setMetadataDefs] = useState<DocumentTypeMetadata[]>([]);
   const [mockJsonText, setMockJsonText] = useState<string>("{}");
   const [parsedPayload, setParsedPayload] = useState<Record<string, unknown>>({});
   const [jsonError, setJsonError] = useState<string | null>(null);
@@ -94,6 +148,54 @@ export default function DocumentDesignDetailPage() {
   const [previewBlob, setPreviewBlob] = useState<Blob | null>(null);
   const [previewMode, setPreviewMode] = useState<"fragment" | "pdf">("fragment");
   const [activeRightTab, setActiveRightTab] = useState<"inspector" | "mockData">("inspector");
+
+  const [leftWidth, setLeftWidth] = useState(380);
+  const [rightWidth, setRightWidth] = useState(330);
+  const [isResizing, setIsResizing] = useState(false);
+
+  const handleLeftMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+    const startX = e.clientX;
+    const startWidth = leftWidth;
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const deltaX = moveEvent.clientX - startX;
+      const newWidth = Math.max(260, Math.min(600, startWidth + deltaX));
+      setLeftWidth(newWidth);
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  };
+
+  const handleRightMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+    const startX = e.clientX;
+    const startWidth = rightWidth;
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const deltaX = startX - moveEvent.clientX;
+      const newWidth = Math.max(260, Math.min(600, startWidth + deltaX));
+      setRightWidth(newWidth);
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  };
 
   const handleSetPreviewMode = (mode: "fragment" | "pdf") => {
     setPreviewMode(mode);
@@ -153,6 +255,7 @@ export default function DocumentDesignDetailPage() {
         if (cancelled) return;
         if (data) {
           setDocTypeFields(data.fields);
+          setMetadataDefs(data.metadata_definitions || []);
           let loadedMock: Record<string, unknown> | null = null;
           if (design?.id) {
             try {
@@ -167,7 +270,29 @@ export default function DocumentDesignDetailPage() {
               console.error("Failed to parse saved mock payload", err);
             }
           }
-          const initialMock = loadedMock || generateMockDataFromFields(data.fields);
+
+          let initialMock: Record<string, any>;
+          if (loadedMock) {
+            initialMock = mergeMockData(loadedMock, data.fields, data.metadata_definitions || []);
+            // Save the merged mock back to localStorage to keep it up to date
+            localStorage.setItem(`mock_payload_${design.id}`, JSON.stringify(initialMock));
+          } else {
+            const mockData = generateMockDataFromFields(data.fields);
+            if (data.metadata_definitions && data.metadata_definitions.length > 0) {
+              const mockMetadata: Record<string, any> = {};
+              data.metadata_definitions.forEach((meta) => {
+                if (meta.type === "number") mockMetadata[meta.name] = 123.45;
+                else if (meta.type === "boolean") mockMetadata[meta.name] = true;
+                else if (meta.type === "date") mockMetadata[meta.name] = new Date().toISOString().split("T")[0];
+                else if (meta.type === "datetime") mockMetadata[meta.name] = new Date().toISOString();
+                else mockMetadata[meta.name] = "Sample Text";
+              });
+              initialMock = { data: mockData, metadata: mockMetadata };
+            } else {
+              initialMock = mockData;
+            }
+          }
+
           const text = JSON.stringify(initialMock, null, 2);
           setMockJsonText(text);
           setParsedPayload(initialMock);
@@ -184,7 +309,20 @@ export default function DocumentDesignDetailPage() {
   }, [design?.document_type_id, design?.id]);
 
   const handleResetMockData = () => {
-    const initialMock = generateMockDataFromFields(docTypeFields);
+    const mockData = generateMockDataFromFields(docTypeFields);
+    let initialMock: Record<string, any> = mockData;
+    if (metadataDefs && metadataDefs.length > 0) {
+      const mockMetadata: Record<string, any> = {};
+      metadataDefs.forEach((meta) => {
+        if (meta.type === "number") mockMetadata[meta.name] = 123.45;
+        else if (meta.type === "boolean") mockMetadata[meta.name] = true;
+        else if (meta.type === "date") mockMetadata[meta.name] = new Date().toISOString().split("T")[0];
+        else if (meta.type === "datetime") mockMetadata[meta.name] = new Date().toISOString();
+        else mockMetadata[meta.name] = "Sample Text";
+      });
+      initialMock = { data: mockData, metadata: mockMetadata };
+    }
+
     const text = JSON.stringify(initialMock, null, 2);
     setMockJsonText(text);
     setParsedPayload(initialMock);
@@ -394,8 +532,11 @@ export default function DocumentDesignDetailPage() {
   }
 
   return (
-    <section className="-m-lg grid min-h-[calc(100vh-4rem)] grid-cols-1 overflow-hidden bg-surface-container lg:grid-cols-[360px_minmax(0,1fr)_320px] xl:grid-cols-[400px_minmax(0,1fr)_340px]">
-      <aside className="flex min-h-0 flex-col border-r border-outline-variant bg-surface-bright">
+    <section className="-m-lg flex min-h-[calc(100vh-4rem)] overflow-hidden bg-surface-container">
+      <aside
+        className="flex min-h-0 flex-col bg-surface-bright shrink-0"
+        style={{ width: leftWidth }}
+      >
         <div className="border-b border-outline-variant p-lg">
           <div className="flex items-start justify-between gap-md">
             <div className="min-w-0">
@@ -564,7 +705,13 @@ export default function DocumentDesignDetailPage() {
         </div>
       </aside>
 
-      <main className="flex min-h-[640px] flex-col overflow-hidden bg-surface-container">
+      {/* Left Resize Handle */}
+      <div
+        className="w-1.5 cursor-col-resize hover:bg-primary/45 active:bg-primary transition-colors h-full shrink-0 z-40 border-r border-outline-variant hover:border-transparent"
+        onMouseDown={handleLeftMouseDown}
+      />
+
+      <main className="flex min-h-[640px] flex-1 flex-col overflow-hidden bg-surface-container">
         <div className="flex items-center justify-between gap-md border-b border-outline-variant bg-surface px-lg py-md">
           <div className="min-w-0">
             <p className="font-label-caps text-on-surface-variant">
@@ -611,7 +758,7 @@ export default function DocumentDesignDetailPage() {
           </div>
         </div>
 
-        <div className="page-canvas-bg flex min-h-0 flex-1 items-start justify-center overflow-auto p-xl">
+        <div className={`page-canvas-bg flex min-h-0 flex-1 items-start justify-center overflow-auto p-xl ${isResizing ? 'pointer-events-none' : ''}`}>
           {previewMode === "pdf" ? (
             <div className="w-full max-w-[800px] bg-surface-container-lowest p-md border border-outline-variant rounded-lg shadow-lg">
               <PreviewFrame blob={previewBlob} loading={previewLoading} error={previewError} />
@@ -657,7 +804,16 @@ export default function DocumentDesignDetailPage() {
         </div>
       </main>
 
-      <aside className="min-h-0 overflow-y-auto border-l border-outline-variant bg-surface p-md flex flex-col gap-md">
+      {/* Right Resize Handle */}
+      <div
+        className="w-1.5 cursor-col-resize hover:bg-primary/45 active:bg-primary transition-colors h-full shrink-0 z-40 border-l border-outline-variant hover:border-transparent"
+        onMouseDown={handleRightMouseDown}
+      />
+
+      <aside
+        className="min-h-0 overflow-y-auto bg-surface p-md flex flex-col gap-md shrink-0"
+        style={{ width: rightWidth }}
+      >
         <div className="flex border border-outline-variant rounded bg-surface-container-low p-[2px] shrink-0">
           <button
             type="button"

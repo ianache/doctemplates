@@ -136,12 +136,20 @@ export default function DocumentTypeDetailPage() {
         <h1 className="font-headings text-[24px] font-bold leading-[32px] tracking-[-0.01em] text-on-surface">
           {documentType.name}
         </h1>
-        <Link
-          to="/document-types"
-          className="text-sm font-bold text-primary hover:underline flex items-center gap-xs"
-        >
-          <span className="material-symbols-outlined text-sm">arrow_back</span> Back to List
-        </Link>
+        <div className="flex items-center gap-md">
+          <Link
+            to={`/document-types/${documentType.id}/edit`}
+            className="flex items-center gap-xs rounded border border-primary px-md py-xs text-sm font-bold text-primary hover:bg-primary/10 active:scale-95 transition-all"
+          >
+            <span className="material-symbols-outlined text-sm">edit</span> Edit
+          </Link>
+          <Link
+            to="/document-types"
+            className="text-sm font-bold text-primary hover:underline flex items-center gap-xs"
+          >
+            <span className="material-symbols-outlined text-sm">arrow_back</span> Back to List
+          </Link>
+        </div>
       </div>
       <p className="mt-xs text-sm leading-5 text-on-surface-variant">{documentType.description}</p>
 
@@ -171,6 +179,52 @@ export default function DocumentTypeDetailPage() {
             </p>
           ) : (
             tree.map((node) => renderNode(node, 0))
+          )}
+        </div>
+      </div>
+
+      {/* Collapsible Metadata Schema Display */}
+      <div className="mt-xl rounded-lg border border-outline-variant bg-surface-container-lowest p-md">
+        <div className="border-b border-outline-variant pb-sm mb-sm bg-white p-xs">
+          <h3 className="font-label-caps text-label-caps text-secondary uppercase">
+            Document Metadata Schema
+          </h3>
+        </div>
+
+        <div className="space-y-xs">
+          {!documentType.metadata_definitions || documentType.metadata_definitions.length === 0 ? (
+            <p className="text-sm text-on-surface-variant py-md text-center">
+              No metadata fields defined for this document type.
+            </p>
+          ) : (
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-outline-variant text-[11px] font-bold text-secondary uppercase tracking-[0.05em]">
+                  <th className="pb-xs">Name</th>
+                  <th className="pb-xs">Type</th>
+                  <th className="pb-xs">Required</th>
+                </tr>
+              </thead>
+              <tbody>
+                {documentType.metadata_definitions.map((meta) => (
+                  <tr key={meta.id} className="border-b border-outline-variant/40 hover:bg-surface-container-low/50">
+                    <td className="py-sm font-mono text-sm text-on-surface font-semibold">{meta.name}</td>
+                    <td className="py-sm">
+                      <span className="rounded bg-surface-container-high px-2 py-0.5 text-[11px] font-bold uppercase text-on-surface-variant font-mono">
+                        {meta.type}
+                      </span>
+                    </td>
+                    <td className="py-sm text-body-sm text-on-surface-variant font-semibold">
+                      {meta.required ? (
+                        <span className="text-error">Yes</span>
+                      ) : (
+                        <span className="text-on-surface-variant opacity-60">No</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
       </div>

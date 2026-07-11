@@ -1,6 +1,6 @@
 from app.models.user import User
 from app.models.session import Session
-from app.models.document_type import DocumentType, DocumentTypeField
+from app.models.document_type import DocumentType, DocumentTypeField, DocumentTypeMetadataDefinition
 from app.models.content_template import HtmlTemplate
 from app.models.static_pdf_asset import StaticPdfAsset
 from app.models.document_design import DocumentDesign, DocumentDesignPage
@@ -12,6 +12,7 @@ __all__ = [
     "Session",
     "DocumentType",
     "DocumentTypeField",
+    "DocumentTypeMetadataDefinition",
     "HtmlTemplate",
     "StaticPdfAsset",
     "DocumentDesign",

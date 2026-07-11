@@ -243,6 +243,24 @@ export default function DocumentIssuanceDetailPage() {
         </div>
 
         <aside className="space-y-lg">
+          {detail.metadata_values && Object.keys(detail.metadata_values).length > 0 && (
+            <section>
+              <h2 className="mb-sm font-headings text-[18px] font-bold text-on-surface">Document Metadata</h2>
+              <div className="rounded border border-outline-variant bg-surface-container-lowest p-md text-sm text-on-surface">
+                <dl className="divide-y divide-outline-variant/40">
+                  {Object.entries(detail.metadata_values).map(([key, value]) => (
+                    <div key={key} className="py-xs flex justify-between gap-md">
+                      <dt className="font-mono text-xs text-on-surface-variant font-semibold">{key}</dt>
+                      <dd className="text-on-surface text-right font-semibold">
+                        {typeof value === "boolean" ? (value ? "True" : "False") : String(value)}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            </section>
+          )}
+
           <section>
             <h2 className="mb-sm font-headings text-[18px] font-bold text-on-surface">Input Data</h2>
             <pre className="max-h-80 overflow-auto rounded border border-outline-variant bg-surface-container-lowest p-md text-xs leading-5 text-on-surface">

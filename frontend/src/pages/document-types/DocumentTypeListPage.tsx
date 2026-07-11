@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import PageHeader from "../../components/PageHeader";
 import PagedTable from "../../components/organisms/PagedTable";
@@ -9,6 +9,7 @@ import { type DocumentTypeListItem, listDocumentTypes } from "../../lib/document
 const PAGE_SIZE = 10;
 
 export default function DocumentTypeListPage() {
+  const navigate = useNavigate();
   const [items, setItems] = useState<DocumentTypeListItem[] | null>(null);
   const [error, setError] = useState(false);
   const [query, setQuery] = useState("");
@@ -74,6 +75,22 @@ export default function DocumentTypeListPage() {
       key: "created_at",
       header: "Created At",
       render: (item) => new Date(item.created_at).toLocaleDateString(),
+    },
+    {
+      key: "actions",
+      header: "Actions",
+      render: (item) => (
+        <div className="flex items-center gap-sm">
+          <Link
+            to={`/document-types/${item.id}/edit`}
+            className="flex items-center gap-xs rounded border border-outline-variant bg-surface-container px-sm py-xs text-xs font-bold text-secondary hover:bg-surface-container-high hover:text-primary active:scale-95 transition-all"
+            onClick={(e) => e.stopPropagation()} // Prevent row click navigation
+          >
+            <span className="material-symbols-outlined text-[16px]">edit</span>
+            Edit
+          </Link>
+        </div>
+      ),
     },
   ];
 
@@ -143,6 +160,7 @@ export default function DocumentTypeListPage() {
           total={total}
           itemName="document types"
           onChangePage={setPage}
+          onRowClick={(item) => navigate(`/document-types/${item.id}/edit`)}
         />
       )}
     </section>

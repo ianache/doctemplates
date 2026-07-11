@@ -42,10 +42,34 @@ class DocumentTypeFieldOut(DocumentTypeFieldIn):
     id: UUID
 
 
+MetadataType = Literal["text", "number", "date", "datetime", "boolean"]
+
+
+class DocumentTypeMetadataIn(BaseModel):
+    name: str
+    type: MetadataType
+    required: bool = True
+
+    @field_validator("name")
+    @classmethod
+    def validate_metadata_name(cls, v: str) -> str:
+        if not v:
+            raise ValueError("Metadata name cannot be empty")
+        if not re.match(r"^[a-zA-Z_][a-zA-Z0-9_]*$", v):
+            raise ValueError(f"Invalid metadata name: '{v}'. Must be a valid identifier.")
+        return v
+
+
+class DocumentTypeMetadataOut(DocumentTypeMetadataIn):
+    model_config = ConfigDict(from_attributes=True)
+    id: UUID
+
+
 class DocumentTypeCreate(BaseModel):
     name: str
     description: str | None = None
     fields: list[DocumentTypeFieldIn]
+    metadata_definitions: list[DocumentTypeMetadataIn] = []
 
     @model_validator(mode="after")
     def validate_schema_structure(self) -> "DocumentTypeCreate":
@@ -127,5 +151,6 @@ class DocumentTypeDetail(BaseModel):
     name: str
     description: str | None
     fields: list[DocumentTypeFieldOut]
+    metadata_definitions: list[DocumentTypeMetadataOut] = []
     created_by_email: str
     created_at: datetime

@@ -5,6 +5,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import FileResponse
+from sqlalchemy import func
 from sqlalchemy.orm import Session as SQLAlchemySession, joinedload
 
 from app.auth.dependencies import get_current_user
@@ -58,6 +59,7 @@ def _issuance_out(issuance: DocumentIssuance) -> DocumentIssuanceLibraryItem:
         user_id=issuance.user_id,
         generated_by_email=issuance.user.email,
         input_data=issuance.input_data,
+        metadata_values=issuance.metadata_values,
         created_at=issuance.created_at,
         preview_url=f"/api/issuances/{issuance.id}/preview",
         download_url=f"/api/issuances/{issuance.id}/download",
@@ -123,6 +125,8 @@ def list_issuances(
     status: Literal["success", "failure"] | None = None,
     created_from: date | None = None,
     created_to: date | None = None,
+    metadata_key: str | None = None,
+    metadata_value: str | None = None,
     user: User = Depends(get_current_user),
     db: SQLAlchemySession = Depends(get_db),
 ) -> list[DocumentIssuanceLibraryItem]:
@@ -146,6 +150,12 @@ def list_issuances(
         query = query.filter(DocumentIssuance.created_at >= datetime.combine(created_from, time.min))
     if created_to is not None:
         query = query.filter(DocumentIssuance.created_at <= datetime.combine(created_to, time.max))
+    if metadata_key and metadata_value is not None:
+        query = query.filter(
+            func.coalesce(func.json_extract_path_text(DocumentIssuance.metadata_values, metadata_key), "").ilike(
+                f"%{metadata_value}%"
+            )
+        )
 
     issuances = query.order_by(DocumentIssuance.created_at.desc()).all()
     return [_issuance_out(issuance) for issuance in issuances]

@@ -4,7 +4,8 @@ import AuthenticatedShell from "./pages/AuthenticatedShell";
 import DocumentTypeListPage from "./pages/document-types/DocumentTypeListPage";
 import DocumentTypeDetailPage from "./pages/document-types/DocumentTypeDetailPage";
 import DocumentTypeCreatePage from "./pages/document-types/DocumentTypeCreatePage";
-import ContentLibraryPage from "./pages/content/ContentLibraryPage";
+import TemplatesPage from "./pages/content/TemplatesPage";
+import StaticPdfsPage from "./pages/content/StaticPdfsPage";
 import HtmlTemplateCreatePage from "./pages/content/HtmlTemplateCreatePage";
 import HtmlTemplateDetailPage from "./pages/content/HtmlTemplateDetailPage";
 import StaticPdfUploadPage from "./pages/content/StaticPdfUploadPage";
@@ -24,6 +25,7 @@ function App() {
         <Route index element={<Navigate to="/document-types" replace />} />
         <Route path="document-types" element={<DocumentTypeListPage />} />
         <Route path="document-types/new" element={<DocumentTypeCreatePage />} />
+        <Route path="document-types/:id/edit" element={<DocumentTypeCreatePage />} />
         <Route path="document-types/:id" element={<DocumentTypeDetailPage />} />
         <Route path="document-designs" element={<DocumentDesignListPage />} />
         <Route path="document-designs/new" element={<DocumentDesignCreatePage />} />
@@ -31,12 +33,12 @@ function App() {
         <Route path="document-designs/:id/versions" element={<VersionHistoryPage />} />
         <Route path="document-issuances" element={<DocumentLibraryPage />} />
         <Route path="document-issuances/:id" element={<DocumentIssuanceDetailPage />} />
-        <Route path="content" element={<ContentLibraryPage />}>
-          <Route path="templates/new" element={<HtmlTemplateCreatePage />} />
-          <Route path="templates/:id" element={<HtmlTemplateDetailPage />} />
-          <Route path="static-pdfs/upload" element={<StaticPdfUploadPage />} />
-          <Route path="static-pdfs/:id" element={<StaticPdfDetailPage />} />
-        </Route>
+        <Route path="content/templates" element={<TemplatesPage />} />
+        <Route path="content/templates/new" element={<HtmlTemplateCreatePage />} />
+        <Route path="content/templates/:id" element={<HtmlTemplateDetailPage />} />
+        <Route path="content/static" element={<StaticPdfsPage />} />
+        <Route path="content/static-pdfs/upload" element={<StaticPdfUploadPage />} />
+        <Route path="content/static-pdfs/:id" element={<StaticPdfDetailPage />} />
       </Route>
     </Routes>
   );

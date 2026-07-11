@@ -21,6 +21,7 @@ class DocumentIssuance(Base):
     file_path: Mapped[str]
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
     input_data: Mapped[dict] = mapped_column(JSON)
+    metadata_values: Mapped[dict | None] = mapped_column(JSON, default=None)
     status: Mapped[str] = mapped_column(default="success")
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 

@@ -9,6 +9,8 @@ export interface DocumentIssuanceFilters {
   status?: DocumentIssuanceStatus | "";
   created_from?: string;
   created_to?: string;
+  metadata_key?: string;
+  metadata_value?: string;
 }
 
 export interface DocumentIssuanceListItem {
@@ -21,6 +23,7 @@ export interface DocumentIssuanceListItem {
   user_id: string;
   generated_by_email: string;
   input_data: Record<string, unknown>;
+  metadata_values: Record<string, unknown> | null;
   created_at: string;
   preview_url: string;
   download_url: string;

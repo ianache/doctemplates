@@ -1,0 +1,137 @@
+{
+  "info": {
+    "_postman_id": "3b36704e-7a2b-4a33-aeb9-370cd0f17645",
+    "name": "DocManagement",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "4516199"
+  },
+  "item": [
+    {
+      "name": "Generar Documento",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "docmanagement_session",
+            "value": "qf-6L6-OZcDxD6ZFwQ7iDGSw7i8_rTVPiEaVhfM_aoA",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Cookie",
+            "value": "docmanagement_session=6fT3tmCMPe7GLP4wlTTJaF8ELSA5Nuf32rSM6vNW2F8",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"codigo\": \"C000199985\",\r\n    \"Nombre\": \"ILVER ANACHE\",\r\n    \"correo\": \"ilver.anache@gmail.com\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "localhost:8000/api/document-designs/12fc34de-6d11-4c7d-90bb-dbb87e02aca3/generate",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "document-designs",
+            "12fc34de-6d11-4c7d-90bb-dbb87e02aca3",
+            "generate"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Generar Documento - Download",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "docmanagement_session",
+            "value": "qf-6L6-OZcDxD6ZFwQ7iDGSw7i8_rTVPiEaVhfM_aoA",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Cookie",
+            "value": "docmanagement_session=qf-6L6-OZcDxD6ZFwQ7iDGSw7i8_rTVPiEaVhfM_aoA",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"codigo\": \"C000199985\",\r\n    \"Nombre\": \"ILVER ANACHE\",\r\n    \"correo\": \"ilver.anache@gmail.com\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "localhost:8000/api/issuances//4a2df81b-2903-4d50-af77-4c80076b23ad/download",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "issuances",
+            "",
+            "4a2df81b-2903-4d50-af77-4c80076b23ad",
+            "download"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Previsualiazacion",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Cookie",
+            "value": "docmanagement_session=6fT3tmCMPe7GLP4wlTTJaF8ELSA5Nuf32rSM6vNW2F8",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/document-designs/dd0f0d77-0b2c-4ddf-a310-ff6d960420f8/preview",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "document-designs",
+            "dd0f0d77-0b2c-4ddf-a310-ff6d960420f8",
+            "preview"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

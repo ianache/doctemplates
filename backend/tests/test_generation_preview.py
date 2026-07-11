@@ -10,7 +10,7 @@ from pypdf import PdfWriter, PdfReader
 from app.auth.session_service import create_session
 from app.config import settings
 from app.models.user import User
-from app.models.document_type import DocumentType, DocumentTypeField
+from app.models.document_type import DocumentType, DocumentTypeField, DocumentTypeMetadataDefinition
 from app.models.document_design import DocumentDesign, DocumentDesignPage
 from app.models.content_template import HtmlTemplate
 from app.models.static_pdf_asset import StaticPdfAsset
@@ -343,3 +343,97 @@ def test_auth_gates(client: TestClient, db_session: SQLAlchemySession):
     issuance_id = uuid.uuid4()
     resp = client.get(f"/api/issuances/{issuance_id}/download")
     assert resp.status_code == 401
+
+
+def test_metadata_validation_and_search(client: TestClient, db_session: SQLAlchemySession, tmp_path: Path):
+    user = _auth_client(client, db_session)
+    
+    # Create DocumentType with metadata definitions
+    doc_type = DocumentType(
+        name="MetadataDocType",
+        description="With metadata",
+        created_by=user,
+        fields=[
+            DocumentTypeField(name="cliente.nombre", type="string", position=0),
+            DocumentTypeField(name="cliente.edad", type="number", position=1),
+            DocumentTypeField(name="fecha", type="date", position=2),
+            DocumentTypeField(name="activo", type="boolean", position=3),
+        ],
+        metadata_definitions=[
+            DocumentTypeMetadataDefinition(name="department", type="text", required=True),
+            DocumentTypeMetadataDefinition(name="due_date", type="date", required=True),
+            DocumentTypeMetadataDefinition(name="amount", type="number", required=False),
+        ]
+    )
+    db_session.add(doc_type)
+    db_session.commit()
+    db_session.refresh(doc_type)
+    
+    design = _create_design(db_session, user, doc_type, status="active")
+    _create_template_page(db_session, user, design)
+    
+    # 1. Valid generation
+    payload = {
+        "data": {
+            "cliente.nombre": "Alice Test",
+            "cliente.edad": 30,
+            "fecha": "2026-07-08",
+            "activo": True,
+        },
+        "metadata": {
+            "department": "sales",
+            "due_date": "2026-07-15",
+            "amount": "123.45",
+        }
+    }
+    
+    response = client.post(f"/api/document-designs/{design.id}/generate", json=payload)
+    assert response.status_code == 201
+    data = response.json()
+    assert "metadata_values" in data
+    assert data["metadata_values"] == {
+        "department": "sales",
+        "due_date": "2026-07-15",
+        "amount": 123.45,
+    }
+    
+    saved_path = Path(data["file_path"])
+    if saved_path.exists():
+        saved_path.unlink()
+        
+    # 2. Missing required metadata field (department)
+    invalid_payload_1 = {
+        "data": payload["data"],
+        "metadata": {
+            "due_date": "2026-07-15"
+        }
+    }
+    response = client.post(f"/api/document-designs/{design.id}/generate", json=invalid_payload_1)
+    assert response.status_code == 400
+    assert "Required metadata field 'department' is missing." in response.json()["detail"]
+    
+    # 3. Invalid metadata type (amount must be a number)
+    invalid_payload_2 = {
+        "data": payload["data"],
+        "metadata": {
+            "department": "sales",
+            "due_date": "2026-07-15",
+            "amount": "not-a-number"
+        }
+    }
+    response = client.post(f"/api/document-designs/{design.id}/generate", json=invalid_payload_2)
+    assert response.status_code == 400
+    assert "Metadata field 'amount' must be a number." in response.json()["detail"]
+    
+    # 4. Search by metadata (valid department query)
+    search_response = client.get("/api/issuances?metadata_key=department&metadata_value=sales")
+    assert search_response.status_code == 200
+    results = search_response.json()
+    assert len(results) > 0
+    assert results[0]["metadata_values"]["department"] == "sales"
+    
+    # 5. Search by metadata (non-matching query)
+    search_response = client.get("/api/issuances?metadata_key=department&metadata_value=marketing")
+    assert search_response.status_code == 200
+    results = search_response.json()
+    assert len(results) == 0
