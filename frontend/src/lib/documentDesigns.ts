@@ -169,3 +169,19 @@ export async function discardDocumentDesignDraft(designId: string): Promise<void
     throw new Error(readErrorMessage(body, res.status));
   }
 }
+
+export async function previewDocumentDesign(
+  designId: string,
+  payload: Record<string, unknown>,
+): Promise<Blob> {
+  const res = await apiFetch(`/api/document-designs/${designId}/preview`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    throw new Error(readErrorMessage(body, res.status));
+  }
+  return res.blob();
+}
