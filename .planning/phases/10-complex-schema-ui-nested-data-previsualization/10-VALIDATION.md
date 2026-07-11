@@ -38,10 +38,16 @@ created: 2026-07-10
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 10-01-01 | 01 | 1 | COMPUI-01 | T-10-03 | Rejects lowercase duplicate keys case-insensitively | compile/unit | `npm run build` | ✅ | ⬜ pending |
-| 10-02-01 | 02 | 2 | COMPUI-02 | T-10-01 | Encodes preview payloads matching backend constraints | compile/unit | `npm run build` | ✅ | ⬜ pending |
-| 10-03-01 | 03 | 3 | COMPUI-02 | T-10-04 | Revokes generated Blob URLs in preview panel cleanup | compile/unit | `npm run build` | ✅ | ⬜ pending |
-| 10-04-01 | 04 | 4 | COMPUI-01, COMPUI-02 | — | N/A | manual | Manual browser walk | ✅ | ⬜ pending |
+| 10-01-01 | 01 | 1 | COMPUI-01 | — | TS path parsing, duplicate checking, and normalization helpers | compile/unit | `npm run build` | ✅ | ⬜ pending |
+| 10-01-02 | 01 | 1 | COMPUI-01 | T-10-01 | Visual schema editor form supports nested/list rows | compile/unit | `npm run build` | ✅ | ⬜ pending |
+| 10-01-03 | 01 | 1 | COMPUI-01 | T-10-02 | Inferred collapsible tree detail view rendering | compile/unit | `npm run build` | ✅ | ⬜ pending |
+| 10-02-01 | 02 | 2 | COMPUI-02 | — | Nested mock JSON generator uses correct JSON data types | compile/unit | `npm run build` | ✅ | ⬜ pending |
+| 10-02-02 | 02 | 2 | COMPUI-02 | T-10-03, T-10-04 | Reusable MockDataPanel JSON editing and PDF PreviewFrame | compile/unit | `npm run build` | ✅ | ⬜ pending |
+| 10-03-01 | 03 | 3 | COMPUI-02 | — | Load schema fields and initialize mock data on designer load | compile/unit | `npm run build` | ✅ | ⬜ pending |
+| 10-03-02 | 03 | 3 | COMPUI-02 | T-10-06, T-10-08 | Wire PDF preview toggles, API calls, and PreviewFrame UI | compile/unit | `npm run build` | ✅ | ⬜ pending |
+| 10-05-01 | 05 | 4 | COMPUI-02 | T-10-11 | localStorage mock JSON load, save, and reset actions | compile/unit | `npm run build` | ✅ | ⬜ pending |
+| 10-04-01 | 04 | 5 | COMPUI-01, COMPUI-02 | — | Clean frontend production build and backend preview tests | compile/unit | `npm run build` && backend tests | ✅ | ⬜ pending |
+| 10-04-02 | 04 | 5 | COMPUI-01, COMPUI-02 | T-10-09, T-10-10 | Full end-to-end browser walk verification of features | manual | Manual browser walk | ✅ | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 

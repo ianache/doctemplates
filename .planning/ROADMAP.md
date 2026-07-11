@@ -226,8 +226,29 @@ Plans:
   1. Operational users can view, add, and manage nested object and list schema properties directly within the Document Types UI form.
   2. The document designer's preview panel supports rendering complex nested and array mock data, allowing users to previsualize layouts before activating the design.
 
-**Plans**: TBD
+**Plans**: 5 plans
 **UI hint**: yes
+
+Plans:
+**Wave 1**
+
+- [ ] 10-01-PLAN.md - Frontend: complex schema field adapter, visual Document Type editor, and nested detail tree
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 10-02-PLAN.md - Frontend: nested mock data generation, preview API client, and reusable preview components
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 10-03-PLAN.md - Frontend: designer integration for editable nested mock data and generated PDF preview
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 10-05-PLAN.md - Frontend: localStorage persistence of custom mock JSON payload
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
+- [ ] 10-04-PLAN.md - Manual browser verification for complex schema UI and nested data previsualization
 
 ## Progress
 
@@ -245,4 +266,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. Backend Core (Nested Data & Case-Insensitive Matching) | 1/1 | Complete    | 2026-07-09 |
 | 8. Template AST & Static Validation | 1/1 | Complete    | 2026-07-10 |
 | 9. Search Documents Library & Audit Trace | 2/3 | In Progress|  |
-| 10. Complex Schema UI & Nested Data Previsualization | 0/0 | Proposed | |
+| 10. Complex Schema UI & Nested Data Previsualization | 0/5 | Planned | |
