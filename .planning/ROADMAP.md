@@ -232,7 +232,7 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 10-01-PLAN.md - Frontend: complex schema field adapter, visual Document Type editor, and nested detail tree
+- [x] 10-01-PLAN.md - Frontend: complex schema field adapter, visual Document Type editor, and nested detail tree
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -266,4 +266,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. Backend Core (Nested Data & Case-Insensitive Matching) | 1/1 | Complete    | 2026-07-09 |
 | 8. Template AST & Static Validation | 1/1 | Complete    | 2026-07-10 |
 | 9. Search Documents Library & Audit Trace | 2/3 | In Progress|  |
-| 10. Complex Schema UI & Nested Data Previsualization | 0/5 | Planned | |
+| 10. Complex Schema UI & Nested Data Previsualization | 1/5 | In Progress | |
