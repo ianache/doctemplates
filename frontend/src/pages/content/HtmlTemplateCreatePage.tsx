@@ -368,7 +368,7 @@ export default function HtmlTemplateCreatePage() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-112px)] overflow-hidden -m-lg">
+    <div className="flex flex-col h-[calc(100vh-4rem)] overflow-hidden -m-lg">
       {/* Top action header bar */}
       <div className="h-14 flex items-center px-lg bg-surface-container-lowest border-b border-outline-variant shrink-0 justify-between">
         <div className="flex items-center gap-md">
