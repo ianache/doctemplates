@@ -12,6 +12,8 @@ export default function DocumentDesignCreatePage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [documentTypeId, setDocumentTypeId] = useState("");
+  const [mockDataJson, setMockDataJson] = useState("");
+  const [mockDataError, setMockDataError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -41,11 +43,26 @@ export default function DocumentDesignCreatePage() {
       return;
     }
 
+    let parsedMock: Record<string, unknown> | null = null;
+    if (mockDataJson.trim()) {
+      try {
+        parsedMock = JSON.parse(mockDataJson);
+        if (typeof parsedMock !== "object" || parsedMock === null || Array.isArray(parsedMock)) {
+          setSubmitError("Mock Data JSON must be a valid JSON object.");
+          return;
+        }
+      } catch (err) {
+        setSubmitError(`Mock Data JSON has syntax errors: ${err instanceof Error ? err.message : "Error"}`);
+        return;
+      }
+    }
+
     try {
       const created = await createDocumentDesign({
         document_type_id: documentTypeId,
         name,
         description: description || null,
+        mock_data: parsedMock,
       });
       navigate(`/document-designs/${created.id}`);
     } catch (error) {
@@ -105,9 +122,35 @@ export default function DocumentDesignCreatePage() {
             <textarea
               value={description}
               onChange={(event) => setDescription(event.target.value)}
-              rows={4}
-              className="mt-xs w-full rounded border border-outline px-sm py-xs text-sm text-on-surface focus:border-primary focus:outline-none"
             />
+          </label>
+
+          <label className="block text-[11px] font-bold uppercase tracking-[0.05em] text-secondary">
+            Mock JSON Payload (Optional)
+            <textarea
+              value={mockDataJson}
+              onChange={(event) => {
+                setMockDataJson(event.target.value);
+                try {
+                  if (event.target.value.trim()) {
+                    JSON.parse(event.target.value);
+                    setMockDataError(null);
+                  } else {
+                    setMockDataError(null);
+                  }
+                } catch (err) {
+                  setMockDataError(err instanceof Error ? err.message : "Invalid JSON syntax");
+                }
+              }}
+              rows={6}
+              placeholder={`{\n  "cliente": {\n    "nombre": "Juan Pérez",\n    "edad": 30\n  }\n}`}
+              className={`mt-xs w-full rounded border font-mono text-xs px-sm py-xs bg-white focus:outline-none ${
+                mockDataError ? "border-error focus:border-error" : "border-outline focus:border-primary"
+              }`}
+            />
+            {mockDataError && (
+              <p className="text-xs text-error mt-xs font-mono">{mockDataError}</p>
+            )}
           </label>
         </div>
 

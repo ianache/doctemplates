@@ -36,6 +36,7 @@ function App() {
         <Route path="content/templates" element={<TemplatesPage />} />
         <Route path="content/templates/new" element={<HtmlTemplateCreatePage />} />
         <Route path="content/templates/:id" element={<HtmlTemplateDetailPage />} />
+        <Route path="content/templates/:id/edit" element={<HtmlTemplateCreatePage />} />
         <Route path="content/static" element={<StaticPdfsPage />} />
         <Route path="content/static-pdfs/upload" element={<StaticPdfUploadPage />} />
         <Route path="content/static-pdfs/:id" element={<StaticPdfDetailPage />} />

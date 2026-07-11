@@ -44,12 +44,20 @@ export default function HtmlTemplateDetailPage() {
           <h2 className="font-headings text-[18px] font-bold text-on-surface">{template.name}</h2>
           <p className="mt-xs text-sm text-on-surface-variant">{template.document_type_name}</p>
         </div>
-        <Link
-          to="/content/templates"
-          className="rounded border border-outline-variant px-md py-xs text-sm font-bold text-on-surface hover:border-outline"
-        >
-          Back to Library
-        </Link>
+        <div className="flex items-center gap-sm">
+          <Link
+            to={`/content/templates/${template.id}/edit`}
+            className="flex items-center gap-xs rounded border border-primary px-md py-xs text-sm font-bold text-primary hover:bg-primary/10 active:scale-95 transition-all"
+          >
+            <span className="material-symbols-outlined text-[18px]">edit</span> Edit
+          </Link>
+          <Link
+            to="/content/templates"
+            className="rounded border border-outline-variant px-md py-xs text-sm font-bold text-on-surface hover:border-outline"
+          >
+            Back to Library
+          </Link>
+        </div>
       </div>
 
       <dl className="mt-md grid gap-sm text-sm">

@@ -31,12 +31,14 @@ export interface DocumentDesignListItem {
 
 export interface DocumentDesignDetail extends Omit<DocumentDesignListItem, "page_count"> {
   pages: DocumentDesignPage[];
+  mock_data?: Record<string, unknown> | null;
 }
 
 export interface DocumentDesignCreatePayload {
   document_type_id: string;
   name: string;
   description: string | null;
+  mock_data?: Record<string, unknown> | null;
 }
 
 export interface AddTemplatePagePayload {
@@ -184,4 +186,23 @@ export async function previewDocumentDesign(
     throw new Error(readErrorMessage(body, res.status));
   }
   return res.blob();
+}
+
+export interface DocumentDesignUpdatePayload {
+  name: string;
+  description: string | null;
+  mock_data?: Record<string, unknown> | null;
+}
+
+export async function updateDocumentDesign(
+  id: string,
+  payload: DocumentDesignUpdatePayload,
+): Promise<DocumentDesignDetail> {
+  return jsonOrError(
+    await apiFetch(`/api/document-designs/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }),
+  );
 }

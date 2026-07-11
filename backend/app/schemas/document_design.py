@@ -8,6 +8,13 @@ class DocumentDesignCreate(BaseModel):
     document_type_id: UUID
     name: str
     description: str | None = None
+    mock_data: dict | None = None
+
+
+class DocumentDesignUpdate(BaseModel):
+    name: str
+    description: str | None = None
+    mock_data: dict | None = None
 
 
 class AddTemplatePage(BaseModel):
@@ -79,3 +86,4 @@ class DocumentDesignDetail(BaseModel):
     created_at: datetime
     pages: list[DocumentDesignPageOut]
     warnings: list[str] = []
+    mock_data: dict | None = None

@@ -5,9 +5,11 @@ interface MockDataPanelProps {
   onChange: (value: string) => void;
   onReset: () => void;
   onPreview: () => void;
+  onSave: () => void;
   isValidJson: boolean;
   parseError: string | null;
   loadingPreview?: boolean;
+  isSavingMock?: boolean;
 }
 
 export function MockDataPanel({
@@ -15,9 +17,11 @@ export function MockDataPanel({
   onChange,
   onReset,
   onPreview,
+  onSave,
   isValidJson,
   parseError,
   loadingPreview = false,
+  isSavingMock = false,
 }: MockDataPanelProps) {
   return (
     <aside className="rounded border border-outline-variant bg-surface-container-lowest p-md">
@@ -47,10 +51,18 @@ export function MockDataPanel({
         <div className="flex gap-sm">
           <button
             type="button"
-            className="flex-1 rounded border border-outline px-md py-xs text-sm font-bold text-on-surface hover:bg-surface-container-low"
+            className="rounded border border-outline px-md py-xs text-sm font-bold text-on-surface hover:bg-surface-container-low"
             onClick={onReset}
           >
             Reset
+          </button>
+          <button
+            type="button"
+            disabled={!isValidJson || isSavingMock}
+            className="flex-1 rounded border border-primary px-md py-xs text-sm font-bold text-primary hover:bg-primary/10 disabled:opacity-50"
+            onClick={onSave}
+          >
+            {isSavingMock ? "Saving..." : "Save Mock"}
           </button>
           <button
             type="button"

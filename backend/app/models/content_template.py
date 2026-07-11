@@ -18,6 +18,7 @@ class HtmlTemplate(Base):
     html: Mapped[str]
     token_names: Mapped[list[str]] = mapped_column(JSON, default=list)
     created_by_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
+    mock_data: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
     document_type: Mapped["DocumentType"] = relationship()

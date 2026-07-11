@@ -26,6 +26,7 @@ def _detail(template: HtmlTemplate) -> HtmlTemplateDetail:
         document_type_name=template.document_type.name,
         html=template.html,
         token_names=list(template.token_names or []),
+        mock_data=template.mock_data,
         created_by_email=template.created_by.email,
         created_at=template.created_at,
     )
@@ -54,6 +55,7 @@ def create_html_template(
         html=payload.html,
         token_names=tokens,
         created_by=user,
+        mock_data=payload.mock_data,
     )
     db.add(template)
     db.commit()
@@ -105,4 +107,44 @@ def get_html_template(
     )
     if template is None:
         raise HTTPException(status_code=404, detail="Template not found")
+    return _detail(template)
+
+
+@router.put("/{template_id}", response_model=HtmlTemplateDetail)
+def update_html_template(
+    template_id: UUID,
+    payload: HtmlTemplateCreate,
+    user: User = Depends(get_current_user),
+    db: SQLAlchemySession = Depends(get_db),
+) -> HtmlTemplateDetail:
+    template = (
+        db.query(HtmlTemplate)
+        .options(joinedload(HtmlTemplate.document_type), joinedload(HtmlTemplate.created_by))
+        .filter(HtmlTemplate.id == template_id)
+        .first()
+    )
+    if template is None:
+        raise HTTPException(status_code=404, detail="Template not found")
+
+    document_type = (
+        db.query(DocumentType)
+        .options(joinedload(DocumentType.fields))
+        .filter(DocumentType.id == payload.document_type_id)
+        .first()
+    )
+    if document_type is None:
+        raise HTTPException(status_code=404, detail="Document type not found")
+
+    tokens = validate_template_tokens(payload.html, [field.name for field in document_type.fields])
+
+    template.name = payload.name
+    template.document_type_id = payload.document_type_id
+    template.html = payload.html
+    template.token_names = tokens
+    template.mock_data = payload.mock_data
+
+    db.commit()
+    db.refresh(template)
+    db.refresh(document_type)
+    db.refresh(user)
     return _detail(template)

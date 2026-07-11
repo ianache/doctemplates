@@ -8,6 +8,7 @@ class HtmlTemplateCreate(BaseModel):
     document_type_id: UUID
     name: str
     html: str
+    mock_data: dict | None = None
 
 
 class HtmlTemplateListItem(BaseModel):
@@ -31,5 +32,6 @@ class HtmlTemplateDetail(BaseModel):
     document_type_name: str
     html: str
     token_names: list[str]
+    mock_data: dict | None = None
     created_by_email: str
     created_at: datetime

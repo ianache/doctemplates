@@ -26,6 +26,7 @@ from app.schemas.document_design import (
     AddStaticPdfPage,
     AddTemplatePage,
     DocumentDesignCreate,
+    DocumentDesignUpdate,
     DocumentDesignDetail,
     DocumentDesignListItem,
     DocumentDesignPageOut,
@@ -104,6 +105,7 @@ def _detail(design: DocumentDesign, db: SQLAlchemySession = None) -> DocumentDes
         created_at=design.created_at,
         pages=[_page_out(page) for page in ordered_pages],
         warnings=warnings,
+        mock_data=design.mock_data,
     )
 
 
@@ -121,8 +123,38 @@ def create_document_design(
         description=payload.description,
         status="draft",
         created_by=user,
+        mock_data=payload.mock_data,
     )
     db.add(design)
+    db.commit()
+    db.refresh(design)
+    return _detail(design, db)
+
+
+@router.put("/{design_id}", response_model=DocumentDesignDetail)
+def update_document_design(
+    design_id: UUID,
+    payload: DocumentDesignUpdate,
+    user: User = Depends(get_current_user),
+    db: SQLAlchemySession = Depends(get_db),
+) -> DocumentDesignDetail:
+    design = (
+        db.query(DocumentDesign)
+        .options(
+            joinedload(DocumentDesign.document_type),
+            joinedload(DocumentDesign.created_by),
+            selectinload(DocumentDesign.pages),
+        )
+        .filter(DocumentDesign.id == design_id)
+        .first()
+    )
+    if design is None:
+        raise HTTPException(status_code=404, detail="Document design not found")
+
+    design.name = payload.name
+    design.description = payload.description
+    design.mock_data = payload.mock_data
+
     db.commit()
     db.refresh(design)
     return _detail(design, db)

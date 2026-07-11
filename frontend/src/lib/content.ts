@@ -17,6 +17,7 @@ export interface HtmlTemplateDetail {
   document_type_name: string;
   html: string;
   token_names: string[];
+  mock_data?: Record<string, unknown> | null;
   created_by_email: string;
   created_at: string;
 }
@@ -25,6 +26,7 @@ export interface HtmlTemplateCreatePayload {
   document_type_id: string;
   name: string;
   html: string;
+  mock_data?: Record<string, unknown> | null;
 }
 
 export interface StaticPdfAssetListItem {
@@ -70,6 +72,19 @@ export async function createHtmlTemplate(
   return jsonOrError(
     await apiFetch("/api/content/templates", {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }),
+  );
+}
+
+export async function updateHtmlTemplate(
+  id: string,
+  payload: HtmlTemplateCreatePayload,
+): Promise<HtmlTemplateDetail> {
+  return jsonOrError(
+    await apiFetch(`/api/content/templates/${id}`, {
+      method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     }),

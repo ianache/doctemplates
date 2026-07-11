@@ -162,3 +162,110 @@ def test_create_template_case_insensitive_and_fallback(
     assert response2.status_code == 201
     assert response2.json()["token_names"] == ["cliente.contactos", "cliente.contactos[].nombre"]
 
+
+def test_update_template_success(client: TestClient, db_session: SQLAlchemySession) -> None:
+    user = _auth_client(client, db_session)
+    document_type = _create_document_type(db_session, user)
+
+    # First create a template
+    create_response = client.post(
+        "/api/content/templates",
+        json={
+            "document_type_id": str(document_type.id),
+            "name": "Original Name",
+            "html": "<p>{{cliente.nombre}}</p>",
+        },
+    )
+    assert create_response.status_code == 201
+    created = create_response.json()
+    template_id = created["id"]
+
+    # Now update it
+    update_response = client.put(
+        f"/api/content/templates/{template_id}",
+        json={
+            "document_type_id": str(document_type.id),
+            "name": "Updated Name",
+            "html": "<p>{{cliente.nombre}} ({{cliente.edad}})</p>",
+        },
+    )
+    assert update_response.status_code == 200
+    updated = update_response.json()
+    assert updated["name"] == "Updated Name"
+    assert updated["html"] == "<p>{{cliente.nombre}} ({{cliente.edad}})</p>"
+    assert set(updated["token_names"]) == {"cliente.nombre", "cliente.edad"}
+
+
+def test_update_template_rejects_unknown_tokens(
+    client: TestClient, db_session: SQLAlchemySession
+) -> None:
+    user = _auth_client(client, db_session)
+    document_type = _create_document_type(db_session, user)
+
+    create_response = client.post(
+        "/api/content/templates",
+        json={
+            "document_type_id": str(document_type.id),
+            "name": "Original Name",
+            "html": "<p>{{cliente.nombre}}</p>",
+        },
+    )
+    assert create_response.status_code == 201
+    template_id = create_response.json()["id"]
+
+    update_response = client.put(
+        f"/api/content/templates/{template_id}",
+        json={
+            "document_type_id": str(document_type.id),
+            "name": "Updated Name",
+            "html": "<p>{{cliente.inexistente}}</p>",
+        },
+    )
+    assert update_response.status_code == 400
+    assert "cliente.inexistente" in update_response.text
+
+
+def test_update_template_requires_auth(client: TestClient, db_session: SQLAlchemySession) -> None:
+    user = _auth_client(client, db_session)
+    document_type = _create_document_type(db_session, user)
+
+    create_response = client.post(
+        "/api/content/templates",
+        json={
+            "document_type_id": str(document_type.id),
+            "name": "Original Name",
+            "html": "<p>{{cliente.nombre}}</p>",
+        },
+    )
+    assert create_response.status_code == 201
+    template_id = create_response.json()["id"]
+
+    # Clear authorization cookie
+    client.cookies.clear()
+
+    update_response = client.put(
+        f"/api/content/templates/{template_id}",
+        json={
+            "document_type_id": str(document_type.id),
+            "name": "Updated Name",
+            "html": "<p>{{cliente.nombre}}</p>",
+        },
+    )
+    assert update_response.status_code == 401
+
+
+def test_update_template_not_found(client: TestClient, db_session: SQLAlchemySession) -> None:
+    user = _auth_client(client, db_session)
+    document_type = _create_document_type(db_session, user)
+    fake_id = "00000000-0000-0000-0000-000000000000"
+
+    update_response = client.put(
+        f"/api/content/templates/{fake_id}",
+        json={
+            "document_type_id": str(document_type.id),
+            "name": "Updated Name",
+            "html": "<p>{{cliente.nombre}}</p>",
+        },
+    )
+    assert update_response.status_code == 404
+

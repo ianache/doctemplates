@@ -28,6 +28,7 @@ import {
   reorderDesignPages,
   updateDesignPage,
   previewDocumentDesign,
+  updateDocumentDesign,
   type DocumentDesignDetail,
   type DocumentDesignListItem,
   type DocumentDesignPage,
@@ -144,6 +145,7 @@ export default function DocumentDesignDetailPage() {
   const [parsedPayload, setParsedPayload] = useState<Record<string, unknown>>({});
   const [jsonError, setJsonError] = useState<string | null>(null);
   const [previewLoading, setPreviewLoading] = useState<boolean>(false);
+  const [isSavingMock, setIsSavingMock] = useState<boolean>(false);
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [previewBlob, setPreviewBlob] = useState<Blob | null>(null);
   const [previewMode, setPreviewMode] = useState<"fragment" | "pdf">("fragment");
@@ -265,6 +267,8 @@ export default function DocumentDesignDetailPage() {
                 if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
                   loadedMock = parsed as Record<string, unknown>;
                 }
+              } else if (design.mock_data) {
+                loadedMock = design.mock_data;
               }
             } catch (err) {
               console.error("Failed to parse saved mock payload", err);
@@ -365,6 +369,23 @@ export default function DocumentDesignDetailPage() {
       setPreviewError(err instanceof Error ? err.message : "Failed to generate PDF preview.");
     } finally {
       setPreviewLoading(false);
+    }
+  };
+
+  const handleSaveMockData = async () => {
+    if (!design) return;
+    setIsSavingMock(true);
+    setPreviewError(null);
+    try {
+      await updateDocumentDesign(design.id, {
+        name: design.name,
+        description: design.description,
+        mock_data: parsedPayload,
+      });
+    } catch (err) {
+      setPreviewError(err instanceof Error ? err.message : "Failed to persist mock data to server.");
+    } finally {
+      setIsSavingMock(false);
     }
   };
 
@@ -854,9 +875,11 @@ export default function DocumentDesignDetailPage() {
                 onChange={handleMockJsonChange}
                 onReset={handleResetMockData}
                 onPreview={handleTriggerPdfPreview}
+                onSave={handleSaveMockData}
                 isValidJson={!jsonError}
                 parseError={jsonError}
                 loadingPreview={previewLoading}
+                isSavingMock={isSavingMock}
               />
             </>
           )}

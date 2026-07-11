@@ -532,3 +532,54 @@ def test_migration_backfill_d05(
     # Legacy draft remains version-less (NULL)
     assert legacy_draft.version_group_id is None
     assert legacy_draft.version_number is None
+
+
+def test_create_design_persists_mock_data(client: TestClient, db_session: SQLAlchemySession) -> None:
+    user = _auth_client(client, db_session)
+    document_type = _create_document_type(db_session, user)
+
+    response = client.post(
+        "/api/document-designs",
+        json={
+            "document_type_id": str(document_type.id),
+            "name": "Design with mock",
+            "description": "Short desc",
+            "mock_data": {"test_key": "test_val"},
+        },
+    )
+    assert response.status_code == 201
+    data = response.json()
+    assert data["name"] == "Design with mock"
+    assert data["mock_data"] == {"test_key": "test_val"}
+
+
+def test_update_design_persists_mock_data(client: TestClient, db_session: SQLAlchemySession) -> None:
+    user = _auth_client(client, db_session)
+    document_type = _create_document_type(db_session, user)
+
+    # 1. Create a design
+    response = client.post(
+        "/api/document-designs",
+        json={
+            "document_type_id": str(document_type.id),
+            "name": "Original Name",
+            "description": "Original Desc",
+        },
+    )
+    assert response.status_code == 201
+    design_id = response.json()["id"]
+
+    # 2. Update it
+    update_response = client.put(
+        f"/api/document-designs/{design_id}",
+        json={
+            "name": "Updated Name",
+            "description": "Updated Desc",
+            "mock_data": {"client": {"name": "Test Client"}},
+        },
+    )
+    assert update_response.status_code == 200
+    data = update_response.json()
+    assert data["name"] == "Updated Name"
+    assert data["description"] == "Updated Desc"
+    assert data["mock_data"] == {"client": {"name": "Test Client"}}
