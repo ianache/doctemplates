@@ -63,6 +63,7 @@ export default function HtmlTemplateCreatePage() {
   const [documentTypeId, setDocumentTypeId] = useState("");
   const [html, setHtml] = useState("");
   const [htmlTouched, setHtmlTouched] = useState(false);
+  const [css, setCss] = useState("");
   const [mockDataJson, setMockDataJson] = useState("");
   const [mockDataError, setMockDataError] = useState<string | null>(null);
 
@@ -87,6 +88,9 @@ export default function HtmlTemplateCreatePage() {
             setDocumentTypeId(t.document_type_id);
             setHtml(t.html);
             setHtmlTouched(true);
+            if (t.css) {
+              setCss(t.css);
+            }
             if (t.mock_data) {
               setMockDataJson(JSON.stringify(t.mock_data, null, 2));
             }
@@ -282,6 +286,7 @@ export default function HtmlTemplateCreatePage() {
           document_type_id: documentTypeId,
           name,
           html,
+          css,
           mock_data: parsedMock,
         });
         navigate(`/content/templates/${id}`);
@@ -290,6 +295,7 @@ export default function HtmlTemplateCreatePage() {
           document_type_id: documentTypeId,
           name,
           html,
+          css,
           mock_data: parsedMock,
         });
         navigate(`/content/templates/${created.id}`);
@@ -310,6 +316,15 @@ export default function HtmlTemplateCreatePage() {
       return next;
     });
   };
+
+  const scopedCss = useMemo(() => {
+    if (!css) return "";
+    return css.replace(/([^\r\n,{}]+)(?=\s*{[^{}]*})/g, (match) => {
+      const trimmed = match.trim();
+      if (trimmed.startsWith("@")) return trimmed; // Skip @media, @keyframes, @page
+      return trimmed.split(",").map(selector => `#visual-canvas-root ${selector.trim()}`).join(", ");
+    });
+  }, [css]);
 
   const tokenTree = useMemo(() => {
     if (!selectedDocumentType?.fields) return [];
@@ -546,7 +561,9 @@ export default function HtmlTemplateCreatePage() {
               {/* Editor Visual (contentEditable canvas) */}
               {editorMode === "visual" && (
                 <div className="p-lg bg-surface-container-lowest min-h-[400px] overflow-y-auto">
+                  <style dangerouslySetInnerHTML={{ __html: scopedCss }} />
                   <div
+                    id="visual-canvas-root"
                     ref={visualRef}
                     contentEditable
                     onInput={handleVisualChange}
@@ -645,6 +662,24 @@ export default function HtmlTemplateCreatePage() {
               Repetitive Lists Support
             </div>
             If you drag a property from a list, it will generate a Jinja loop <code className="bg-white px-1 border border-outline rounded font-mono">{"{% for %}"}</code> automatically. If you drag the list node itself (e.g. <code className="bg-white px-1 border border-outline rounded font-mono">{"cita.equipos[]"}</code>), it will generate a fully loopable HTML table!
+          </div>
+
+          {/* CSS Style Panel */}
+          <div className="mt-lg border-t border-outline-variant pt-md">
+            <h3 className="font-headings text-[14px] font-bold text-on-surface flex items-center gap-xs">
+              <span className="material-symbols-outlined text-primary text-[20px]">css</span>
+              CSS STYLES
+            </h3>
+            <p className="text-[11px] text-secondary mt-xs mb-sm">
+              Define custom stylesheets to style the HTML template layout.
+            </p>
+            <textarea
+              value={css}
+              onChange={(e) => setCss(e.target.value)}
+              rows={10}
+              placeholder={`/* e.g. */\n.styled-title {\n  color: #1a73e8;\n  font-size: 24px;\n}`}
+              className="w-full rounded border border-outline-variant p-sm font-mono text-xs text-on-surface focus:border-primary focus:outline-none bg-white resize-y"
+            />
           </div>
         </aside>
       </div>

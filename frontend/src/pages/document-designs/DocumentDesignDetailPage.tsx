@@ -791,7 +791,17 @@ export default function DocumentDesignDetailPage() {
                   <iframe
                     title={`Preview ${pageLabel(selectedPage)}`}
                     className="h-full min-h-[680px] w-full flex-1 border-0 bg-white"
-                    srcDoc={String(selectedPage.snapshot.html)}
+                    srcDoc={`
+                      <style>
+                        body {
+                          font-family: Helvetica, Arial, sans-serif;
+                          font-size: 10pt;
+                          line-height: 1.4;
+                        }
+                        ${selectedPage.snapshot.css || ""}
+                      </style>
+                      ${selectedPage.snapshot.html || ""}
+                    `}
                   />
                 ) : (
                   <div className="flex flex-1 flex-col items-center justify-center gap-md text-center">

@@ -25,6 +25,7 @@ def _detail(template: HtmlTemplate) -> HtmlTemplateDetail:
         document_type_id=template.document_type_id,
         document_type_name=template.document_type.name,
         html=template.html,
+        css=template.css,
         token_names=list(template.token_names or []),
         mock_data=template.mock_data,
         created_by_email=template.created_by.email,
@@ -53,6 +54,7 @@ def create_html_template(
         document_type=document_type,
         name=payload.name,
         html=payload.html,
+        css=payload.css,
         token_names=tokens,
         created_by=user,
         mock_data=payload.mock_data,
@@ -140,6 +142,7 @@ def update_html_template(
     template.name = payload.name
     template.document_type_id = payload.document_type_id
     template.html = payload.html
+    template.css = payload.css
     template.token_names = tokens
     template.mock_data = payload.mock_data
 

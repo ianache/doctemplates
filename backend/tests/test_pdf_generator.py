@@ -216,3 +216,11 @@ def test_generate_composed_pdf(db_session: SQLAlchemySession):
 
     pdf_bytes = generate_composed_pdf(design, payload, db_session)
     assert pdf_bytes.startswith(b"%PDF")
+
+
+def test_render_html_page_with_css():
+    html_content = "<h1 class='styled-title'>Hello</h1>"
+    context = {}
+    css_content = ".styled-title { color: red; font-size: 24pt; }"
+    pdf_bytes = render_html_page_to_pdf(html_content, context, css_content)
+    assert pdf_bytes.startswith(b"%PDF")

@@ -11,6 +11,7 @@ def template_snapshot(template: HtmlTemplate) -> dict:
         "template_id": str(template.id),
         "name": template.name,
         "html": template.html,
+        "css": template.css,
         "token_names": list(template.token_names or []),
         "document_type_id": str(template.document_type_id),
     }

@@ -16,6 +16,7 @@ class HtmlTemplate(Base):
     )
     name: Mapped[str] = mapped_column(index=True)
     html: Mapped[str]
+    css: Mapped[str | None] = mapped_column(nullable=True, default="")
     token_names: Mapped[list[str]] = mapped_column(JSON, default=list)
     created_by_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
     mock_data: Mapped[dict | None] = mapped_column(JSON, nullable=True)

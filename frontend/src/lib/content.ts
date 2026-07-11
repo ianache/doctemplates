@@ -16,6 +16,7 @@ export interface HtmlTemplateDetail {
   document_type_id: string;
   document_type_name: string;
   html: string;
+  css?: string | null;
   token_names: string[];
   mock_data?: Record<string, unknown> | null;
   created_by_email: string;
@@ -26,6 +27,7 @@ export interface HtmlTemplateCreatePayload {
   document_type_id: string;
   name: string;
   html: string;
+  css?: string | null;
   mock_data?: Record<string, unknown> | null;
 }
 

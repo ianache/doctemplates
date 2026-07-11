@@ -542,7 +542,7 @@ class CaseInsensitiveSandboxedEnvironment(SandboxedEnvironment):
     context_class = CaseInsensitiveContext
 
 
-def render_html_page_to_pdf(html_content: str, context: dict) -> bytes:
+def render_html_page_to_pdf(html_content: str, context: dict, css_content: str | None = "") -> bytes:
     """Renders a Jinja2 template and compiles it to PDF bytes using xhtml2pdf."""
     env = CaseInsensitiveSandboxedEnvironment(autoescape=True)
     env.filters["date_format"] = date_format_filter
@@ -557,17 +557,18 @@ def render_html_page_to_pdf(html_content: str, context: dict) -> bytes:
             detail=f"Template rendering failed: {str(e)}"
         )
 
-    base_css = """
+    base_css = f"""
     <style>
-        @page {
+        @page {{
             size: letter portrait;
             margin: 1in;
-        }
-        body {
+        }}
+        body {{
             font-family: Helvetica, Arial, sans-serif;
             font-size: 10pt;
             line-height: 1.4;
-        }
+        }}
+        {css_content or ""}
     </style>
     """
     final_html = base_css + rendered_html
@@ -614,11 +615,14 @@ def generate_composed_pdf(
     for page in design.pages:
         if page.block_type == "html_template":
             html_content = ""
+            css_content = ""
             template = templates_by_id.get(page.content_id)
             if template:
                 html_content = template.html
+                css_content = getattr(template, "css", "") or ""
             else:
                 html_content = (page.snapshot or {}).get("html", "")
+                css_content = (page.snapshot or {}).get("css", "") or ""
 
             if not html_content:
                 raise HTTPException(
@@ -626,7 +630,7 @@ def generate_composed_pdf(
                     detail=f"HTML template content is empty for page position {page.position}."
                 )
 
-            pdf_bytes = render_html_page_to_pdf(html_content, expanded_payload)
+            pdf_bytes = render_html_page_to_pdf(html_content, expanded_payload, css_content)
             reader = PdfReader(io.BytesIO(pdf_bytes))
             for p in reader.pages:
                 writer.add_page(p)
