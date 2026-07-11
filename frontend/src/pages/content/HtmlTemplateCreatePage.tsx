@@ -1,52 +1,60 @@
-import { type FormEvent, useEffect, useState, useRef, useMemo } from "react";
-import { useNavigate, Link, useParams } from "react-router-dom";
+import { useEffect, useState, useMemo, useRef } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
-import PageHeader from "../../components/PageHeader";
-import {
-  getDocumentType,
-  listDocumentTypes,
-  type DocumentTypeDetail,
-  type DocumentTypeListItem,
-  type DocumentTypeField,
-} from "../../lib/documentTypes";
-import { buildSchemaFieldTree, type SchemaFieldTreeNode } from "../../lib/schemaFields";
 import { createHtmlTemplate, getHtmlTemplate, updateHtmlTemplate } from "../../lib/content";
+import { getDocumentType, listDocumentTypes, type DocumentTypeDetail, type DocumentTypeListItem } from "../../lib/documentTypes";
+import { buildSchemaFieldTree, type SchemaFieldTreeNode } from "../../lib/schemaFields";
 
-function getDragTextForNode(node: SchemaFieldTreeNode, allFields: DocumentTypeField[]): string {
-  if (node.type === "leaf") {
-    const path = node.fullPath;
-    const lastListIndex = path.lastIndexOf("[]");
-    if (lastListIndex !== -1) {
-      const listPath = path.substring(0, lastListIndex);
-      const relativePath = path.substring(lastListIndex + 3); // Skip "[]" and "."
-      const listParts = listPath.split(".");
-      const rawListName = listParts[listParts.length - 1];
-      const iteratorName = rawListName.endsWith("s") ? rawListName.substring(0, rawListName.length - 1) : "item";
-      return `{% for ${iteratorName} in ${listPath} %}\n  {{ ${iteratorName}.${relativePath} }}\n{% endfor %}`;
-    } else {
-      return `{{ ${node.fullPath} }}`;
-    }
-  } else if (node.type === "list") {
+function getDragTextForNode(node: SchemaFieldTreeNode, fields: any[]): string {
+  if (node.type === "list") {
     const listPath = node.fullPath;
-    const listParts = listPath.split(".");
-    const rawListName = listParts[listParts.length - 1];
-    const iteratorName = rawListName.endsWith("s") ? rawListName.substring(0, rawListName.length - 1) : "item";
-    
-    // Find all fields nested directly under this list
-    const subFields = allFields.filter(f => f.name.startsWith(listPath + "."));
-    const headers = subFields.map(f => {
-      const name = f.name.substring(listPath.length + 1); // skip listPath + "."
-      return `<th>${name.charAt(0).toUpperCase() + name.slice(1)}</th>`;
-    }).join("\n      ");
-    const cells = subFields.map(f => {
-      const name = f.name.substring(listPath.length + 1); // skip listPath + "."
-      return `<td>{{ ${iteratorName}.${name} }}</td>`;
-    }).join("\n      ");
-    
-    return `<table>\n  <thead>\n    <tr>\n      ${headers}\n    </tr>\n  </thead>\n  <tbody>\n    {% for ${iteratorName} in ${listPath.replace("[]", "")} %}\n    <tr>\n      ${cells}\n    </tr>\n    {% endfor %}\n  </tbody>\n</table>`;
-  } else {
-    return `<!-- ${node.fullPath} -->`;
+    const cleanPath = listPath.replace(/\[\]/g, "");
+    const listVar = cleanPath.split(".").pop() || "item";
+    const itemAlias = listVar.slice(0, -1) || "item";
+
+    const childFields = fields.filter(f => f.name.startsWith(cleanPath + "."));
+    const columns = childFields.map(f => {
+      const relPath = f.name.slice((cleanPath + ".").length);
+      return {
+        header: relPath.split(".").pop() || relPath,
+        expr: `{{ ${itemAlias}.${relPath} }}`
+      };
+    });
+
+    if (columns.length === 0) {
+      columns.push({ header: "Item", expr: `{{ ${itemAlias} }}` });
+    }
+
+    return `
+<table>
+  <thead>
+    <tr>
+      ${columns.map(c => `<th>${c.header}</th>`).join("\n      ")}
+    </tr>
+  </thead>
+  <tbody>
+    {% for ${itemAlias} in ${cleanPath} %}
+    <tr>
+      ${columns.map(c => `<td>${c.expr}</td>`).join("\n      ")}
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>`;
   }
+
+  const isInsideList = node.fullPath.includes("[]");
+  if (isInsideList) {
+    const parts = node.fullPath.split("[]");
+    const listPart = parts[0];
+    const subPart = parts[1];
+    const listVar = listPart.split(".").pop() || "item";
+    const itemAlias = listVar.slice(0, -1) || "item";
+    const cleanSubPart = subPart.startsWith(".") ? subPart.slice(1) : subPart;
+
+    return `{% for ${itemAlias} in ${listPart} %}{{ ${itemAlias}.${cleanSubPart} }}{% endfor %}`;
+  }
+
+  return `{{ ${node.fullPath} }}`;
 }
 
 export default function HtmlTemplateCreatePage() {
@@ -126,19 +134,49 @@ export default function HtmlTemplateCreatePage() {
     let cancelled = false;
     getDocumentType(documentTypeId).then((detail) => {
       if (cancelled) return;
-      setSelectedDocumentType(detail);
-      if (!htmlTouched && detail?.fields?.length) {
-        setHtml(`<p>Welcome {{ ${detail.fields[0].name} }}</p>`);
+      if (detail) {
+        setSelectedDocumentType(detail);
+
+        // Default HTML structure based on Document Type fields
+        if (!htmlTouched && !isEditMode) {
+          const defaultHtml = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>${name || "Template"}</title>
+</head>
+<body>
+  <div class="template-container">
+    <h1>${name || "DOCUMENT"}</h1>
+    <p>Asociado a: ${detail.name}</p>
+    <hr/>
+    <!-- Drag and drop tokens here -->
+  </div>
+</body>
+</html>`;
+          setHtml(defaultHtml);
+          setTimeout(() => {
+            if (visualRef.current) {
+              visualRef.current.innerHTML = defaultHtml;
+            }
+          }, 0);
+        }
       }
     });
 
     return () => {
       cancelled = true;
     };
-  }, [documentTypeId, htmlTouched]);
+  }, [documentTypeId, htmlTouched, isEditMode, name]);
 
-  // Synchronize visual and code editor inner states
-  const handleToggleMode = (mode: "visual" | "code") => {
+  const handleVisualChange = () => {
+    if (visualRef.current) {
+      setHtml(visualRef.current.innerHTML);
+      setHtmlTouched(true);
+    }
+  };
+
+  const handleSetEditorMode = (mode: "visual" | "code") => {
     setEditorMode(mode);
     if (mode === "visual") {
       setTimeout(() => {
@@ -149,110 +187,53 @@ export default function HtmlTemplateCreatePage() {
     }
   };
 
-  const handleVisualChange = () => {
-    if (visualRef.current) {
-      setHtml(visualRef.current.innerHTML);
-      setHtmlTouched(true);
-    }
-  };
-
-  // Drag and Drop Logic
   const handleTextareaDrop = (e: React.DragEvent<HTMLTextAreaElement>) => {
     e.preventDefault();
-    const text = e.dataTransfer.getData("text/plain");
-    if (!text) return;
-    
+    const token = e.dataTransfer.getData("text/plain");
+    if (!token) return;
+
     const textarea = e.currentTarget;
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
-    const currentVal = textarea.value;
-    
-    const newVal = currentVal.substring(0, start) + text + currentVal.substring(end);
-    setHtml(newVal);
+    const text = textarea.value;
+    const nextHtml = text.substring(0, start) + token + text.substring(end);
+
+    setHtml(nextHtml);
     setHtmlTouched(true);
-    
-    setTimeout(() => {
-      textarea.focus();
-      textarea.setSelectionRange(start + text.length, start + text.length);
-    }, 0);
   };
 
   const handleVisualDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    const text = e.dataTransfer.getData("text/plain");
-    if (!text) return;
+    const token = e.dataTransfer.getData("text/plain");
+    if (!token) return;
 
-    let range: Range | null = null;
-    if (document.caretRangeFromPoint) {
-      range = document.caretRangeFromPoint(e.clientX, e.clientY);
-    } else if ((e.target as any).ownerDocument && (e.target as any).ownerDocument.caretPositionFromPoint) {
-      const position = (e.target as any).ownerDocument.caretPositionFromPoint(e.clientX, e.clientY);
-      if (position) {
-        range = document.createRange();
-        range.setStart(position.offsetNode, position.offset);
-        range.collapse(true);
-      }
-    }
+    // Inject token as a styled span / node at the cursor position
+    const selection = window.getSelection();
+    if (!selection || !selection.rangeCount) return;
 
-    if (range) {
-      range.deleteContents();
-      
-      let nodeToInsert: Node;
-      if (text.startsWith("{{") || text.startsWith("{%")) {
-        const span = document.createElement("span");
-        span.className = "mx-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded font-mono text-xs inline-block select-all";
-        span.setAttribute("contenteditable", "false");
-        span.innerText = text.replace(/\n/g, " ");
-        nodeToInsert = span;
-      } else {
-        nodeToInsert = document.createTextNode(text);
-      }
-      
-      range.insertNode(nodeToInsert);
-      handleVisualChange();
-    }
-  };
+    const range = selection.getRangeAt(0);
+    // Check if drop is inside the canvas
+    if (!visualRef.current?.contains(range.startContainer)) return;
 
-  // Rich Text Toolbar Actions
-  const execToolbarCommand = (command: string, value: string = "") => {
-    document.execCommand(command, false, value);
+    range.deleteContents();
+
+    // Create a pill styled token node
+    const isExpression = token.includes("for") || token.includes("endfor") || token.includes("if");
+    const node = document.createElement("span");
+    node.className = isExpression
+      ? "bg-primary-fixed text-primary px-xs py-0.5 rounded font-mono text-xs mx-0.5 select-none"
+      : "bg-surface-container-highest text-on-surface px-xs py-0.5 rounded font-mono text-xs mx-0.5 select-none";
+    node.textContent = token;
+    // Set contenteditable false on token to make it atomic
+    node.setAttribute("contenteditable", "false");
+
+    range.insertNode(node);
+    range.collapse(false);
+
     handleVisualChange();
   };
 
-  const insertTable = () => {
-    const tableHtml = `
-      <table class="w-full border-collapse border border-outline-variant my-md">
-        <thead>
-          <tr class="bg-surface-container">
-            <th class="border border-outline-variant p-2 text-left">Header 1</th>
-            <th class="border border-outline-variant p-2 text-left">Header 2</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="border border-outline-variant p-2">Data 1</td>
-            <td class="border border-outline-variant p-2">Data 2</td>
-          </tr>
-        </tbody>
-      </table>
-    `;
-    const sel = window.getSelection();
-    if (sel && sel.rangeCount > 0) {
-      const range = sel.getRangeAt(0);
-      range.deleteContents();
-      const el = document.createElement("div");
-      el.innerHTML = tableHtml;
-      const fragment = document.createDocumentFragment();
-      let node;
-      while ((node = el.firstChild)) {
-        fragment.appendChild(node);
-      }
-      range.insertNode(fragment);
-      handleVisualChange();
-    }
-  };
-
-  const handleSubmitForm = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmitForm = async (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     setSubmitError(null);
 
@@ -260,7 +241,6 @@ export default function HtmlTemplateCreatePage() {
       setSubmitError("Template name is required.");
       return;
     }
-
     if (!documentTypeId) {
       setSubmitError("Choose a document type.");
       return;
@@ -333,9 +313,6 @@ export default function HtmlTemplateCreatePage() {
 
   const renderTokenNode = (node: SchemaFieldTreeNode) => {
     const isLeaf = node.type === "leaf";
-    const isList = node.type === "list";
-    const isObject = node.type === "object";
-    const hasChildren = node.children && node.children.length > 0;
     const isCollapsed = collapsedTokens.has(node.id);
 
     return (
@@ -367,25 +344,14 @@ export default function HtmlTemplateCreatePage() {
             <div className="w-[18px]"></div>
           )}
 
-          <span className="material-symbols-outlined text-secondary text-[18px]">
-            {isList ? "list" : isObject ? (isCollapsed ? "folder" : "folder_open") : "code"}
+          <span className="material-symbols-outlined text-[18px] text-outline">
+            {isLeaf ? "code" : "folder"}
           </span>
-
-          <span className="font-mono text-xs">{node.name}</span>
-
-          {isLeaf && (
-            <span className="rounded bg-surface-container-high px-1.5 py-0.5 text-[9px] font-bold uppercase text-on-surface-variant font-mono">
-              {node.fieldType}
-            </span>
-          )}
-
-          <span className="material-symbols-outlined text-secondary text-[16px] opacity-0 group-hover:opacity-100 ml-auto transition-opacity">
-            drag_indicator
-          </span>
+          <span className="text-body-sm font-semibold">{node.name}</span>
         </div>
 
-        {!isLeaf && !isCollapsed && hasChildren && (
-          <div className="ml-md border-l border-outline-variant pl-xs space-y-xs">
+        {!isLeaf && !isCollapsed && node.children && (
+          <div className="pl-md border-l border-outline-variant ml-sm space-y-xs">
             {node.children.map(renderTokenNode)}
           </div>
         )}
@@ -393,27 +359,45 @@ export default function HtmlTemplateCreatePage() {
     );
   };
 
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <span className="material-symbols-outlined animate-spin text-secondary">progress_activity</span>
+      </div>
+    );
+  }
+
   return (
-    <section>
-      <PageHeader
-        breadcrumbs={[
-          { label: "Content Library" },
-          { label: "Templates", to: "/content/templates" },
-          { label: isEditMode ? "Edit HTML Template" : "New HTML Template" }
-        ]}
-        title={isEditMode ? "Edit HTML Template" : "Create HTML Template"}
-      />
-
-      {submitError ? (
-        <div className="mb-md rounded border border-error/30 bg-background p-sm text-sm text-error">
-          {submitError}
+    <div className="flex flex-col h-[calc(100vh-112px)] overflow-hidden -m-lg">
+      {/* Top action header bar */}
+      <div className="h-14 flex items-center px-lg bg-surface-container-lowest border-b border-outline-variant shrink-0 justify-between">
+        <div className="flex items-center gap-md">
+          <h1 className="font-headings text-[20px] font-bold tracking-tight text-on-surface">
+            {isEditMode ? "Edit HTML Template" : "New HTML Template"}
+          </h1>
         </div>
-      ) : null}
+        <div className="flex items-center gap-sm">
+          <Link
+            to="/content/templates"
+            className="rounded border border-outline-variant bg-surface-container px-md py-xs text-xs font-bold text-secondary hover:bg-surface-container-high transition-all"
+          >
+            Cancel
+          </Link>
+          <button
+            onClick={handleSubmitForm}
+            type="button"
+            className="rounded bg-primary px-md py-xs text-xs font-bold text-white hover:bg-primary/90 transition-all shadow-sm"
+          >
+            {isEditMode ? "Save Changes" : "Create Template"}
+          </button>
+        </div>
+      </div>
 
-      <div className="grid grid-cols-[1fr_320px] gap-lg items-start mt-lg">
-        {/* Main Workspace (Left) */}
-        <form onSubmit={handleSubmitForm} className="space-y-lg rounded-lg border border-outline-variant bg-surface-container-lowest p-md">
-          <div className="grid gap-md md:grid-cols-2">
+      {/* Main Workspace (3 Panels) */}
+      <div className="flex-1 grid grid-cols-12 overflow-hidden min-h-0 bg-surface-container-low">
+        {/* PANEL 1: Left Panel - Metadata & Tokens */}
+        <aside className="col-span-3 border-r border-outline-variant bg-surface flex flex-col overflow-hidden h-full">
+          <div className="p-md space-y-md border-b border-outline-variant shrink-0 bg-white">
             <label className="block text-[11px] font-bold uppercase tracking-[0.05em] text-secondary">
               Template Name
               <input
@@ -446,146 +430,146 @@ export default function HtmlTemplateCreatePage() {
             </label>
           </div>
 
-          {/* Editor Container */}
-          <div className="border border-outline-variant rounded-lg overflow-hidden flex flex-col bg-white">
-            {/* Editor Mode Header Toolbar */}
-            <div className="flex items-center justify-between bg-surface-container-low px-sm py-xs border-b border-outline-variant select-none">
-              <div className="flex gap-xs bg-surface-container rounded p-0.5 border border-outline-variant">
-                <button
-                  type="button"
-                  onClick={() => handleToggleMode("code")}
-                  className={`flex items-center gap-xs px-sm py-1 rounded text-xs font-bold transition-all ${
-                    editorMode === "code"
-                      ? "bg-white text-primary shadow-sm"
-                      : "text-secondary hover:text-on-surface"
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-sm">code</span>
-                  Escritura Directa
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleToggleMode("visual")}
-                  className={`flex items-center gap-xs px-sm py-1 rounded text-xs font-bold transition-all ${
-                    editorMode === "visual"
-                      ? "bg-white text-primary shadow-sm"
-                      : "text-secondary hover:text-on-surface"
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-sm">format_align_left</span>
-                  Editor Visual
-                </button>
+          {/* Token Explorer title */}
+          <div className="p-md bg-surface-container-low flex items-center justify-between shrink-0">
+            <h3 className="font-headings text-sm font-bold text-on-surface flex items-center gap-xs">
+              <span className="material-symbols-outlined text-primary text-[20px]">explore</span>
+              EXPLORADOR DE TOKENS
+            </h3>
+          </div>
+
+          {/* Token Explorer Tree (Scrollable) */}
+          <div className="flex-1 overflow-y-auto p-md">
+            {!selectedDocumentType?.fields?.length ? (
+              <div className="text-center py-lg border border-dashed border-outline-variant rounded bg-surface p-sm">
+                <p className="text-xs text-secondary">
+                  Select a document type above to explore available tokens.
+                </p>
               </div>
+            ) : (
+              <div className="space-y-xs pr-xs">
+                {tokenTree.map(renderTokenNode)}
+              </div>
+            )}
+          </div>
 
-              {/* Rich Text Toolbar Actions (Only in Visual Mode) */}
-              {editorMode === "visual" && (
-                <div className="flex items-center gap-xs border-l border-outline-variant/60 pl-sm ml-sm">
-                  <button
-                    type="button"
-                    onClick={() => execToolbarCommand("bold")}
-                    className="p-1 rounded hover:bg-surface-container text-secondary hover:text-on-surface text-sm font-bold material-symbols-outlined"
-                    title="Bold"
-                  >
-                    format_bold
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => execToolbarCommand("italic")}
-                    className="p-1 rounded hover:bg-surface-container text-secondary hover:text-on-surface text-sm font-bold material-symbols-outlined"
-                    title="Italic"
-                  >
-                    format_italic
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => execToolbarCommand("underline")}
-                    className="p-1 rounded hover:bg-surface-container text-secondary hover:text-on-surface text-sm font-bold material-symbols-outlined"
-                    title="Underline"
-                  >
-                    format_underlined
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => execToolbarCommand("formatBlock", "h2")}
-                    className="p-1 rounded hover:bg-surface-container text-secondary hover:text-on-surface text-xs font-bold"
-                    title="Heading"
-                  >
-                    H2
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => execToolbarCommand("formatBlock", "p")}
-                    className="p-1 rounded hover:bg-surface-container text-secondary hover:text-on-surface text-xs font-bold"
-                    title="Paragraph"
-                  >
-                    P
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => insertTable()}
-                    className="p-1 rounded hover:bg-surface-container text-secondary hover:text-on-surface text-sm font-bold material-symbols-outlined"
-                    title="Insert Table"
-                  >
-                    table_chart
-                  </button>
-                </div>
-              )}
+          <div className="p-md bg-primary-container/10 border-t border-outline-variant shrink-0">
+            <p className="text-[10px] leading-tight text-on-surface-variant italic">
+              Tip: Drag tokens directly into the editor to generate dynamic syntax automatically.
+            </p>
+          </div>
+        </aside>
+
+        {/* PANEL 2: Central Panel - Workspace (Canvas & Tabs) */}
+        <section className="col-span-6 flex flex-col bg-surface-container-low overflow-hidden h-full">
+          <div className="h-12 flex items-center px-md bg-white border-b border-outline-variant shadow-sm z-10 shrink-0">
+            <div className="flex bg-surface-container rounded p-[2px]">
+              <button
+                type="button"
+                className={`px-md py-1 font-bold text-xs rounded transition-all flex items-center gap-xs ${
+                  editorMode === "visual"
+                    ? "bg-white text-primary shadow-sm"
+                    : "text-secondary hover:text-primary"
+                }`}
+                onClick={() => handleSetEditorMode("visual")}
+              >
+                <span className="material-symbols-outlined text-[16px]">visibility</span>
+                Visual
+              </button>
+              <button
+                type="button"
+                className={`px-md py-1 font-bold text-xs rounded transition-all flex items-center gap-xs ${
+                  editorMode === "code"
+                    ? "bg-white text-primary shadow-sm"
+                    : "text-secondary hover:text-primary"
+                }`}
+                onClick={() => handleSetEditorMode("code")}
+              >
+                <span className="material-symbols-outlined text-[16px]">code</span>
+                Source
+              </button>
             </div>
+            {submitError && (
+              <span className="ml-md text-xs text-error font-medium truncate max-w-[250px]">
+                {submitError}
+              </span>
+            )}
+          </div>
 
-            {/* Workspace Areas */}
-            <div className="relative min-h-[400px]">
-              {/* Escritura Directa (Textarea / Code View) */}
-              {editorMode === "code" && (
-                <div className="w-full h-full flex">
-                  {/* Line numbers dummy sidebar */}
-                  <div className="w-12 bg-surface-container-low border-r border-outline-variant py-sm text-right pr-sm select-none font-mono text-[11px] text-outline text-height-relaxed">
-                    {Array.from({ length: Math.max(15, html.split("\n").length) }).map((_, i) => (
-                      <div key={i}>{i + 1}</div>
-                    ))}
-                  </div>
-                  <textarea
-                    value={html}
-                    onChange={(event) => {
-                      setHtml(event.target.value);
-                      setHtmlTouched(true);
-                    }}
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={handleTextareaDrop}
-                    rows={16}
-                    placeholder="<!-- Write your HTML template code directly here. Drag and drop tokens. -->"
-                    className="flex-1 w-full bg-slate-900 text-slate-100 p-sm font-mono text-sm leading-relaxed focus:outline-none resize-y min-h-[400px]"
-                  />
+          {/* Canvas Container (Scrollable) */}
+          <div className="flex-1 p-md overflow-y-auto flex flex-col items-center">
+            {editorMode === "code" ? (
+              <div className="w-full max-w-[800px] border border-outline-variant rounded-lg overflow-hidden flex bg-white shadow-md">
+                {/* Line numbers dummy sidebar */}
+                <div className="w-12 bg-surface-container-low border-r border-outline-variant py-sm text-right pr-sm select-none font-mono text-[11px] text-outline text-height-relaxed">
+                  {Array.from({ length: Math.max(25, html.split("\n").length) }).map((_, i) => (
+                    <div key={i}>{i + 1}</div>
+                  ))}
                 </div>
-              )}
+                <textarea
+                  value={html}
+                  onChange={(event) => {
+                    setHtml(event.target.value);
+                    setHtmlTouched(true);
+                  }}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={handleTextareaDrop}
+                  rows={28}
+                  placeholder="<!-- Write your HTML template code directly here. Drag and drop tokens. -->"
+                  className="flex-1 w-full bg-slate-900 text-slate-100 p-sm font-mono text-sm leading-relaxed focus:outline-none resize-none min-h-[600px]"
+                />
+              </div>
+            ) : (
+              <div className="w-full max-w-[800px] bg-white min-h-[1056px] shadow-lg rounded p-xl border border-outline-variant flex flex-col relative">
+                <style dangerouslySetInnerHTML={{ __html: scopedCss }} />
+                <div
+                  id="visual-canvas-root"
+                  ref={visualRef}
+                  contentEditable
+                  onInput={handleVisualChange}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={handleVisualDrop}
+                  className="w-full flex-1 min-h-[600px] focus:outline-none prose max-w-none"
+                />
+              </div>
+            )}
+          </div>
+        </section>
 
-              {/* Editor Visual (contentEditable canvas) */}
-              {editorMode === "visual" && (
-                <div className="p-lg bg-surface-container-lowest min-h-[400px] overflow-y-auto">
-                  <style dangerouslySetInnerHTML={{ __html: scopedCss }} />
-                  <div
-                    id="visual-canvas-root"
-                    ref={visualRef}
-                    contentEditable
-                    onInput={handleVisualChange}
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={handleVisualDrop}
-                    className="w-full min-h-[350px] border border-dashed border-outline rounded-lg bg-white p-lg focus:outline-none prose max-w-none shadow-sm"
-                  />
-                </div>
-              )}
+        {/* PANEL 3: Right Panel - Styles & Preview Data */}
+        <section className="col-span-3 border-l border-outline-variant flex flex-col bg-surface overflow-hidden h-full">
+          {/* CSS Styles Section (50% height) */}
+          <div className="h-1/2 flex flex-col border-b border-outline-variant overflow-hidden">
+            <div className="p-md bg-surface-container-low flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-xs">
+                <span className="material-symbols-outlined text-primary text-[20px]">css</span>
+                <h3 className="font-headings text-sm font-bold text-on-surface">CSS Styles</h3>
+              </div>
+            </div>
+            <div className="flex-1 p-sm bg-white overflow-hidden flex flex-col">
+              <textarea
+                value={css}
+                onChange={(e) => setCss(e.target.value)}
+                placeholder={`/* Write custom CSS rules here */\n.title {\n  color: #1a73e8;\n  font-size: 24px;\n}`}
+                className="flex-1 w-full rounded border border-outline-variant p-sm font-mono text-xs text-on-surface focus:border-primary focus:outline-none bg-slate-900 text-slate-100 resize-none"
+              />
             </div>
           </div>
 
-          {/* Mock Data Section */}
-          <div className="rounded-lg border border-outline-variant bg-surface-container-low p-md">
-            <h3 className="text-sm font-bold text-on-surface flex items-center gap-xs">
-              <span className="material-symbols-outlined text-[18px] text-primary">data_object</span>
-              Mock Data for Preview
-            </h3>
-            <p className="text-xs text-secondary mt-xs">
-              Configure sample values matching your Document Type fields.
-            </p>
-            <label className="block mt-sm">
+          {/* Mock Data Section (50% height) */}
+          <div className="h-1/2 flex flex-col overflow-hidden">
+            <div className="p-md bg-surface-container-low flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-xs">
+                <span className="material-symbols-outlined text-primary text-[20px]">data_object</span>
+                <h3 className="font-headings text-sm font-bold text-on-surface">Mock Preview Data</h3>
+              </div>
+              {mockDataError && (
+                <span className="text-[10px] text-error font-mono truncate max-w-[120px]" title={mockDataError}>
+                  Error
+                </span>
+              )}
+            </div>
+            <div className="flex-1 p-sm bg-white overflow-hidden flex flex-col">
               <textarea
                 value={mockDataJson}
                 onChange={(e) => {
@@ -601,88 +585,15 @@ export default function HtmlTemplateCreatePage() {
                     setMockDataError(err instanceof Error ? err.message : "Invalid JSON syntax");
                   }
                 }}
-                rows={6}
-                placeholder={`{\n  "cliente": {\n    "nombre": "Juan Pérez",\n    "edad": 30\n  }\n}`}
-                className={`mt-xs w-full rounded border font-mono text-xs p-sm bg-white focus:outline-none ${
+                placeholder={`{\n  "cliente": {\n    "nombre": "Juan Pérez"\n  }\n}`}
+                className={`flex-1 w-full rounded border font-mono text-xs p-sm bg-slate-900 text-slate-100 focus:outline-none resize-none ${
                   mockDataError ? "border-error focus:border-error" : "border-outline-variant focus:border-primary"
                 }`}
               />
-            </label>
-            {mockDataError && (
-              <p className="text-xs text-error mt-xs font-mono">{mockDataError}</p>
-            )}
-          </div>
-
-          <div className="flex justify-end gap-sm mt-md">
-            <Link
-              to="/content/templates"
-              className="rounded border border-outline-variant bg-surface-container px-lg py-sm text-sm font-bold text-secondary hover:bg-surface-container-high active:scale-95 transition-all"
-            >
-              Cancel
-            </Link>
-            <button
-              type="submit"
-              className="rounded bg-primary px-lg py-sm text-sm font-bold text-white hover:bg-primary/90 active:scale-95 transition-all"
-            >
-              {isEditMode ? "Save Changes" : "Create Template"}
-            </button>
-          </div>
-        </form>
-
-        {/* Sidebar Panel: Token Explorer (Right) */}
-        <aside className="rounded-lg border border-outline-variant bg-surface-container-lowest p-md flex flex-col max-h-[620px] overflow-y-auto sticky top-4">
-          <div className="border-b border-outline-variant pb-sm mb-sm">
-            <h3 className="font-headings text-[14px] font-bold text-on-surface flex items-center gap-xs">
-              <span className="material-symbols-outlined text-primary text-[20px]">explore</span>
-              EXPLORADOR DE TOKENS
-            </h3>
-            <p className="text-[11px] text-secondary mt-xs">
-              Drag tokens directly into the HTML code or visual canvas.
-            </p>
-          </div>
-
-          <div className="space-y-sm flex-1">
-            {!selectedDocumentType?.fields?.length ? (
-              <div className="text-center py-lg border border-dashed border-outline-variant rounded bg-surface p-sm">
-                <p className="text-xs text-secondary">
-                  Select a document type on the left to explore available tokens.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-xs pr-xs">
-                {tokenTree.map(renderTokenNode)}
-              </div>
-            )}
-          </div>
-
-          {/* Help box */}
-          <div className="mt-md rounded bg-surface-container p-sm border border-outline-variant text-[11px] leading-relaxed text-secondary select-none">
-            <div className="font-bold flex items-center gap-1 text-on-surface mb-1">
-              <span className="material-symbols-outlined text-[14px] text-primary">info</span>
-              Repetitive Lists Support
             </div>
-            If you drag a property from a list, it will generate a Jinja loop <code className="bg-white px-1 border border-outline rounded font-mono">{"{% for %}"}</code> automatically. If you drag the list node itself (e.g. <code className="bg-white px-1 border border-outline rounded font-mono">{"cita.equipos[]"}</code>), it will generate a fully loopable HTML table!
           </div>
-
-          {/* CSS Style Panel */}
-          <div className="mt-lg border-t border-outline-variant pt-md">
-            <h3 className="font-headings text-[14px] font-bold text-on-surface flex items-center gap-xs">
-              <span className="material-symbols-outlined text-primary text-[20px]">css</span>
-              CSS STYLES
-            </h3>
-            <p className="text-[11px] text-secondary mt-xs mb-sm">
-              Define custom stylesheets to style the HTML template layout.
-            </p>
-            <textarea
-              value={css}
-              onChange={(e) => setCss(e.target.value)}
-              rows={10}
-              placeholder={`/* e.g. */\n.styled-title {\n  color: #1a73e8;\n  font-size: 24px;\n}`}
-              className="w-full rounded border border-outline-variant p-sm font-mono text-xs text-on-surface focus:border-primary focus:outline-none bg-white resize-y"
-            />
-          </div>
-        </aside>
+        </section>
       </div>
-    </section>
+    </div>
   );
 }
