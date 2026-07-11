@@ -153,7 +153,21 @@ export default function DocumentDesignDetailPage() {
         if (cancelled) return;
         if (data) {
           setDocTypeFields(data.fields);
-          const initialMock = generateMockDataFromFields(data.fields);
+          let loadedMock: Record<string, unknown> | null = null;
+          if (design?.id) {
+            try {
+              const saved = localStorage.getItem(`mock_payload_${design.id}`);
+              if (saved) {
+                const parsed = JSON.parse(saved);
+                if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
+                  loadedMock = parsed as Record<string, unknown>;
+                }
+              }
+            } catch (err) {
+              console.error("Failed to parse saved mock payload", err);
+            }
+          }
+          const initialMock = loadedMock || generateMockDataFromFields(data.fields);
           const text = JSON.stringify(initialMock, null, 2);
           setMockJsonText(text);
           setParsedPayload(initialMock);
@@ -167,7 +181,7 @@ export default function DocumentDesignDetailPage() {
     return () => {
       cancelled = true;
     };
-  }, [design?.document_type_id]);
+  }, [design?.document_type_id, design?.id]);
 
   const handleResetMockData = () => {
     const initialMock = generateMockDataFromFields(docTypeFields);
@@ -175,6 +189,9 @@ export default function DocumentDesignDetailPage() {
     setMockJsonText(text);
     setParsedPayload(initialMock);
     setJsonError(null);
+    if (design?.id) {
+      localStorage.removeItem(`mock_payload_${design.id}`);
+    }
   };
 
   const handleMockJsonChange = (text: string) => {
@@ -190,6 +207,9 @@ export default function DocumentDesignDetailPage() {
       } else {
         setParsedPayload(parsed);
         setJsonError(null);
+        if (design?.id) {
+          localStorage.setItem(`mock_payload_${design.id}`, JSON.stringify(parsed));
+        }
       }
     } catch (err) {
       setJsonError(err instanceof Error ? err.message : "Invalid JSON syntax");
