@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, useRef } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
-import { createHtmlTemplate, getHtmlTemplate, updateHtmlTemplate } from "../../lib/content";
+import { createHtmlTemplate, getHtmlTemplate, updateHtmlTemplate, previewHtmlTemplate } from "../../lib/content";
 import { getDocumentType, listDocumentTypes, type DocumentTypeDetail, type DocumentTypeListItem } from "../../lib/documentTypes";
 import { buildSchemaFieldTree, type SchemaFieldTreeNode } from "../../lib/schemaFields";
 
@@ -76,8 +76,11 @@ export default function HtmlTemplateCreatePage() {
   const [mockDataError, setMockDataError] = useState<string | null>(null);
 
   // Layout & Editing Modes
-  const [editorMode, setEditorMode] = useState<"visual" | "code">("code");
+  const [editorMode, setEditorMode] = useState<"visual" | "code" | "preview">("code");
   const [collapsedTokens, setCollapsedTokens] = useState<Set<string>>(new Set());
+  const [previewHtml, setPreviewHtml] = useState<string>("");
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -176,7 +179,7 @@ export default function HtmlTemplateCreatePage() {
     }
   };
 
-  const handleSetEditorMode = (mode: "visual" | "code") => {
+  const handleSetEditorMode = (mode: "visual" | "code" | "preview") => {
     setEditorMode(mode);
     if (mode === "visual") {
       setTimeout(() => {
@@ -186,6 +189,70 @@ export default function HtmlTemplateCreatePage() {
       }, 0);
     }
   };
+
+  useEffect(() => {
+    if (editorMode !== "preview") return;
+
+    let cancelled = false;
+    const fetchPreview = async () => {
+      setPreviewLoading(true);
+      setPreviewError(null);
+      try {
+        let parsedMock: Record<string, unknown> | null = null;
+        if (mockDataJson.trim()) {
+          try {
+            parsedMock = JSON.parse(mockDataJson);
+          } catch {
+            throw new Error("Invalid Mock Data JSON structure.");
+          }
+        }
+        const resp = await previewHtmlTemplate({
+          html,
+          css,
+          mock_data: parsedMock,
+        });
+        if (cancelled) return;
+        setPreviewHtml(resp.rendered_html);
+      } catch (err) {
+        if (cancelled) return;
+        setPreviewError(err instanceof Error ? err.message : "Failed to load preview.");
+      } finally {
+        if (!cancelled) setPreviewLoading(false);
+      }
+    };
+
+    const delayDebounceFn = setTimeout(() => {
+      fetchPreview();
+    }, 400);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(delayDebounceFn);
+    };
+  }, [editorMode, html, css, mockDataJson]);
+
+  const srcDocContent = useMemo(() => {
+    const cleanHtml = previewHtml || "";
+    const styleTag = `<style>${css || ""}</style>`;
+    if (cleanHtml.includes("<head>")) {
+      return cleanHtml.replace("<head>", `<head>${styleTag}`);
+    } else if (cleanHtml.includes("<HEAD>")) {
+      return cleanHtml.replace("<HEAD>", `<HEAD>${styleTag}`);
+    } else {
+      return `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            ${styleTag}
+          </head>
+          <body>
+            ${cleanHtml}
+          </body>
+        </html>
+      `;
+    }
+  }, [previewHtml, css]);
 
   const handleTextareaDrop = (e: React.DragEvent<HTMLTextAreaElement>) => {
     e.preventDefault();
@@ -488,6 +555,18 @@ export default function HtmlTemplateCreatePage() {
                 <span className="material-symbols-outlined text-[16px]">code</span>
                 Source
               </button>
+              <button
+                type="button"
+                className={`px-md py-1 font-bold text-xs rounded transition-all flex items-center gap-xs ${
+                  editorMode === "preview"
+                    ? "bg-white text-primary shadow-sm"
+                    : "text-secondary hover:text-primary"
+                }`}
+                onClick={() => handleSetEditorMode("preview")}
+              >
+                <span className="material-symbols-outlined text-[16px]">pageview</span>
+                Preview
+              </button>
             </div>
             {submitError && (
               <span className="ml-md text-xs text-error font-medium truncate max-w-[250px]">
@@ -498,7 +577,7 @@ export default function HtmlTemplateCreatePage() {
 
           {/* Canvas Container (Scrollable) */}
           <div className="flex-1 p-md overflow-y-auto flex flex-col items-center">
-            {editorMode === "code" ? (
+            {editorMode === "code" && (
               <div className="w-full max-w-[800px] border border-outline-variant rounded-lg overflow-hidden flex bg-white shadow-md">
                 {/* Line numbers dummy sidebar */}
                 <div className="w-12 bg-surface-container-low border-r border-outline-variant py-sm text-right pr-sm select-none font-mono text-[11px] text-outline text-height-relaxed">
@@ -519,7 +598,9 @@ export default function HtmlTemplateCreatePage() {
                   className="flex-1 w-full bg-slate-900 text-slate-100 p-sm font-mono text-sm leading-relaxed focus:outline-none resize-none min-h-[600px]"
                 />
               </div>
-            ) : (
+            )}
+
+            {editorMode === "visual" && (
               <div className="w-full max-w-[800px] bg-white min-h-[1056px] shadow-lg rounded p-xl border border-outline-variant flex flex-col relative">
                 <style dangerouslySetInnerHTML={{ __html: scopedCss }} />
                 <div
@@ -531,6 +612,31 @@ export default function HtmlTemplateCreatePage() {
                   onDrop={handleVisualDrop}
                   className="w-full flex-1 min-h-[600px] focus:outline-none prose max-w-none"
                 />
+              </div>
+            )}
+
+            {editorMode === "preview" && (
+              <div className="w-full max-w-[800px] bg-white min-h-[1056px] shadow-lg rounded border border-outline-variant flex flex-col relative overflow-hidden">
+                {previewLoading && (
+                  <div className="absolute inset-0 bg-white/75 flex items-center justify-center z-25">
+                    <span className="material-symbols-outlined animate-spin text-primary text-[32px]">progress_activity</span>
+                  </div>
+                )}
+                {previewError ? (
+                  <div className="p-xl flex-1 flex flex-col items-center justify-center text-center gap-md text-error bg-error-container/10">
+                    <span className="material-symbols-outlined text-[48px]">error_outline</span>
+                    <div>
+                      <h3 className="font-bold text-on-surface">Preview Rendering Failed</h3>
+                      <p className="text-xs text-secondary mt-xs max-w-md font-mono">{previewError}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <iframe
+                    title="Jinja Template Preview"
+                    className="w-full flex-1 min-h-[600px] border-0"
+                    srcDoc={srcDocContent}
+                  />
+                )}
               </div>
             )}
           </div>

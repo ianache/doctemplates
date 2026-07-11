@@ -93,6 +93,28 @@ export async function updateHtmlTemplate(
   );
 }
 
+export interface HtmlTemplatePreviewPayload {
+  html: string;
+  css?: string | null;
+  mock_data?: Record<string, unknown> | null;
+}
+
+export interface HtmlTemplatePreviewResponse {
+  rendered_html: string;
+}
+
+export async function previewHtmlTemplate(
+  payload: HtmlTemplatePreviewPayload,
+): Promise<HtmlTemplatePreviewResponse> {
+  return jsonOrError(
+    await apiFetch("/api/content/templates/preview", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }),
+  );
+}
+
 export async function listStaticPdfAssets(documentTypeId?: string): Promise<StaticPdfAssetListItem[]> {
   const query = documentTypeId ? `?document_type_id=${encodeURIComponent(documentTypeId)}` : "";
   return jsonOrError(await apiFetch(`/api/content/static-pdfs${query}`));

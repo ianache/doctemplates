@@ -37,3 +37,13 @@ class HtmlTemplateDetail(BaseModel):
     mock_data: dict | None = None
     created_by_email: str
     created_at: datetime
+
+
+class HtmlTemplatePreviewRequest(BaseModel):
+    html: str
+    css: str | None = ""
+    mock_data: dict | None = None
+
+
+class HtmlTemplatePreviewResponse(BaseModel):
+    rendered_html: str

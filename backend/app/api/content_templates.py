@@ -12,6 +12,8 @@ from app.schemas.content_template import (
     HtmlTemplateCreate,
     HtmlTemplateDetail,
     HtmlTemplateListItem,
+    HtmlTemplatePreviewRequest,
+    HtmlTemplatePreviewResponse,
 )
 from app.services.content_validation import validate_template_tokens
 
@@ -151,3 +153,27 @@ def update_html_template(
     db.refresh(document_type)
     db.refresh(user)
     return _detail(template)
+
+
+@router.post("/preview", response_model=HtmlTemplatePreviewResponse)
+def preview_template(
+    payload: HtmlTemplatePreviewRequest,
+    user: User = Depends(get_current_user),
+) -> HtmlTemplatePreviewResponse:
+    from app.services.pdf_generator import CaseInsensitiveSandboxedEnvironment, RecursiveCaseInsensitiveDict, date_format_filter
+
+    env = CaseInsensitiveSandboxedEnvironment(autoescape=True)
+    env.filters["date_format"] = date_format_filter
+
+    try:
+        template = env.from_string(payload.html)
+        context = payload.mock_data or {}
+        wrapped_context = RecursiveCaseInsensitiveDict(context)
+        rendered_html = template.render(wrapped_context)
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Template rendering failed: {str(e)}"
+        )
+
+    return HtmlTemplatePreviewResponse(rendered_html=rendered_html)

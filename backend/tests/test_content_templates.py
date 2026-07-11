@@ -269,3 +269,30 @@ def test_update_template_not_found(client: TestClient, db_session: SQLAlchemySes
     )
     assert update_response.status_code == 404
 
+
+def test_preview_template_success(client: TestClient, db_session: SQLAlchemySession) -> None:
+    _auth_client(client, db_session)
+    response = client.post(
+        "/api/content/templates/preview",
+        json={
+            "html": "<p>Hello, {{ cliente.nombre }}!</p>",
+            "css": ".para { color: red; }",
+            "mock_data": {"cliente": {"nombre": "Maria"}}
+        }
+    )
+    assert response.status_code == 200
+    assert response.json()["rendered_html"] == "<p>Hello, Maria!</p>"
+
+
+def test_preview_template_invalid_jinja(client: TestClient, db_session: SQLAlchemySession) -> None:
+    _auth_client(client, db_session)
+    response = client.post(
+        "/api/content/templates/preview",
+        json={
+            "html": "<p>Hello, {% if cliente.nombre %}</p>",  # Missing endif
+            "mock_data": {"cliente": {"nombre": "Maria"}}
+        }
+    )
+    assert response.status_code == 400
+    assert "Template rendering failed" in response.json()["detail"]
+

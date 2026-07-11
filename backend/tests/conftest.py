@@ -21,6 +21,7 @@ from sqlalchemy.orm import sessionmaker
 from app.config import settings
 from app.db import Base, get_db
 from app.main import app
+import app.models as _unused_models
 
 
 @pytest.fixture(scope="session")

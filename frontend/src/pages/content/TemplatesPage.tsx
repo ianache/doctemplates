@@ -151,7 +151,7 @@ export default function TemplatesPage() {
       className: "text-right",
       render: (item) => (
         <Link
-          to={`/content/templates/${item.id}`}
+          to={`/content/templates/${item.id}/edit`}
           className="inline-flex p-1 text-primary hover:bg-surface-container-high rounded"
           title="Open details"
           onClick={(e) => e.stopPropagation()}
@@ -352,7 +352,7 @@ export default function TemplatesPage() {
 
             <div className="mt-auto">
               <Link
-                to={`/content/templates/${selectedTemplate.id}`}
+                to={`/content/templates/${selectedTemplate.id}/edit`}
                 className="w-full text-center block bg-primary text-white font-label-caps text-label-caps py-sm hover:bg-primary-container hover:text-on-primary-container transition-all rounded shadow-sm"
               >
                 OPEN DETAILS
