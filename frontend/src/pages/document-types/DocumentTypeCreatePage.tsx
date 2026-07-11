@@ -3,6 +3,8 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 
 import { createDocumentType, type FieldType } from "../../lib/documentTypes";
+import { SchemaFieldEditor } from "./components/SchemaFieldEditor";
+import { validateSchemaFields, normalizeSchemaFields } from "../../lib/schemaFields";
 
 type FieldRow = {
   name: string;
@@ -16,11 +18,10 @@ type FormValues = {
   fields: FieldRow[];
 };
 
-const FIELD_TYPES: FieldType[] = ["string", "number", "date", "boolean"];
-
 export default function DocumentTypeCreatePage() {
   const navigate = useNavigate();
   const [submitError, setSubmitError] = useState<string | null>(null);
+  
   const {
     register,
     control,
@@ -30,32 +31,38 @@ export default function DocumentTypeCreatePage() {
     defaultValues: {
       name: "",
       description: "",
-      fields: [{ name: "", type: "string", description: "" }],
+      fields: [{ name: "new_field", type: "string", description: "" }],
     },
   });
-  const { fields, append, remove } = useFieldArray({ control, name: "fields" });
+
+  const { fields, append, remove, update } = useFieldArray({ control, name: "fields" });
 
   const onSubmit = handleSubmit(async (values) => {
     setSubmitError(null);
-    const names = values.fields.map((field) => field.name);
-    if (new Set(names).size !== names.length) {
-      setSubmitError("Field names must be unique within a document type.");
+
+    // 1. Client-side validation for complex path constraints and structural conflicts
+    const validationError = validateSchemaFields(values.fields);
+    if (validationError) {
+      setSubmitError(validationError);
       return;
     }
+
+    // 2. Client-side normalization (trim names/descriptions)
+    const normalizedFields = normalizeSchemaFields(values.fields);
 
     try {
       const created = await createDocumentType({
         name: values.name,
         description: values.description || null,
-        fields: values.fields.map((field) => ({
-          name: field.name,
-          type: field.type,
-          description: field.description || null,
-        })),
+        fields: normalizedFields,
       });
       navigate(`/document-types/${created.id}`);
-    } catch {
-      setSubmitError("We couldn't save this document type. Check the fields below and try again.");
+    } catch (err) {
+      setSubmitError(
+        err instanceof Error
+          ? err.message
+          : "We couldn't save this document type. Check the fields below and try again."
+      );
     }
   });
 
@@ -70,17 +77,18 @@ export default function DocumentTypeCreatePage() {
         className="mt-xl rounded-lg border border-outline-variant bg-surface-container-lowest p-lg"
       >
         {submitError ? (
-          <p className="mb-md rounded border border-error/30 bg-background p-sm text-sm text-error">
+          <div className="mb-md rounded border border-error/30 bg-background p-sm text-sm text-error">
             {submitError}
-          </p>
+          </div>
         ) : null}
 
-        <div className="space-y-md">
+        <div className="space-y-md mb-lg">
           <label className="block text-[11px] font-bold uppercase leading-[16px] tracking-[0.05em] text-secondary">
             Name
             <input
               {...register("name", { required: "Name is required." })}
               className="mt-xs w-full rounded border border-outline px-sm py-xs text-sm text-on-surface focus:border-primary focus:outline-none"
+              placeholder="e.g. Invoice, Contract"
             />
           </label>
           {errors.name ? <p className="text-sm text-error">{errors.name.message}</p> : null}
@@ -91,69 +99,21 @@ export default function DocumentTypeCreatePage() {
               {...register("description")}
               rows={3}
               className="mt-xs w-full rounded border border-outline px-sm py-xs text-sm text-on-surface focus:border-primary focus:outline-none"
+              placeholder="Describe the purpose of this document type..."
             />
           </label>
         </div>
 
-        <div className="mt-lg space-y-sm">
-          {fields.map((field, index) => (
-            <div key={field.id} className="flex items-end gap-sm border-t border-outline-variant pt-sm">
-              <label className="flex-1 text-[11px] font-bold uppercase leading-[16px] tracking-[0.05em] text-secondary">
-                Name
-                <input
-                  {...register(`fields.${index}.name`, { required: "Name is required." })}
-                  className="mt-xs w-full rounded border border-outline px-sm py-xs font-mono text-sm text-on-surface focus:border-primary focus:outline-none"
-                />
-                {errors.fields?.[index]?.name ? (
-                  <p className="mt-xs text-sm text-error">{errors.fields[index]?.name?.message}</p>
-                ) : null}
-              </label>
-
-              <label className="text-[11px] font-bold uppercase leading-[16px] tracking-[0.05em] text-secondary">
-                Type
-                <select
-                  {...register(`fields.${index}.type`, {
-                    required: "Choose a field type.",
-                  })}
-                  className="mt-xs rounded border border-outline px-sm py-xs text-sm text-on-surface focus:border-primary focus:outline-none"
-                >
-                  {FIELD_TYPES.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
-                    </option>
-                  ))}
-                </select>
-                {errors.fields?.[index]?.type ? (
-                  <p className="mt-xs text-sm text-error">{errors.fields[index]?.type?.message}</p>
-                ) : null}
-              </label>
-
-              <label className="flex-1 text-[11px] font-bold uppercase leading-[16px] tracking-[0.05em] text-secondary">
-                Description
-                <input
-                  {...register(`fields.${index}.description`)}
-                  className="mt-xs w-full rounded border border-outline px-sm py-xs text-sm text-on-surface focus:border-primary focus:outline-none"
-                />
-              </label>
-
-              <button
-                type="button"
-                onClick={() => remove(index)}
-                className="rounded border border-outline-variant px-sm py-xs text-sm font-bold text-on-surface hover:border-outline"
-              >
-                Remove
-              </button>
-            </div>
-          ))}
+        {/* Visual Schema Tree Builder */}
+        <div className="mt-lg">
+          <SchemaFieldEditor
+            register={register}
+            control={control}
+            append={append}
+            remove={remove}
+            update={update}
+          />
         </div>
-
-        <button
-          type="button"
-          onClick={() => append({ name: "", type: "string", description: "" })}
-          className="mt-md rounded border border-primary px-md py-xs text-sm font-bold text-primary hover:bg-primary/10"
-        >
-          Add field
-        </button>
 
         <div className="mt-lg flex justify-end">
           <button
