@@ -240,7 +240,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 10-03-PLAN.md - Frontend: designer integration for editable nested mock data and generated PDF preview
+- [x] 10-03-PLAN.md - Frontend: designer integration for editable nested mock data and generated PDF preview
 
 **Wave 4** *(blocked on Wave 3 completion)*
 

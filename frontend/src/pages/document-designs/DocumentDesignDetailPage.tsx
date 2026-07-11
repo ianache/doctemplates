@@ -27,13 +27,18 @@ import {
   listDocumentDesignVersions,
   reorderDesignPages,
   updateDesignPage,
+  previewDocumentDesign,
   type DocumentDesignDetail,
   type DocumentDesignListItem,
   type DocumentDesignPage,
 } from "../../lib/documentDesigns";
+import { getDocumentType, type DocumentTypeField } from "../../lib/documentTypes";
+import { generateMockDataFromFields } from "../../lib/schemaFields";
 import AddContentModal from "./components/AddContentModal";
 import DesignPageCard from "./components/DesignPageCard";
 import DesignPageInspector from "./components/DesignPageInspector";
+import { MockDataPanel } from "./components/MockDataPanel";
+import { PreviewFrame } from "./components/PreviewFrame";
 
 function sortPages(pages: DocumentDesignPage[]) {
   return [...pages].sort((a, b) => a.position - b.position);
@@ -80,6 +85,26 @@ export default function DocumentDesignDetailPage() {
   const [showDiscardModal, setShowDiscardModal] = useState(false);
   const [discarding, setDiscarding] = useState(false);
 
+  const [docTypeFields, setDocTypeFields] = useState<DocumentTypeField[]>([]);
+  const [mockJsonText, setMockJsonText] = useState<string>("{}");
+  const [parsedPayload, setParsedPayload] = useState<Record<string, unknown>>({});
+  const [jsonError, setJsonError] = useState<string | null>(null);
+  const [previewLoading, setPreviewLoading] = useState<boolean>(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const [previewBlob, setPreviewBlob] = useState<Blob | null>(null);
+  const [previewMode, setPreviewMode] = useState<"fragment" | "pdf">("fragment");
+  const [activeRightTab, setActiveRightTab] = useState<"inspector" | "mockData">("inspector");
+
+  const handleSetPreviewMode = (mode: "fragment" | "pdf") => {
+    setPreviewMode(mode);
+    setActiveRightTab(mode === "pdf" ? "mockData" : "inspector");
+  };
+
+  const handleSetActiveRightTab = (tab: "inspector" | "mockData") => {
+    setActiveRightTab(tab);
+    setPreviewMode(tab === "mockData" ? "pdf" : "fragment");
+  };
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -119,6 +144,71 @@ export default function DocumentDesignDetailPage() {
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
+
+  useEffect(() => {
+    if (!design?.document_type_id) return;
+    let cancelled = false;
+    getDocumentType(design.document_type_id)
+      .then((data) => {
+        if (cancelled) return;
+        if (data) {
+          setDocTypeFields(data.fields);
+          const initialMock = generateMockDataFromFields(data.fields);
+          const text = JSON.stringify(initialMock, null, 2);
+          setMockJsonText(text);
+          setParsedPayload(initialMock);
+          setJsonError(null);
+        }
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setPreviewError("Could not load schema fields for preview setup.");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [design?.document_type_id]);
+
+  const handleResetMockData = () => {
+    const initialMock = generateMockDataFromFields(docTypeFields);
+    const text = JSON.stringify(initialMock, null, 2);
+    setMockJsonText(text);
+    setParsedPayload(initialMock);
+    setJsonError(null);
+  };
+
+  const handleMockJsonChange = (text: string) => {
+    setMockJsonText(text);
+    try {
+      if (!text.trim()) {
+        setJsonError("JSON payload cannot be empty");
+        return;
+      }
+      const parsed = JSON.parse(text);
+      if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+        setJsonError("JSON root must be an object");
+      } else {
+        setParsedPayload(parsed);
+        setJsonError(null);
+      }
+    } catch (err) {
+      setJsonError(err instanceof Error ? err.message : "Invalid JSON syntax");
+    }
+  };
+
+  const handleTriggerPdfPreview = async () => {
+    if (!design) return;
+    setPreviewLoading(true);
+    setPreviewError(null);
+    try {
+      const blob = await previewDocumentDesign(design.id, parsedPayload);
+      setPreviewBlob(blob);
+    } catch (err) {
+      setPreviewError(err instanceof Error ? err.message : "Failed to generate PDF preview.");
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
 
   const pages = useMemo(() => sortPages(design?.pages ?? []), [design?.pages]);
   const selectedPage = pages.find((page) => page.id === selectedPageId) ?? null;
@@ -458,57 +548,143 @@ export default function DocumentDesignDetailPage() {
         <div className="flex items-center justify-between gap-md border-b border-outline-variant bg-surface px-lg py-md">
           <div className="min-w-0">
             <p className="font-label-caps text-on-surface-variant">
-              {selectedPage ? `Page ${selectedPage.position + 1}` : "Preview"}
+              {previewMode === "pdf"
+                ? "Generated PDF"
+                : selectedPage
+                ? `Page ${selectedPage.position + 1}`
+                : "Preview"}
             </p>
-            <h2 className="truncate font-headings text-headline-md text-on-surface">{pageLabel(selectedPage)}</h2>
+            <h2 className="truncate font-headings text-headline-md text-on-surface">
+              {previewMode === "pdf" ? "Document Previsualization" : pageLabel(selectedPage)}
+            </h2>
           </div>
-          <span className="rounded border border-outline-variant bg-surface-container-low px-sm py-xs text-label-caps text-on-surface-variant">
-            {pageMetadata(selectedPage)}
-          </span>
+          <div className="flex items-center gap-md">
+            <div className="flex border border-outline-variant rounded bg-surface-container-low p-[2px]">
+              <button
+                type="button"
+                className={`rounded px-sm py-xs text-xs font-bold ${
+                  previewMode === "fragment"
+                    ? "bg-surface text-primary shadow-sm"
+                    : "text-on-surface-variant hover:text-on-surface"
+                }`}
+                onClick={() => handleSetPreviewMode("fragment")}
+              >
+                Fragment Preview
+              </button>
+              <button
+                type="button"
+                className={`rounded px-sm py-xs text-xs font-bold ${
+                  previewMode === "pdf"
+                    ? "bg-surface text-primary shadow-sm"
+                    : "text-on-surface-variant hover:text-on-surface"
+                }`}
+                onClick={() => handleSetPreviewMode("pdf")}
+              >
+                PDF Preview
+              </button>
+            </div>
+            {previewMode === "fragment" && (
+              <span className="rounded border border-outline-variant bg-surface-container-low px-sm py-xs text-label-caps text-on-surface-variant">
+                {pageMetadata(selectedPage)}
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="page-canvas-bg flex min-h-0 flex-1 items-start justify-center overflow-auto p-xl">
-          <div className="flex min-h-[760px] w-full max-w-[595px] flex-col border border-outline-variant bg-white p-xl shadow-lg">
-            {selectedPage ? (
-              selectedPage.block_type === "html_template" && typeof selectedPage.snapshot.html === "string" ? (
-                <iframe
-                  title={`Preview ${pageLabel(selectedPage)}`}
-                  className="h-full min-h-[680px] w-full flex-1 border-0 bg-white"
-                  srcDoc={String(selectedPage.snapshot.html)}
-                />
+          {previewMode === "pdf" ? (
+            <div className="w-full max-w-[800px] bg-surface-container-lowest p-md border border-outline-variant rounded-lg shadow-lg">
+              <PreviewFrame blob={previewBlob} loading={previewLoading} error={previewError} />
+            </div>
+          ) : (
+            <div className="flex min-h-[760px] w-full max-w-[595px] flex-col border border-outline-variant bg-white p-xl shadow-lg">
+              {selectedPage ? (
+                selectedPage.block_type === "html_template" && typeof selectedPage.snapshot.html === "string" ? (
+                  <iframe
+                    title={`Preview ${pageLabel(selectedPage)}`}
+                    className="h-full min-h-[680px] w-full flex-1 border-0 bg-white"
+                    srcDoc={String(selectedPage.snapshot.html)}
+                  />
+                ) : (
+                  <div className="flex flex-1 flex-col items-center justify-center gap-md text-center">
+                    <span className="material-symbols-outlined text-[56px] text-primary">picture_as_pdf</span>
+                    <div>
+                      <h3 className="font-headings text-headline-md text-on-surface">{pageLabel(selectedPage)}</h3>
+                      <p className="mt-xs text-body-sm text-on-surface-variant">{pageMetadata(selectedPage)}</p>
+                    </div>
+                  </div>
+                )
               ) : (
                 <div className="flex flex-1 flex-col items-center justify-center gap-md text-center">
-                  <span className="material-symbols-outlined text-[56px] text-primary">picture_as_pdf</span>
+                  <span className="material-symbols-outlined text-[56px] text-on-surface-variant">
+                    dashboard_customize
+                  </span>
                   <div>
-                    <h3 className="font-headings text-headline-md text-on-surface">{pageLabel(selectedPage)}</h3>
-                    <p className="mt-xs text-body-sm text-on-surface-variant">{pageMetadata(selectedPage)}</p>
+                    <h3 className="font-headings text-headline-md text-on-surface">Select a fragment</h3>
+                    <p className="mt-xs text-body-sm text-on-surface-variant">
+                      The selected page preview appears here.
+                    </p>
                   </div>
                 </div>
-              )
-            ) : (
-              <div className="flex flex-1 flex-col items-center justify-center gap-md text-center">
-                <span className="material-symbols-outlined text-[56px] text-on-surface-variant">
-                  dashboard_customize
-                </span>
-                <div>
-                  <h3 className="font-headings text-headline-md text-on-surface">Select a fragment</h3>
-                  <p className="mt-xs text-body-sm text-on-surface-variant">
-                    The selected page preview appears here.
-                  </p>
-                </div>
-              </div>
-            )}
+              )}
 
-            <div className="mt-auto flex justify-between border-t border-outline-variant pt-md text-[10px] text-on-surface-variant">
-              <span>Precision Archival</span>
-              <span>{selectedPage ? `Page ${selectedPage.position + 1} of ${pages.length}` : `${pages.length} pages`}</span>
+              <div className="mt-auto flex justify-between border-t border-outline-variant pt-md text-[10px] text-on-surface-variant">
+                <span>Precision Archival</span>
+                <span>{selectedPage ? `Page ${selectedPage.position + 1} of ${pages.length}` : `${pages.length} pages`}</span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </main>
 
-      <aside className="min-h-0 overflow-y-auto border-l border-outline-variant bg-surface p-md">
-        <DesignPageInspector page={selectedPage} onSave={handleSavePage} readOnly={readOnly} />
+      <aside className="min-h-0 overflow-y-auto border-l border-outline-variant bg-surface p-md flex flex-col gap-md">
+        <div className="flex border border-outline-variant rounded bg-surface-container-low p-[2px] shrink-0">
+          <button
+            type="button"
+            className={`flex-1 rounded py-xs text-xs font-bold text-center ${
+              activeRightTab === "inspector"
+                ? "bg-surface text-primary shadow-sm"
+                : "text-on-surface-variant hover:text-on-surface"
+            }`}
+            onClick={() => handleSetActiveRightTab("inspector")}
+          >
+            Page Inspector
+          </button>
+          <button
+            type="button"
+            className={`flex-1 rounded py-xs text-xs font-bold text-center ${
+              activeRightTab === "mockData"
+                ? "bg-surface text-primary shadow-sm"
+                : "text-on-surface-variant hover:text-on-surface"
+            }`}
+            onClick={() => handleSetActiveRightTab("mockData")}
+          >
+            Mock Data Preview
+          </button>
+        </div>
+
+        <div className="flex-1 min-h-0">
+          {activeRightTab === "inspector" ? (
+            <DesignPageInspector page={selectedPage} onSave={handleSavePage} readOnly={readOnly} />
+          ) : (
+            <>
+              {previewError ? (
+                <div className="mb-sm text-xs text-error bg-error/5 border border-error/20 p-xs rounded font-mono">
+                  {previewError}
+                </div>
+              ) : null}
+              <MockDataPanel
+                value={mockJsonText}
+                onChange={handleMockJsonChange}
+                onReset={handleResetMockData}
+                onPreview={handleTriggerPdfPreview}
+                isValidJson={!jsonError}
+                parseError={jsonError}
+                loadingPreview={previewLoading}
+              />
+            </>
+          )}
+        </div>
       </aside>
 
       {modalMode ? (
