@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Nested Objects and Case-Insensitive Templates
-current_phase: 12
-current_phase_name: implementar-la-propuesta-de-atomic-design
-status: verifying
-stopped_at: Completed 11-01-PLAN.md
-last_updated: "2026-07-12T18:02:11.286Z"
+current_phase: 13
+current_phase_name: implementar-la-propuesta-de-separacion-de-almacenamiento
+status: complete
+stopped_at: Completed Phase 13
+last_updated: "2026-07-12T23:00:00.000Z"
 last_activity: 2026-07-12
-last_activity_desc: Phase 12 execution started
+last_activity_desc: Phase 13 completed successfully
 progress:
-  total_phases: 7
-  completed_phases: 6
-  total_plans: 15
-  completed_plans: 15
-  percent: 86
+  total_phases: 8
+  completed_phases: 7
+  total_plans: 24
+  completed_plans: 24
+  percent: 100
 ---
 
 # Project State
@@ -24,20 +24,20 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-09)
 
 **Core value:** Operational users can visually compose a document design (templates + fixed content, in order) and reliably generate a correct final PDF from it via API, without engineering involvement per document type.
-**Current focus:** Phase 12 — implementar-la-propuesta-de-atomic-design
+**Current focus:** Phase 13 completed successfully
 
 ## Current Position
 
-Phase: 12 (implementar-la-propuesta-de-atomic-design) — EXECUTING
-Plan: 4 of 4
-Status: Phase complete — ready for verification
-Last activity: 2026-07-12 — Phase 12 execution started
+- Phase: 13 (implementar-la-propuesta-de-separacion-de-almacenamiento) — COMPLETE
+- Plan: 5 of 5
+- Status: Completed
+- Last activity: 2026-07-12 — Phase 13 completed successfully
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 27
+- Total plans completed: 37
 - Average duration: - min
 - Total execution time: 0 hours
 
@@ -51,8 +51,11 @@ Last activity: 2026-07-12 — Phase 12 execution started
 - Phase 6: 2/2 plans complete
 - Phase 7: 1/1 plans complete
 - Phase 8: 1/1 plans complete
-- Phase 9: 2/3 plans complete
+- Phase 9: 3/3 plans complete
 - Phase 10: 5/5 plans complete
+- Phase 11: 1/1 plans complete
+- Phase 12: 4/4 plans complete
+- Phase 13: 5/5 plans complete
 
 **Recent Trend:**
 
@@ -109,6 +112,8 @@ Recent decisions affecting current work:
 - [Phase 12]: Moved SchemaFieldEditor and SchemaMetadataEditor into document-types/components/organisms/ to respect atomic folder scopes.
 - [Phase 12]: Updated relative imports in SchemaFieldEditor and SchemaMetadataEditor to point to the correct lib paths.
 - [Phase 12]: Updated imports in DocumentTypeCreatePage.tsx to point to organisms folder.
+- [Phase 13]: Renamed stored_path in static_pdf_assets and file_path in document_issuances to storage_key.
+- [Phase 13]: Used regex substring update in Postgres data migration to extract base filenames as keys.
 
 ### Pending Todos
 
@@ -128,6 +133,7 @@ None.
 | Phase 12 P02 | 15min | 2 tasks | 5 files |
 | Phase 12 P03 | 15min | 2 tasks | 5 files |
 | Phase 12 P04 | 10min | 2 tasks | 3 files |
+| Phase 13 P01 | 15 | 2 tasks | 3 files |
 
 ### Roadmap Evolution
 
@@ -135,7 +141,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-07-12T04:29:26.901Z
+Last session: 2026-07-12T20:17:48.679Z
 Stopped at: Completed 11-01-PLAN.md
 Resume file: None
 
