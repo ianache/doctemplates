@@ -21,6 +21,10 @@ const JinjaToken = TiptapNode.create({
       contenteditable: {
         default: "false",
       },
+      label: {
+        default: "",
+        parseHTML: (element) => element.textContent || "",
+      },
     };
   },
 
@@ -32,8 +36,9 @@ const JinjaToken = TiptapNode.create({
     ];
   },
 
-  renderHTML({ HTMLAttributes }) {
-    return ["span", mergeAttributes(HTMLAttributes), 0];
+  renderHTML({ node, HTMLAttributes }) {
+    const { label, ...restAttrs } = HTMLAttributes;
+    return ["span", mergeAttributes(restAttrs), node.attrs.label || ""];
   },
 });
 
@@ -177,6 +182,7 @@ export default function HtmlJinjaEditor({ value, onChange, css, onDropToken }: H
             "data-jinja-raw": encoded,
             class: className,
             contenteditable: "false",
+            label: token,
           },
         });
 
