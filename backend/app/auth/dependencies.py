@@ -37,7 +37,12 @@ def get_current_user(
     arrive from Keycloak via the BFF.
     """
     sub = token_claims.get("sub")
-    email = token_claims.get("email")
+    email = (
+        token_claims.get("email")
+        or token_claims.get("preferred_username")
+        or token_claims.get("client_id")
+        or token_claims.get("azp")
+    )
     if not sub or not email:
         raise HTTPException(status_code=401, detail="Invalid token claims")
     return upsert_user(db, sub=sub, email=email)

@@ -85,6 +85,29 @@ def test_valid_bearer_token_accepted(
     }
 
 
+def test_service_account_bearer_token_accepted_without_email(
+    protected_route: str, client: TestClient, mint_test_jwt: Callable[..., str]
+) -> None:
+    token = mint_test_jwt(
+        {
+            "sub": "service-account-sub",
+            "preferred_username": "service-account-docmanagement-api-client",
+            "client_id": "docmanagement-api-client",
+            "aud": settings.oidc_api_audience,
+            "iss": settings.oidc_issuer,
+            "exp": (datetime.now(timezone.utc) + timedelta(minutes=5)).timestamp(),
+        }
+    )
+    response = client.get(
+        protected_route, headers={"Authorization": f"Bearer {token}"}
+    )
+    assert response.status_code == 200
+    assert response.json() == {
+        "sub": "service-account-sub",
+        "email": "service-account-docmanagement-api-client",
+    }
+
+
 def test_health_endpoint_requires_auth(client: TestClient) -> None:
     response = client.get("/api/health")
     assert response.status_code == 401

@@ -87,6 +87,30 @@ def _page_out(page: DocumentDesignPage) -> DocumentDesignPageOut:
     )
 
 
+def _activate_design(design: DocumentDesign, db: SQLAlchemySession) -> None:
+    validate_design_activation(design, db)
+
+    if design.version_group_id is None:
+        design.version_group_id = design.id
+        design.version_number = 1
+        design.status = "active"
+        return
+
+    old_current = (
+        db.query(DocumentDesign)
+        .filter(
+            DocumentDesign.version_group_id == design.version_group_id,
+            DocumentDesign.status == "active",
+            DocumentDesign.id != design.id,
+        )
+        .first()
+    )
+    if old_current is not None:
+        old_current.status = "superseded"
+        db.flush()
+    design.status = "active"
+
+
 def _detail(design: DocumentDesign, db: SQLAlchemySession = None) -> DocumentDesignDetail:
     ordered_pages = sorted(design.pages, key=lambda page: page.position)
     warnings = []
@@ -334,29 +358,7 @@ def activate_document_design(
     db: SQLAlchemySession = Depends(get_db),
 ) -> DocumentDesignDetail:
     design = _require_design(db, design_id)
-    validate_design_activation(design, db)
-
-    if design.version_group_id is None:
-        # First-ever activation (Phase 4 legacy path): becomes Version 1.
-        design.version_group_id = design.id
-        design.version_number = 1
-        design.status = "active"
-    else:
-        # Forked draft becoming current.
-        # Supersede the old active version first in the group.
-        old_current = (
-            db.query(DocumentDesign)
-            .filter(
-                DocumentDesign.version_group_id == design.version_group_id,
-                DocumentDesign.status == "active",
-                DocumentDesign.id != design.id
-            )
-            .first()
-        )
-        if old_current is not None:
-            old_current.status = "superseded"
-            db.flush()
-        design.status = "active"
+    _activate_design(design, db)
 
     db.commit()
     db.refresh(design)
@@ -604,7 +606,8 @@ def generate_document(
 ) -> DocumentIssuance:
     design = _require_design(db, design_id)
     if design.status == "draft":
-        raise HTTPException(status_code=400, detail="Cannot generate documents from a draft design")
+        _activate_design(design, db)
+        db.flush()
 
     # Split data and metadata
     data = payload.get("data", payload) if isinstance(payload, dict) else {}
@@ -678,4 +681,3 @@ def preview_document(
 
     pdf_bytes = generate_composed_pdf(design, data, db, mock_fallback=True)
     return Response(content=pdf_bytes, media_type="application/pdf")
-

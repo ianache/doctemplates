@@ -86,6 +86,28 @@ def test_invalid_jwt_rejected_wrong_issuer(mint_test_jwt: Callable[..., str], mo
         verify_bearer_token(token)
 
 
+def test_valid_jwt_accepted_with_configured_issuer_alias(
+    mint_test_jwt: Callable[..., str],
+    mock_jwks_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    alias = "http://keycloak:8080/realms/docmanagement"
+    monkeypatch.setattr(settings, "oidc_issuer_aliases", alias)
+    token = mint_test_jwt(
+        {
+            "sub": "test-sub",
+            "email": "alice@example.com",
+            "aud": settings.oidc_api_audience,
+            "iss": alias,
+            "exp": datetime.now(timezone.utc) + timedelta(minutes=5),
+        }
+    )
+
+    claims = verify_bearer_token(token)
+
+    assert claims["iss"] == alias
+
+
 def test_invalid_jwt_rejected_expired(mint_test_jwt: Callable[..., str], mock_jwks_client) -> None:
     token = mint_test_jwt(
         {

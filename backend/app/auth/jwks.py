@@ -27,8 +27,18 @@ def _get_jwks_client() -> PyJWKClient:
     """
     global _jwks_client
     if _jwks_client is None:
-        _jwks_client = PyJWKClient(f"{settings.oidc_issuer}/protocol/openid-connect/certs")
+        jwks_url = settings.oidc_jwks_url or f"{settings.oidc_issuer}/protocol/openid-connect/certs"
+        _jwks_client = PyJWKClient(jwks_url)
     return _jwks_client
+
+
+def _valid_issuers() -> set[str]:
+    aliases = {
+        issuer.strip()
+        for issuer in settings.oidc_issuer_aliases.split(",")
+        if issuer.strip()
+    }
+    return {settings.oidc_issuer, *aliases}
 
 
 def verify_bearer_token(token: str) -> dict:
@@ -42,10 +52,12 @@ def verify_bearer_token(token: str) -> dict:
     those exceptions into HTTP 401 responses.
     """
     signing_key = _get_jwks_client().get_signing_key_from_jwt(token)
-    return jwt.decode(
+    claims = jwt.decode(
         token,
         signing_key.key,
         algorithms=["RS256"],
         audience=settings.oidc_api_audience,
-        issuer=settings.oidc_issuer,
     )
+    if claims.get("iss") not in _valid_issuers():
+        raise jwt.InvalidIssuerError("Invalid issuer")
+    return claims

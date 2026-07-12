@@ -7,7 +7,7 @@
       "clientId": "docmanagement-backend",
       "enabled": true,
       "publicClient": false,
-      "secret": "dev-backend-secret-change-in-prod",
+      "secret": "${KEYCLOAK_BACKEND_CLIENT_SECRET}",
       "standardFlowEnabled": true,
       "directAccessGrantsEnabled": false,
       "serviceAccountsEnabled": false,
@@ -33,10 +33,22 @@
       "clientId": "docmanagement-api-client",
       "enabled": true,
       "publicClient": false,
-      "secret": "dev-api-client-secret-change-in-prod",
+      "secret": "${KEYCLOAK_API_CLIENT_SECRET}",
       "standardFlowEnabled": false,
       "serviceAccountsEnabled": true,
-      "directAccessGrantsEnabled": false
+      "directAccessGrantsEnabled": false,
+      "protocolMappers": [
+        {
+          "name": "audience-mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.client.audience": "docmanagement-backend",
+            "id.token.claim": "false",
+            "access.token.claim": "true"
+          }
+        }
+      ]
     }
   ],
   "users": [
@@ -48,7 +60,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "devpass123",
+            "value": "${KEYCLOAK_ALICE_PASSWORD}",
           "temporary": false
         }
       ]
@@ -61,7 +73,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "devpass123",
+            "value": "${KEYCLOAK_BOB_PASSWORD}",
           "temporary": false
         }
       ]

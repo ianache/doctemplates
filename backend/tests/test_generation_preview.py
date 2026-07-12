@@ -189,12 +189,36 @@ def test_generate_validation(client: TestClient, db_session: SQLAlchemySession, 
     user = _auth_client(client, db_session)
     doc_type = _create_document_type(db_session, user)
 
-    # 1. Reject draft design (400 Bad Request)
+    # 1. Generate from a valid new draft design by activating it first
     draft_design = _create_design(db_session, user, doc_type, status="draft")
+    draft_design.version_group_id = None
+    draft_design.version_number = None
+    db_session.commit()
     _create_template_page(db_session, user, draft_design)
-    response = client.post(f"/api/document-designs/{draft_design.id}/generate", json={})
+    draft_payload = {
+        "cliente.nombre": "Draft Doe",
+        "cliente.edad": 29,
+        "fecha": "2026-07-08",
+        "activo": True,
+    }
+    response = client.post(f"/api/document-designs/{draft_design.id}/generate", json=draft_payload)
+    assert response.status_code == 201
+    db_session.refresh(draft_design)
+    assert draft_design.status == "active"
+    assert draft_design.version_group_id == draft_design.id
+    assert draft_design.version_number == 1
+    saved_path = Path(response.json()["file_path"])
+    if saved_path.exists():
+        saved_path.unlink()
+
+    # Still reject drafts that cannot be activated
+    empty_draft = _create_design(db_session, user, doc_type, status="draft")
+    empty_draft.version_group_id = None
+    empty_draft.version_number = None
+    db_session.commit()
+    response = client.post(f"/api/document-designs/{empty_draft.id}/generate", json=draft_payload)
     assert response.status_code == 400
-    assert "Cannot generate documents from a draft design" in response.json()["detail"]
+    assert "at least one page" in response.json()["detail"]
 
     # 2. Allow active and superseded designs
     superseded_design = _create_design(db_session, user, doc_type, status="superseded")

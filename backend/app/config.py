@@ -13,6 +13,8 @@ class Settings(BaseSettings):
 
     oidc_issuer: str
     oidc_api_audience: str
+    oidc_jwks_url: str | None = None
+    oidc_issuer_aliases: str = ""
 
     database_url: str
     test_database_url: str
