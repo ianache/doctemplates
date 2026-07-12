@@ -258,18 +258,20 @@ export default function HtmlTemplateCreatePage() {
   }, [documentTypeId, htmlTouched, isEditMode, name]);
 
   const handleVisualChange = () => {
-    if (visualRef.current) {
-      setHtml(htmlToTemplate(visualRef.current.innerHTML));
-      setHtmlTouched(true);
-    }
+    setHtmlTouched(true);
   };
 
   const handleSetEditorMode = (mode: "visual" | "code" | "preview") => {
+    let currentHtml = html;
+    if (editorMode === "visual" && visualRef.current) {
+      currentHtml = htmlToTemplate(visualRef.current.innerHTML);
+      setHtml(currentHtml);
+    }
     setEditorMode(mode);
     if (mode === "visual") {
       setTimeout(() => {
         if (visualRef.current) {
-          visualRef.current.innerHTML = templateToHtml(html);
+          visualRef.current.innerHTML = templateToHtml(currentHtml);
         }
       }, 0);
     }
@@ -416,11 +418,16 @@ export default function HtmlTemplateCreatePage() {
     }
 
     try {
+      let finalHtml = html;
+      if (editorMode === "visual" && visualRef.current) {
+        finalHtml = htmlToTemplate(visualRef.current.innerHTML);
+      }
+
       if (isEditMode && id) {
         await updateHtmlTemplate(id, {
           document_type_id: documentTypeId,
           name,
-          html,
+          html: finalHtml,
           css,
           mock_data: parsedMock,
         });
@@ -429,7 +436,7 @@ export default function HtmlTemplateCreatePage() {
         await createHtmlTemplate({
           document_type_id: documentTypeId,
           name,
-          html,
+          html: finalHtml,
           css,
           mock_data: parsedMock,
         });
