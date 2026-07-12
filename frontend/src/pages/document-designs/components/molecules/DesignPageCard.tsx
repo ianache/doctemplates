@@ -1,7 +1,7 @@
 import { CSS } from "@dnd-kit/utilities";
 import { useSortable } from "@dnd-kit/sortable";
 
-import type { DocumentDesignPage } from "../../../lib/documentDesigns";
+import type { DocumentDesignPage } from "../../../../lib/documentDesigns";
 
 interface DesignPageCardProps {
   page: DocumentDesignPage;

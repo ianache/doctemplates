@@ -36,7 +36,7 @@ import {
 import { getDocumentType, type DocumentTypeField, type DocumentTypeMetadata } from "../../lib/documentTypes";
 import { generateMockDataFromFields } from "../../lib/schemaFields";
 import AddContentModal from "./components/AddContentModal";
-import DesignPageCard from "./components/DesignPageCard";
+import DesignPageCard from "./components/molecules/DesignPageCard";
 import DesignPageInspector from "./components/DesignPageInspector";
 import { MockDataPanel } from "./components/MockDataPanel";
 import { PreviewFrame } from "./components/PreviewFrame";

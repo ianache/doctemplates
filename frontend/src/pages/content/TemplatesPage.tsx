@@ -6,8 +6,9 @@ import {
   type HtmlTemplateListItem,
   type HtmlTemplateDetail,
 } from "../../lib/content";
-import { listDocumentTypes, type DocumentTypeListItem } from "../../lib/documentTypes";
+import { getDocumentType, listDocumentTypes, type DocumentTypeDetail, type DocumentTypeListItem } from "../../lib/documentTypes";
 import PagedTable, { type Column } from "../../components/organisms/PagedTable";
+import TokenExplorer from "../document-designs/components/organisms/TokenExplorer";
 
 export default function TemplatesPage() {
   const [templates, setTemplates] = useState<HtmlTemplateListItem[] | null>(null);
@@ -27,6 +28,7 @@ export default function TemplatesPage() {
   // Detail / Inspector States
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<HtmlTemplateDetail | null>(null);
+  const [selectedDocumentType, setSelectedDocumentType] = useState<DocumentTypeDetail | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
 
   // Pagination State
@@ -56,6 +58,7 @@ export default function TemplatesPage() {
   useEffect(() => {
     if (!selectedTemplateId) {
       setSelectedTemplate(null);
+      setSelectedDocumentType(null);
       return;
     }
     let cancelled = false;
@@ -76,6 +79,26 @@ export default function TemplatesPage() {
       cancelled = true;
     };
   }, [selectedTemplateId]);
+
+  useEffect(() => {
+    if (!selectedTemplate?.document_type_id) {
+      setSelectedDocumentType(null);
+      return;
+    }
+
+    let cancelled = false;
+    getDocumentType(selectedTemplate.document_type_id)
+      .then((detail) => {
+        if (!cancelled) setSelectedDocumentType(detail);
+      })
+      .catch(() => {
+        if (!cancelled) setSelectedDocumentType(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedTemplate?.document_type_id]);
 
   const handleApplyFilters = () => {
     setAppliedKeyword(keyword);
@@ -328,19 +351,19 @@ export default function TemplatesPage() {
               </div>
             </div>
 
-            {/* Variables tag cloud */}
-            {selectedTemplate.token_names.length > 0 && (
-              <div className="bg-white border border-outline-variant p-md rounded-lg max-h-48 overflow-y-auto">
-                <label className="font-label-caps text-[10px] text-primary mb-xs block">VARIABLES</label>
-                <div className="flex flex-wrap gap-xs">
-                  {selectedTemplate.token_names.map((token) => (
-                    <span key={token} className="px-1.5 py-0.5 rounded bg-surface-container text-body-xs font-mono text-on-surface text-[10px]">
-                      {token}
-                    </span>
-                  ))}
-                </div>
+            <div className="bg-white border border-outline-variant p-md rounded-lg min-h-0 flex flex-col">
+              <label className="font-label-caps text-[10px] text-primary mb-xs block">VARIABLES</label>
+              <div className="max-h-64 overflow-y-auto">
+                <TokenExplorer
+                  fields={selectedDocumentType?.fields ?? []}
+                  emptyMessage={
+                    selectedTemplate.token_names.length > 0
+                      ? "Loading document type tokens..."
+                      : "This template has no detected variables."
+                  }
+                />
               </div>
-            )}
+            </div>
 
             <div className="mt-auto">
               <Link
