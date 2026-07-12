@@ -28,5 +28,14 @@ class Settings(BaseSettings):
     content_storage_root: str = "../.content-storage"
     issuance_storage_root: str = "../.content-storage/issuances"
 
+    # Storage Decoupling Settings
+    storage_provider_type: str = "local"
+    storage_s3_endpoint_url: str | None = None
+    storage_s3_access_key: str | None = None
+    storage_s3_secret_key: str | None = None
+    storage_s3_region: str | None = None
+    storage_s3_bucket_static_pdfs: str = "docmanagement-static-pdfs"
+    storage_s3_bucket_issuances: str = "docmanagement-issuances"
+
 
 settings = Settings()
