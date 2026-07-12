@@ -56,3 +56,17 @@ Plans:
 - [x] 11-01-PLAN.md
 
 - [x] TBD (run /gsd-plan-phase 11 to break down) (completed 2026-07-12)
+
+### Phase 12: implementar la propuesta de atomic design
+
+**Goal:** Implement formal hybrid Atomic Design pattern across frontend components, extracting form atoms and reorganizing modules into molecules and organisms.
+**Requirements:** ATOMIC-01, ATOMIC-02, ATOMIC-03, ATOMIC-04
+**Depends on:** Phase 11
+**Plans:** 4 plans
+
+Plans:
+
+- [ ] 12-01-PLAN.md — Reorganize global PageHeader and extract form atoms (InputText, Select, Checkbox)
+- [ ] 12-02-PLAN.md — Move DesignPageCard, TokenExplorer, and HtmlJinjaEditor to subfolders under document-designs/components/
+- [ ] 12-03-PLAN.md — Move AddContentModal, DesignPageInspector, MockDataPanel, and PreviewFrame to document-designs/components/organisms/
+- [ ] 12-04-PLAN.md — Move SchemaFieldEditor and SchemaMetadataEditor to document-types/components/organisms/
