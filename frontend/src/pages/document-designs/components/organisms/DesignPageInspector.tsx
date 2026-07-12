@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import type { DocumentDesignPage } from "../../../lib/documentDesigns";
+import type { DocumentDesignPage } from "../../../../lib/documentDesigns";
 
 interface DesignPageInspectorProps {
   page: DocumentDesignPage | null;

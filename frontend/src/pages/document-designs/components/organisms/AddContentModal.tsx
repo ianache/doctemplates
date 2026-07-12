@@ -5,7 +5,7 @@ import {
   listStaticPdfAssets,
   type HtmlTemplateListItem,
   type StaticPdfAssetListItem,
-} from "../../../lib/content";
+} from "../../../../lib/content";
 
 interface AddContentModalProps {
   mode: "template" | "pdf";

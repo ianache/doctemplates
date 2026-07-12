@@ -35,11 +35,11 @@ import {
 } from "../../lib/documentDesigns";
 import { getDocumentType, type DocumentTypeField, type DocumentTypeMetadata } from "../../lib/documentTypes";
 import { generateMockDataFromFields } from "../../lib/schemaFields";
-import AddContentModal from "./components/AddContentModal";
+import AddContentModal from "./components/organisms/AddContentModal";
 import DesignPageCard from "./components/molecules/DesignPageCard";
-import DesignPageInspector from "./components/DesignPageInspector";
-import { MockDataPanel } from "./components/MockDataPanel";
-import { PreviewFrame } from "./components/PreviewFrame";
+import DesignPageInspector from "./components/organisms/DesignPageInspector";
+import { MockDataPanel } from "./components/organisms/MockDataPanel";
+import { PreviewFrame } from "./components/organisms/PreviewFrame";
 
 function sortPages(pages: DocumentDesignPage[]) {
   return [...pages].sort((a, b) => a.position - b.position);
