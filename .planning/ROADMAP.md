@@ -43,3 +43,14 @@
 | 8. Template AST & Static Validation | v2.0 | 1/1 | Complete | 2026-07-10 |
 | 9. Search Documents Library & Audit Trace | v2.0 | 3/3 | Complete | 2026-07-11 |
 | 10. Complex Schema UI & Nested Data Previsualization | v2.0 | 5/5 | Complete | 2026-07-11 |
+
+### Phase 11: Necesito introducir un componente bff entre frontend y backend aislando la logica del core en el backend
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 10
+**Plans:** 0 plans
+
+Plans:
+
+- [ ] TBD (run /gsd-plan-phase 11 to break down)

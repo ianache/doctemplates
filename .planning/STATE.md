@@ -116,6 +116,10 @@ None.
 | 260709-v5i | Atomic Design PagedTable component | 2026-07-10 | d1d9746 | [260709-v5i-atomic-design-pagedtable-component](./quick/260709-v5i-atomic-design-pagedtable-component/) |
 | 2 | Align Document Designs page body with visual design reference | 2026-07-10 | 9a8bf0e | — |
 
+### Roadmap Evolution
+
+- Phase 11 added: Necesito introducir un componente bff entre frontend y backend aislando la logica del core en el backend
+
 ## Session Continuity
 
 Last session: 2026-07-11T05:32:00.000Z
