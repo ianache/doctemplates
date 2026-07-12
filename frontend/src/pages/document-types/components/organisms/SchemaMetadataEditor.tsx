@@ -1,5 +1,5 @@
 import { useWatch } from "react-hook-form";
-import type { DocumentTypeMetadataIn } from "../../../lib/documentTypes";
+import type { DocumentTypeMetadataIn } from "../../../../lib/documentTypes";
 
 interface SchemaMetadataEditorProps {
   append: (value: any) => void;

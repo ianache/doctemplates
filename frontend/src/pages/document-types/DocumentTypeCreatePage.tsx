@@ -3,8 +3,8 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { createDocumentType, getDocumentType, updateDocumentType, type FieldType, type DocumentTypeMetadataIn } from "../../lib/documentTypes";
-import { SchemaFieldEditor } from "./components/SchemaFieldEditor";
-import { SchemaMetadataEditor } from "./components/SchemaMetadataEditor";
+import { SchemaFieldEditor } from "./components/organisms/SchemaFieldEditor";
+import { SchemaMetadataEditor } from "./components/organisms/SchemaMetadataEditor";
 import { validateSchemaFields, normalizeSchemaFields } from "../../lib/schemaFields";
 
 type FieldRow = {
