@@ -507,7 +507,11 @@ export default function HtmlTemplateCreatePage() {
           )}
 
           <span className="material-symbols-outlined text-[18px] text-outline">
-            {isLeaf ? "code" : "folder"}
+            {node.type === "list"
+              ? "list"
+              : node.type === "object"
+              ? (isCollapsed ? "folder" : "folder_open")
+              : "description"}
           </span>
           <span className="text-body-sm font-semibold">{node.name}</span>
         </div>
