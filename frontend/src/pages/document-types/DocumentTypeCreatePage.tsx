@@ -61,12 +61,12 @@ function getCurlCode(typeId: string, payload: any, firstMetaName: string): strin
   return `# 1. Generar Documento
 curl -X POST "http://localhost:8000/api/document-designs/YOUR_DESIGN_ID/generate" \\
   -H "Content-Type: application/json" \\
-  -H "Cookie: docmanagement_session=YOUR_SESSION_ID" \\
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \\
   -d '${JSON.stringify(payload, null, 2)}'
 
 # 2. Buscar por Metadatos
 curl -X GET "http://localhost:8000/api/issuances?document_type_id=${typeId}${firstMetaName ? `&metadata.${firstMetaName}=Sample` : ""}" \\
-  -H "Cookie: docmanagement_session=YOUR_SESSION_ID"`;
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"`;
 }
 
 function getJSCode(typeId: string, payload: any, firstMetaName: string): string {
@@ -76,7 +76,7 @@ const generateDoc = async () => {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Cookie": "docmanagement_session=YOUR_SESSION_ID"
+      "Authorization": "Bearer YOUR_ACCESS_TOKEN"
     },
     body: JSON.stringify(${JSON.stringify(payload, null, 2).replace(/\n/g, "\n      ")})
   });
@@ -89,7 +89,7 @@ const searchDocs = async () => {
   const url = "http://localhost:8000/api/issuances?document_type_id=${typeId}${firstMetaName ? `&metadata.${firstMetaName}=Sample` : ""}";
   const res = await fetch(url, {
     headers: {
-      "Cookie": "docmanagement_session=YOUR_SESSION_ID"
+      "Authorization": "Bearer YOUR_ACCESS_TOKEN"
     }
   });
   const list = await res.json();
@@ -102,11 +102,13 @@ function getPythonCode(typeId: string, payload: any, firstMetaName: string): str
 
 # 1. Generar Documento
 url = "http://localhost:8000/api/document-designs/YOUR_DESIGN_ID/generate"
-headers = {"Content-Type": "application/json"}
-cookies = {"docmanagement_session": "YOUR_SESSION_ID"}
+headers = {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer YOUR_ACCESS_TOKEN"
+}
 payload = ${JSON.stringify(payload, null, 4)}
 
-response = requests.post(url, json=payload, headers=headers, cookies=cookies)
+response = requests.post(url, json=payload, headers=headers)
 print("Creado:", response.json())
 
 # 2. Buscar por Metadatos
@@ -115,7 +117,7 @@ params = {
     "document_type_id": "${typeId}"${firstMetaName ? `,
     "metadata.${firstMetaName}": "Sample"` : ""}
 }
-response = requests.get(search_url, params=params, cookies=cookies)
+response = requests.get(search_url, params=params, headers=headers)
 print("Documentos:", response.json())`;
 }
 
@@ -137,7 +139,7 @@ ${JSON.stringify(payload, null, 4)}
         HttpRequest reqGen = HttpRequest.newBuilder()
             .uri(URI.create("http://localhost:8000/api/document-designs/YOUR_DESIGN_ID/generate"))
             .header("Content-Type", "application/json")
-            .header("Cookie", "docmanagement_session=YOUR_SESSION_ID")
+            .header("Authorization", "Bearer YOUR_ACCESS_TOKEN")
             .POST(HttpRequest.BodyPublishers.ofString(payload))
             .build();
 
@@ -148,7 +150,7 @@ ${JSON.stringify(payload, null, 4)}
         String queryUrl = "http://localhost:8000/api/issuances?document_type_id=${typeId}${firstMetaName ? `&metadata.${firstMetaName}=Sample` : ""}";
         HttpRequest reqQuery = HttpRequest.newBuilder()
             .uri(URI.create(queryUrl))
-            .header("Cookie", "docmanagement_session=YOUR_SESSION_ID")
+            .header("Authorization", "Bearer YOUR_ACCESS_TOKEN")
             .GET()
             .build();
 
