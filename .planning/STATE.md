@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Nested Objects and Case-Insensitive Templates
-current_phase: 11
-current_phase_name: necesito-introducir-un-componente-bff-entre-frontend-y-backe
+current_phase: 12
+current_phase_name: implementar-la-propuesta-de-atomic-design
 status: verifying
 stopped_at: Completed 11-01-PLAN.md
-last_updated: "2026-07-12T04:29:26.929Z"
+last_updated: "2026-07-12T18:02:11.286Z"
 last_activity: 2026-07-12
-last_activity_desc: Phase 11 execution started
+last_activity_desc: Phase 12 execution started
 progress:
-  total_phases: 6
-  completed_phases: 5
-  total_plans: 11
-  completed_plans: 11
-  percent: 83
+  total_phases: 7
+  completed_phases: 6
+  total_plans: 15
+  completed_plans: 15
+  percent: 86
 ---
 
 # Project State
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-09)
 
 **Core value:** Operational users can visually compose a document design (templates + fixed content, in order) and reliably generate a correct final PDF from it via API, without engineering involvement per document type.
-**Current focus:** Phase 11 — necesito-introducir-un-componente-bff-entre-frontend-y-backe
+**Current focus:** Phase 12 — implementar-la-propuesta-de-atomic-design
 
 ## Current Position
 
-Phase: 11 (necesito-introducir-un-componente-bff-entre-frontend-y-backe) — EXECUTING
-Plan: 1 of 1
+Phase: 12 (implementar-la-propuesta-de-atomic-design) — EXECUTING
+Plan: 4 of 4
 Status: Phase complete — ready for verification
-Last activity: 2026-07-12 — Phase 11 execution started
+Last activity: 2026-07-12 — Phase 12 execution started
 
 ## Performance Metrics
 
@@ -100,6 +100,15 @@ Recent decisions affecting current work:
 - [Phase 07]: Preserved exact API payload casing in the database record input_data.
 - [Phase 07]: Implemented read-only runtime proxies for case-insensitive validation and template rendering.
 - [Phase 07]: Secured the sandbox environment by overriding __getattribute__ to block private dunder access on proxies.
+- [Phase 12]: Moved PageHeader into molecules directory and updated all references.
+- [Phase 12]: Extracted global reusable form atoms (InputText, Select, Checkbox) to standardise form styling.
+- [Phase 12]: Moved DesignPageCard to document-designs/components/molecules/ and adjusted its relative import path.
+- [Phase 12]: Moved TokenExplorer and HtmlJinjaEditor to document-designs/components/organisms/ to enforce localized page folder scopes.
+- [Phase 12]: Moved AddContentModal, DesignPageInspector, MockDataPanel, and PreviewFrame to document-designs/components/organisms/ to complete the page folder atomic design.
+- [Phase 12]: Fixed minor double closing tag typo in DesignPageInspector and MockDataPanel during relocation verification.
+- [Phase 12]: Moved SchemaFieldEditor and SchemaMetadataEditor into document-types/components/organisms/ to respect atomic folder scopes.
+- [Phase 12]: Updated relative imports in SchemaFieldEditor and SchemaMetadataEditor to point to the correct lib paths.
+- [Phase 12]: Updated imports in DocumentTypeCreatePage.tsx to point to organisms folder.
 
 ### Pending Todos
 
@@ -115,6 +124,10 @@ None.
 |---|-------------|------|--------|-----------|
 | 260709-v5i | Atomic Design PagedTable component | 2026-07-10 | d1d9746 | [260709-v5i-atomic-design-pagedtable-component](./quick/260709-v5i-atomic-design-pagedtable-component/) |
 | 2 | Align Document Designs page body with visual design reference | 2026-07-10 | 9a8bf0e | — |
+| Phase 12 P01 | 10min | 3 tasks | 9 files |
+| Phase 12 P02 | 15min | 2 tasks | 5 files |
+| Phase 12 P03 | 15min | 2 tasks | 5 files |
+| Phase 12 P04 | 10min | 2 tasks | 3 files |
 
 ### Roadmap Evolution
 

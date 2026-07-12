@@ -377,11 +377,12 @@ export default function DocumentDesignDetailPage() {
     setIsSavingMock(true);
     setPreviewError(null);
     try {
-      await updateDocumentDesign(design.id, {
+      const updated = await updateDocumentDesign(design.id, {
         name: design.name,
         description: design.description,
         mock_data: parsedPayload,
       });
+      setDesign(updated);
     } catch (err) {
       setPreviewError(err instanceof Error ? err.message : "Failed to persist mock data to server.");
     } finally {
