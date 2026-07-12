@@ -12,6 +12,9 @@ class LocalStorageProvider(StorageProvider):
         self.root_paths = root_paths
 
     def _get_path(self, key: str, category: str) -> Path:
+        path = Path(key)
+        if path.is_absolute():
+            return path
         root = self.root_paths.get(category)
         if not root:
             raise ValueError(f"Unknown storage category: {category}")
@@ -37,12 +40,13 @@ class LocalStorageProvider(StorageProvider):
         if path.exists():
             os.remove(path)
 
-    def get_download_response(self, key: str, filename: str, category: str) -> Response:
+    def get_download_response(self, key: str, filename: str, category: str, disposition: str = "attachment") -> Response:
         path = self._get_path(key, category)
         if not path.exists():
             raise FileNotFoundError(f"File not found for download: {path}")
+        headers = {"Content-Disposition": f'{disposition}; filename="{filename}"'}
         return FileResponse(
             path,
             media_type="application/pdf",
-            filename=filename,
+            headers=headers,
         )

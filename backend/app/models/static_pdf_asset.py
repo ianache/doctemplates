@@ -14,6 +14,19 @@ class StaticPdfAsset(Base):
     original_filename: Mapped[str]
     stored_filename: Mapped[str] = mapped_column(index=True)
     storage_key: Mapped[str]
+
+    @property
+    def stored_path(self) -> str:
+        from pathlib import Path
+        if Path(self.storage_key).is_absolute():
+            return self.storage_key
+        from app.config import settings
+        import os
+        return os.path.join(settings.content_storage_root, self.storage_key)
+
+    @stored_path.setter
+    def stored_path(self, value: str) -> None:
+        self.storage_key = value
     page_count: Mapped[int]
     page_start: Mapped[int | None]
     page_end: Mapped[int | None]

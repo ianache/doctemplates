@@ -28,6 +28,6 @@ class StorageProvider(ABC):
         pass
 
     @abstractmethod
-    def get_download_response(self, key: str, filename: str, category: str) -> Response:
-        """Return a FastAPI Response (e.g. FileResponse or StreamingResponse) for downloading the file."""
+    def get_download_response(self, key: str, filename: str, category: str, disposition: str = "attachment") -> Response:
+        """Return a FastAPI Response (e.g. FileResponse or StreamingResponse) for downloading/previewing the file."""
         pass

@@ -13,6 +13,7 @@ from app.models.static_pdf_asset import StaticPdfAsset
 from app.models.user import User
 from app.schemas.static_pdf_asset import StaticPdfAssetDetail, StaticPdfAssetListItem
 from app.services.content_storage import save_static_pdf_asset
+from app.dependencies import get_storage_provider
 
 router = APIRouter(prefix="/api/content/static-pdfs", tags=["static-pdfs"])
 
@@ -43,6 +44,7 @@ def upload_static_pdf_asset(
     document_type_id: UUID | None = Form(default=None),
     user: User = Depends(get_current_user),
     db: SQLAlchemySession = Depends(get_db),
+    storage_provider = Depends(get_storage_provider),
 ) -> StaticPdfAssetDetail:
     document_type = require_document_type(db, document_type_id) if document_type_id is not None else None
 
@@ -50,7 +52,7 @@ def upload_static_pdf_asset(
         asset_id,
         original_filename,
         stored_filename,
-        stored_path,
+        storage_key,
         page_count,
         file_size,
         _source_page_count,
@@ -58,7 +60,7 @@ def upload_static_pdf_asset(
         stored_page_end,
     ) = save_static_pdf_asset(
         file,
-        storage_root=settings.content_storage_root,
+        storage_provider=storage_provider,
         page_start=page_start,
         page_end=page_end,
     )
@@ -67,7 +69,7 @@ def upload_static_pdf_asset(
         id=UUID(asset_id),
         original_filename=original_filename,
         stored_filename=stored_filename,
-        stored_path=stored_path,
+        storage_key=storage_key,
         page_count=page_count,
         page_start=stored_page_start,
         page_end=stored_page_end,
@@ -135,12 +137,13 @@ def download_static_pdf_asset(
     asset_id: UUID,
     user: User = Depends(get_current_user),
     db: SQLAlchemySession = Depends(get_db),
+    storage_provider = Depends(get_storage_provider),
 ):
     asset = db.query(StaticPdfAsset).filter(StaticPdfAsset.id == asset_id).first()
     if asset is None:
         raise HTTPException(status_code=404, detail="PDF asset not found")
-    return FileResponse(
-        Path(asset.stored_path),
-        media_type="application/pdf",
+    return storage_provider.get_download_response(
+        asset.storage_key,
         filename=asset.original_filename,
+        category="static_pdfs",
     )

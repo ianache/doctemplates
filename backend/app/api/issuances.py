@@ -3,7 +3,7 @@ from datetime import date, datetime, time
 from typing import Literal
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import FileResponse
 from sqlalchemy import func
 from sqlalchemy.orm import Session as SQLAlchemySession, joinedload
@@ -14,6 +14,8 @@ from app.models.document_design import DocumentDesign
 from app.models.document_issuance import DocumentIssuance
 from app.models.document_tracelog import DocumentTracelog
 from app.models.user import User
+from app.dependencies import get_storage_provider
+from app.services.storage.base import StorageProvider
 from app.schemas.document_issuance import (
     DocumentIssuanceLibraryItem,
     DocumentIssuanceShareOut,
@@ -66,16 +68,15 @@ def _issuance_out(issuance: DocumentIssuance) -> DocumentIssuanceLibraryItem:
     )
 
 
-def _pdf_response(issuance: DocumentIssuance) -> FileResponse:
-    file_path = Path(issuance.file_path)
-    if not file_path.exists():
-        raise HTTPException(status_code=404, detail="Issued PDF file not found on disk")
-
-    return FileResponse(
-        file_path,
-        media_type="application/pdf",
-        filename=f"{issuance.id}.pdf",
-    )
+def _pdf_response(issuance: DocumentIssuance, storage_provider: StorageProvider) -> Response:
+    try:
+        return storage_provider.get_download_response(
+            issuance.storage_key,
+            filename=f"{issuance.id}.pdf",
+            category="issuances"
+        )
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Issued PDF file not found on storage")
 
 
 def _append_tracelog(
@@ -102,12 +103,13 @@ def public_download_issuance(
     signature: str,
     request: Request,
     db: SQLAlchemySession = Depends(get_db),
+    storage_provider = Depends(get_storage_provider),
 ):
     if not verify_issuance_signature(issuance_id, signature):
         raise HTTPException(status_code=403, detail="Invalid document signature")
 
     issuance = _require_issuance(db, issuance_id)
-    response = _pdf_response(issuance)
+    response = _pdf_response(issuance, storage_provider)
     _append_tracelog(
         db,
         issuance,
@@ -175,16 +177,18 @@ def preview_issuance(
     issuance_id: UUID,
     user: User = Depends(get_current_user),
     db: SQLAlchemySession = Depends(get_db),
+    storage_provider = Depends(get_storage_provider),
 ):
     issuance = _require_issuance(db, issuance_id)
-    file_path = Path(issuance.file_path)
-    if not file_path.exists():
-        raise HTTPException(status_code=404, detail="Issued PDF file not found on disk")
-    return FileResponse(
-        file_path,
-        media_type="application/pdf",
-        headers={"Content-Disposition": "inline"},
-    )
+    try:
+        return storage_provider.get_download_response(
+            issuance.storage_key,
+            filename=f"{issuance.id}.pdf",
+            category="issuances",
+            disposition="inline"
+        )
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Issued PDF file not found on storage")
 
 
 @router.get("/{issuance_id}/download")
@@ -193,9 +197,10 @@ def download_issuance(
     request: Request,
     user: User = Depends(get_current_user),
     db: SQLAlchemySession = Depends(get_db),
+    storage_provider = Depends(get_storage_provider),
 ):
     issuance = _require_issuance(db, issuance_id)
-    response = _pdf_response(issuance)
+    response = _pdf_response(issuance, storage_provider)
     _append_tracelog(
         db,
         issuance,

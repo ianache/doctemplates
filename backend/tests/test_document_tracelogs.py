@@ -174,7 +174,7 @@ def test_generate_document_creates_generation_tracelog(
     design = _create_design(db_session, user)
     monkeypatch.setattr(
         "app.api.document_designs.generate_composed_pdf",
-        lambda design, payload, db, mock_fallback=False: b"%PDF-1.4\n%%EOF",
+        lambda *args, **kwargs: b"%PDF-1.4\n%%EOF",
     )
 
     response = client.post(f"/api/document-designs/{design.id}/generate", json={"name": "Acme"})

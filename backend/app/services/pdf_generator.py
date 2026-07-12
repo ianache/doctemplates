@@ -12,6 +12,7 @@ from app.models.document_design import DocumentDesign
 from app.models.content_template import HtmlTemplate
 from app.models.static_pdf_asset import StaticPdfAsset
 from app.models.document_type import DocumentTypeField
+from app.services.storage.base import StorageProvider
 
 
 def date_format_filter(value: str, format_str: str = "%d/%m/%Y") -> str:
@@ -590,9 +591,13 @@ def generate_composed_pdf(
     design: DocumentDesign,
     payload: dict,
     db: SQLAlchemySession,
+    storage_provider: StorageProvider | None = None,
     mock_fallback: bool = False
 ) -> bytes:
     """Composes a single merged PDF from a design, its pages, and client data."""
+    if storage_provider is None:
+        from app.dependencies import get_storage_provider
+        storage_provider = get_storage_provider()
     # 1. Validate and coerce payload fields
     expanded_payload = validate_and_coerce_payload(payload, design.document_type.fields, mock_fallback)
 
@@ -637,25 +642,27 @@ def generate_composed_pdf(
 
         elif page.block_type == "static_pdf":
             asset = assets_by_id.get(page.content_id)
-            stored_path = ""
+            storage_key = ""
             if asset:
-                stored_path = asset.stored_path
+                storage_key = asset.storage_key
             else:
-                stored_path = (page.snapshot or {}).get("stored_path", "")
+                storage_key = (page.snapshot or {}).get("storage_key", "") or (page.snapshot or {}).get("stored_path", "")
 
-            if not stored_path:
+            if not storage_key:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"Static PDF asset path not specified for page position {page.position}."
+                    detail=f"Static PDF asset storage key not specified for page position {page.position}."
                 )
 
-            if not os.path.exists(stored_path):
+            try:
+                stream = storage_provider.get_stream(storage_key, "static_pdfs")
+            except Exception:
                 raise HTTPException(
                     status_code=404,
-                    detail=f"Static PDF file not found at {stored_path} for page position {page.position}."
+                    detail=f"Static PDF file not found for key {storage_key} at page position {page.position}."
                 )
 
-            reader = PdfReader(stored_path)
+            reader = PdfReader(stream)
             for p in reader.pages:
                 writer.add_page(p)
 

@@ -19,6 +19,19 @@ class DocumentIssuance(Base):
         ForeignKey("document_designs.id", ondelete="RESTRICT")
     )
     storage_key: Mapped[str]
+
+    @property
+    def file_path(self) -> str:
+        from pathlib import Path
+        if Path(self.storage_key).is_absolute():
+            return self.storage_key
+        from app.config import settings
+        import os
+        return os.path.join(settings.issuance_storage_root, self.storage_key)
+
+    @file_path.setter
+    def file_path(self, value: str) -> None:
+        self.storage_key = value
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
     input_data: Mapped[dict] = mapped_column(JSON)
     metadata_values: Mapped[dict | None] = mapped_column(JSON, default=None)

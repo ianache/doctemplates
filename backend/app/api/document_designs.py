@@ -21,6 +21,8 @@ from app.models.static_pdf_asset import StaticPdfAsset
 from app.models.user import User
 from app.schemas.document_issuance import DocumentIssuanceOut
 from app.services.pdf_generator import generate_composed_pdf
+from app.dependencies import get_storage_provider
+from app.services.storage.base import StorageProvider
 
 from app.schemas.document_design import (
     AddStaticPdfPage,
@@ -603,6 +605,7 @@ def generate_document(
     payload: dict = Body(default={}),
     user: User = Depends(get_current_user),
     db: SQLAlchemySession = Depends(get_db),
+    storage_provider: StorageProvider = Depends(get_storage_provider),
 ) -> DocumentIssuance:
     design = _require_design(db, design_id)
     if design.status == "draft":
@@ -621,22 +624,15 @@ def generate_document(
     coerced_metadata = validate_metadata_values(metadata, design.document_type.metadata_definitions)
 
     # Generate PDF bytes
-    pdf_bytes = generate_composed_pdf(design, data, db, mock_fallback=False)
-
-    # Ensure output directory exists
-    os.makedirs(settings.issuance_storage_root, exist_ok=True)
+    pdf_bytes = generate_composed_pdf(design, data, db, storage_provider, mock_fallback=False)
 
     issuance_id = uuid.uuid4()
-    filename = f"{issuance_id}.pdf"
-    file_path = os.path.join(settings.issuance_storage_root, filename)
-
-    with open(file_path, "wb") as f:
-        f.write(pdf_bytes)
+    storage_key = storage_provider.save(f"{issuance_id}.pdf", pdf_bytes, category="issuances")
 
     issuance = DocumentIssuance(
         id=issuance_id,
         design_version_id=design.id,
-        file_path=file_path,
+        storage_key=storage_key,
         user_id=user.id,
         input_data=data,
         metadata_values=coerced_metadata,
@@ -663,6 +659,7 @@ def preview_document(
     payload: dict = Body(default={}),
     user: User = Depends(get_current_user),
     db: SQLAlchemySession = Depends(get_db),
+    storage_provider: StorageProvider = Depends(get_storage_provider),
 ) -> Response:
     design = _require_design(db, design_id)
     if design.status not in ("draft", "active"):
@@ -679,5 +676,5 @@ def preview_document(
     # Validate metadata
     _ = validate_metadata_values(metadata, design.document_type.metadata_definitions)
 
-    pdf_bytes = generate_composed_pdf(design, data, db, mock_fallback=True)
+    pdf_bytes = generate_composed_pdf(design, data, db, storage_provider, mock_fallback=True)
     return Response(content=pdf_bytes, media_type="application/pdf")
