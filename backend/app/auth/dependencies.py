@@ -1,47 +1,14 @@
 """FastAPI dependencies gating access to protected routes.
 
-Two independent auth mechanisms (D-09), no shared code path:
-
-- `get_current_user` - cookie-session based, backs the browser UI. Looks
-  up the session id carried in the `settings.session_cookie_name` cookie
-  directly against the `sessions` table (Pattern 3: DB-backed session).
-- `verify_bearer_token_dep` - bearer-token based, backs future API/M2M
-  callers. Delegates to `app.auth.jwks.verify_bearer_token`.
+All routes now gate access using Bearer token verification.
 """
-from datetime import datetime, timezone
-
-from fastapi import Depends, Header, HTTPException, Request
+from fastapi import Depends, Header, HTTPException
 from sqlalchemy.orm import Session as SQLAlchemySession
 
 from app.auth.jwks import verify_bearer_token
-from app.config import settings
+from app.auth.user_service import upsert_user
 from app.db import get_db
-from app.models.session import Session as SessionModel
 from app.models.user import User
-
-
-def get_current_user(request: Request, db: SQLAlchemySession = Depends(get_db)) -> User:
-    """Resolves the authenticated user from the session cookie.
-
-    Raises 401 when the cookie is missing, or when it references a session
-    that does not exist or has expired - never silently allows an
-    unauthenticated request through (AUTH-01 core requirement).
-    """
-    token = request.cookies.get(settings.session_cookie_name)
-    if not token:
-        raise HTTPException(status_code=401, detail="Not authenticated")
-    session = db.query(SessionModel).filter_by(id=token).first()
-    if session is None:
-        raise HTTPException(status_code=401, detail="Session expired")
-    # `sessions.expires_at` is a naive DateTime column (no timezone stored),
-    # populated with UTC values - normalize to aware UTC before comparing so
-    # this works whether the driver returns a naive or aware value.
-    expires_at = session.expires_at
-    if expires_at.tzinfo is None:
-        expires_at = expires_at.replace(tzinfo=timezone.utc)
-    if expires_at < datetime.now(timezone.utc):
-        raise HTTPException(status_code=401, detail="Session expired")
-    return session.user
 
 
 def verify_bearer_token_dep(authorization: str | None = Header(default=None)) -> dict:
@@ -58,3 +25,19 @@ def verify_bearer_token_dep(authorization: str | None = Header(default=None)) ->
         return verify_bearer_token(token)
     except Exception as exc:
         raise HTTPException(status_code=401, detail="Invalid bearer token") from exc
+
+
+def get_current_user(
+    db: SQLAlchemySession = Depends(get_db),
+    token_claims: dict = Depends(verify_bearer_token_dep),
+) -> User:
+    """Resolves the user from the verified Bearer token claims.
+
+    Automatically syncs user records in Postgres when new/updated profiles
+    arrive from Keycloak via the BFF.
+    """
+    sub = token_claims.get("sub")
+    email = token_claims.get("email")
+    if not sub or not email:
+        raise HTTPException(status_code=401, detail="Invalid token claims")
+    return upsert_user(db, sub=sub, email=email)
