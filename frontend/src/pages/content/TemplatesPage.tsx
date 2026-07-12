@@ -307,14 +307,6 @@ export default function TemplatesPage() {
           </div>
         ) : selectedTemplate ? (
           <div className="flex-1 flex flex-col gap-md min-h-0">
-            {/* HTML Source Preview box */}
-            <div className="flex-1 bg-white border border-outline-variant rounded-lg p-md shadow-sm relative group overflow-hidden flex flex-col min-h-0">
-              <span className="font-label-caps text-[10px] text-primary mb-xs block">HTML PREVIEW</span>
-              <pre className="flex-1 overflow-auto rounded border border-outline-variant bg-surface-container-lowest p-sm text-[11px] font-mono leading-relaxed text-on-surface">
-                <code>{selectedTemplate.html}</code>
-              </pre>
-            </div>
-
             {/* Properties box */}
             <div className="bg-white border border-outline-variant p-md rounded-lg">
               <label className="font-label-caps text-[10px] text-primary mb-xs block">PROPERTIES</label>
