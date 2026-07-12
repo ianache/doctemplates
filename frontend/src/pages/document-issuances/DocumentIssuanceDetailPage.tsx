@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
-import PageHeader from "../../components/PageHeader";
+import PageHeader from "../../components/molecules/PageHeader";
 import { API_BASE_URL, apiFetch } from "../../lib/api";
 import {
   getDocumentIssuance,

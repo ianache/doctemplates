@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, Outlet } from "react-router-dom";
 
-import PageHeader from "../../components/PageHeader";
+import PageHeader from "../../components/molecules/PageHeader";
 import {
   listHtmlTemplates,
   listStaticPdfAssets,

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { Link } from "react-router-dom";
 
-import PageHeader from "../../components/PageHeader";
+import PageHeader from "../../components/molecules/PageHeader";
 import DateRange from "../../components/molecules/DateRange";
 import {
   listDocumentIssuances,

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-import PageHeader from "../../components/PageHeader";
+import PageHeader from "../../components/molecules/PageHeader";
 import PagedTable from "../../components/organisms/PagedTable";
 import type { Column } from "../../components/organisms/PagedTable";
 import { type DocumentTypeListItem, listDocumentTypes } from "../../lib/documentTypes";
