@@ -4,7 +4,6 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { createHtmlTemplate, getHtmlTemplate, updateHtmlTemplate, previewHtmlTemplate } from "../../lib/content";
 import { getDocumentType, listDocumentTypes, type DocumentTypeDetail, type DocumentTypeListItem } from "../../lib/documentTypes";
 import { buildSchemaFieldTree, type SchemaFieldTreeNode } from "../../lib/schemaFields";
-import HtmlJinjaEditor from "../../components/HtmlJinjaEditor";
 
 function getDragTextForNode(node: SchemaFieldTreeNode, fields: any[]): string {
   if (node.type === "list") {
@@ -76,7 +75,7 @@ export default function HtmlTemplateCreatePage() {
   const [mockDataError, setMockDataError] = useState<string | null>(null);
 
   // Layout & Editing Modes
-  const [editorMode, setEditorMode] = useState<"visual" | "code" | "preview">("code");
+  const [editorMode, setEditorMode] = useState<"code" | "preview">("code");
   const [collapsedTokens, setCollapsedTokens] = useState<Set<string>>(new Set());
   const [previewHtml, setPreviewHtml] = useState<string>("");
   const [previewLoading, setPreviewLoading] = useState(false);
@@ -162,7 +161,7 @@ export default function HtmlTemplateCreatePage() {
     };
   }, [documentTypeId, htmlTouched, isEditMode, name]);
 
-  const handleSetEditorMode = (mode: "visual" | "code" | "preview") => {
+  const handleSetEditorMode = (mode: "code" | "preview") => {
     setEditorMode(mode);
   };
 
@@ -474,18 +473,6 @@ export default function HtmlTemplateCreatePage() {
               <button
                 type="button"
                 className={`px-md py-1 font-bold text-xs rounded transition-all flex items-center gap-xs ${
-                  editorMode === "visual"
-                    ? "bg-white text-primary shadow-sm"
-                    : "text-secondary hover:text-primary"
-                }`}
-                onClick={() => handleSetEditorMode("visual")}
-              >
-                <span className="material-symbols-outlined text-[16px]">visibility</span>
-                Visual
-              </button>
-              <button
-                type="button"
-                className={`px-md py-1 font-bold text-xs rounded transition-all flex items-center gap-xs ${
                   editorMode === "code"
                     ? "bg-white text-primary shadow-sm"
                     : "text-secondary hover:text-primary"
@@ -540,16 +527,7 @@ export default function HtmlTemplateCreatePage() {
               </div>
             )}
 
-            {editorMode === "visual" && (
-              <HtmlJinjaEditor
-                value={html}
-                onChange={(syncedHtml) => {
-                  setHtml(syncedHtml);
-                  setHtmlTouched(true);
-                }}
-                css={css}
-              />
-            )}
+
 
             {editorMode === "preview" && (
               <div className="w-full max-w-[800px] bg-white min-h-[1056px] shadow-lg rounded border border-outline-variant flex flex-col relative overflow-hidden">
