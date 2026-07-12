@@ -108,7 +108,7 @@ async def proxy_endpoint(request: Request, path: str):
                                     "reason": "token_refresh_failed",
                                 },
                             )
-                            res.delete_cookie(cookie_name)
+                            res.delete_cookie(cookie_name, path="/")
                             return res
         else:
             res = JSONResponse(
@@ -118,7 +118,7 @@ async def proxy_endpoint(request: Request, path: str):
                     "reason": "no_refresh_token",
                 },
             )
-            res.delete_cookie(cookie_name)
+            res.delete_cookie(cookie_name, path="/")
             return res
 
     # Build proxy request headers
@@ -173,6 +173,7 @@ async def proxy_endpoint(request: Request, path: str):
             secure=settings.session_cookie_secure,
             samesite="lax",
             max_age=settings.session_ttl_seconds,
+            path="/",
         )
 
     return response

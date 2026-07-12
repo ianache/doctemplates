@@ -5,8 +5,8 @@ import secrets
 from urllib.parse import urlencode
 
 import httpx
-from fastapi import APIRouter, HTTPException, Request, Response
-from fastapi.responses import RedirectResponse
+from fastapi import APIRouter, HTTPException, Request
+from fastapi.responses import JSONResponse, RedirectResponse
 
 from app.auth.session import encrypt_session
 from app.config import settings
@@ -43,7 +43,7 @@ async def login(request: Request):
     )
 
     redirect_url = f"{_oidc_endpoint('auth')}?{query}"
-    res = RedirectResponse(redirect_url)
+    res = RedirectResponse(redirect_url, status_code=302)
 
     # Set short-lived cookies
     res.set_cookie(
@@ -53,6 +53,7 @@ async def login(request: Request):
         secure=settings.session_cookie_secure,
         samesite="lax",
         max_age=300,
+        path="/",
     )
     res.set_cookie(
         key="oidc_code_verifier",
@@ -61,6 +62,7 @@ async def login(request: Request):
         secure=settings.session_cookie_secure,
         samesite="lax",
         max_age=300,
+        path="/",
     )
     return res
 
@@ -118,7 +120,8 @@ async def auth_callback(request: Request):
         logging.exception("OIDC callback token exchange failed")
         reason = "callback_failed"
         return RedirectResponse(
-            f"{settings.frontend_origin}/login?error=callback_failed&reason={reason}"
+            f"{settings.frontend_origin}/login?error=callback_failed&reason={reason}",
+            status_code=302,
         )
     finally:
         if should_close:
@@ -140,7 +143,7 @@ async def auth_callback(request: Request):
 
     session_cookie_value = encrypt_session(session_payload, settings.session_secret)
 
-    res = RedirectResponse(settings.frontend_origin)
+    res = RedirectResponse(settings.frontend_origin, status_code=302)
     # Set session cookie
     res.set_cookie(
         key=settings.session_cookie_name,
@@ -149,14 +152,16 @@ async def auth_callback(request: Request):
         secure=settings.session_cookie_secure,
         samesite="lax",
         max_age=settings.session_ttl_seconds,
+        path="/",
     )
     # Delete short-lived cookies
-    res.delete_cookie("oidc_state")
-    res.delete_cookie("oidc_code_verifier")
+    res.delete_cookie("oidc_state", path="/")
+    res.delete_cookie("oidc_code_verifier", path="/")
     return res
 
 
 @router.post("/logout")
-async def logout(response: Response):
-    response.delete_cookie(settings.session_cookie_name)
-    return {"status": "logged_out"}
+async def logout():
+    res = JSONResponse({"status": "logged_out"})
+    res.delete_cookie(settings.session_cookie_name, path="/")
+    return res

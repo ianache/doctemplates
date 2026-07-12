@@ -17,6 +17,10 @@ class Settings(BaseSettings):
     database_url: str
     test_database_url: str
 
+    session_secret: str = ""
+    session_cookie_name: str = "docmanagement_session"
+    session_ttl_seconds: int = 604800
+
     secret_key: str | None = None
     frontend_origin: str
     content_storage_root: str = "../.content-storage"
