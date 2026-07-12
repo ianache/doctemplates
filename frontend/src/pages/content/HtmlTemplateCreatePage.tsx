@@ -1,9 +1,10 @@
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { createHtmlTemplate, getHtmlTemplate, updateHtmlTemplate, previewHtmlTemplate } from "../../lib/content";
 import { getDocumentType, listDocumentTypes, type DocumentTypeDetail, type DocumentTypeListItem } from "../../lib/documentTypes";
 import { buildSchemaFieldTree, type SchemaFieldTreeNode } from "../../lib/schemaFields";
+import HtmlJinjaEditor from "../../components/HtmlJinjaEditor";
 
 function getDragTextForNode(node: SchemaFieldTreeNode, fields: any[]): string {
   if (node.type === "list") {
@@ -57,96 +58,10 @@ function getDragTextForNode(node: SchemaFieldTreeNode, fields: any[]): string {
   return `{{ ${node.fullPath} }}`;
 }
 
-function templateToHtml(template: string): string {
-  if (!template) return "";
-
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(template, "text/html");
-
-  const walk = (parent: Node) => {
-    const children = Array.from(parent.childNodes);
-    for (const child of children) {
-      if (child.nodeType === Node.TEXT_NODE) {
-        const text = child.nodeValue || "";
-        if (text.includes("{%") || text.includes("{{")) {
-          const fragment = doc.createDocumentFragment();
-          const parts = text.split(/(\{%[\s\S]*?%\})|(\{\{[\s\S]*?\}\})/g);
-          
-          for (let i = 0; i < parts.length; i++) {
-            const part = parts[i];
-            if (part === undefined || part === "") continue;
-
-            if (part.startsWith("{%") && part.endsWith("%}")) {
-              const encoded = btoa(unescape(encodeURIComponent(part)));
-              const commentNode = doc.createComment(`JINJA_STMT:${encoded}`);
-              fragment.appendChild(commentNode);
-            } else if (part.startsWith("{{") && part.endsWith("}}")) {
-              const encoded = btoa(unescape(encodeURIComponent(part)));
-              const span = doc.createElement("span");
-              span.className = "jinja-expression bg-surface-container-highest text-on-surface px-xs py-0.5 rounded font-mono text-xs mx-0.5 select-none";
-              span.textContent = part;
-              span.setAttribute("contenteditable", "false");
-              span.setAttribute("data-jinja-raw", encoded);
-              fragment.appendChild(span);
-            } else {
-              fragment.appendChild(doc.createTextNode(part));
-            }
-          }
-          child.replaceWith(fragment);
-        }
-      } else if (child.nodeType === Node.ELEMENT_NODE) {
-        const el = child as HTMLElement;
-        const tagName = el.tagName.toLowerCase();
-        if (tagName !== "script" && tagName !== "style") {
-          walk(child);
-        }
-      }
-    }
-  };
-
-  walk(doc.body);
-
-  const hasHtmlTag = /<html/i.test(template);
-  if (hasHtmlTag) {
-    return "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
-  } else {
-    return doc.body.innerHTML;
-  }
-}
-
-function htmlToTemplate(html: string): string {
-  if (!html) return "";
-  
-  let result = html;
-  
-  // 1. Decode statement comments
-  result = result.replace(/<!--\s*JINJA_STMT:([A-Za-z0-9+/=]+)\s*-->/g, (match, encoded) => {
-    try {
-      return decodeURIComponent(escape(atob(encoded)));
-    } catch (e) {
-      console.error("Failed to decode Jinja statement comment", e);
-      return match;
-    }
-  });
-
-  // 2. Decode expression spans
-  result = result.replace(/<span[^>]*?data-jinja-raw="([^"]+)"[^>]*?>[\s\S]*?<\/span>/g, (match, encoded) => {
-    try {
-      return decodeURIComponent(escape(atob(encoded)));
-    } catch (e) {
-      console.error("Failed to decode Jinja expression span", e);
-      return match;
-    }
-  });
-
-  return result;
-}
-
 export default function HtmlTemplateCreatePage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEditMode = !!id;
-  const visualRef = useRef<HTMLDivElement>(null);
 
   const [documentTypes, setDocumentTypes] = useState<DocumentTypeListItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -190,11 +105,6 @@ export default function HtmlTemplateCreatePage() {
             if (t.mock_data) {
               setMockDataJson(JSON.stringify(t.mock_data, null, 2));
             }
-            setTimeout(() => {
-              if (visualRef.current) {
-                visualRef.current.innerHTML = templateToHtml(t.html);
-              }
-            }, 0);
           }
         } else {
           setDocumentTypeId(rows[0]?.id ?? "");
@@ -243,11 +153,6 @@ export default function HtmlTemplateCreatePage() {
 </body>
 </html>`;
           setHtml(defaultHtml);
-          setTimeout(() => {
-            if (visualRef.current) {
-              visualRef.current.innerHTML = templateToHtml(defaultHtml);
-            }
-          }, 0);
         }
       }
     });
@@ -257,24 +162,8 @@ export default function HtmlTemplateCreatePage() {
     };
   }, [documentTypeId, htmlTouched, isEditMode, name]);
 
-  const handleVisualChange = () => {
-    setHtmlTouched(true);
-  };
-
   const handleSetEditorMode = (mode: "visual" | "code" | "preview") => {
-    let currentHtml = html;
-    if (editorMode === "visual" && visualRef.current) {
-      currentHtml = htmlToTemplate(visualRef.current.innerHTML);
-      setHtml(currentHtml);
-    }
     setEditorMode(mode);
-    if (mode === "visual") {
-      setTimeout(() => {
-        if (visualRef.current) {
-          visualRef.current.innerHTML = templateToHtml(currentHtml);
-        }
-      }, 0);
-    }
   };
 
   useEffect(() => {
@@ -356,40 +245,6 @@ export default function HtmlTemplateCreatePage() {
     setHtmlTouched(true);
   };
 
-  const handleVisualDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const token = e.dataTransfer.getData("text/plain");
-    if (!token) return;
-
-    // Inject token as a styled span / node at the cursor position
-    const selection = window.getSelection();
-    if (!selection || !selection.rangeCount) return;
-
-    const range = selection.getRangeAt(0);
-    // Check if drop is inside the canvas
-    if (!visualRef.current?.contains(range.startContainer)) return;
-
-    range.deleteContents();
-
-    // Create a pill styled token node
-    const isExpression = token.includes("for") || token.includes("endfor") || token.includes("if");
-    const node = document.createElement("span");
-    node.className = isExpression
-      ? "jinja-statement bg-primary-fixed text-primary px-xs py-0.5 rounded font-mono text-xs mx-0.5 select-none"
-      : "jinja-expression bg-surface-container-highest text-on-surface px-xs py-0.5 rounded font-mono text-xs mx-0.5 select-none";
-    node.textContent = token;
-    // Set contenteditable false on token to make it atomic
-    node.setAttribute("contenteditable", "false");
-
-    const encoded = btoa(unescape(encodeURIComponent(token)));
-    node.setAttribute("data-jinja-raw", encoded);
-
-    range.insertNode(node);
-    range.collapse(false);
-
-    handleVisualChange();
-  };
-
   const handleSubmitForm = async (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     setSubmitError(null);
@@ -418,16 +273,11 @@ export default function HtmlTemplateCreatePage() {
     }
 
     try {
-      let finalHtml = html;
-      if (editorMode === "visual" && visualRef.current) {
-        finalHtml = htmlToTemplate(visualRef.current.innerHTML);
-      }
-
       if (isEditMode && id) {
         await updateHtmlTemplate(id, {
           document_type_id: documentTypeId,
           name,
-          html: finalHtml,
+          html,
           css,
           mock_data: parsedMock,
         });
@@ -436,7 +286,7 @@ export default function HtmlTemplateCreatePage() {
         await createHtmlTemplate({
           document_type_id: documentTypeId,
           name,
-          html: finalHtml,
+          html,
           css,
           mock_data: parsedMock,
         });
@@ -458,15 +308,6 @@ export default function HtmlTemplateCreatePage() {
       return next;
     });
   };
-
-  const scopedCss = useMemo(() => {
-    if (!css) return "";
-    return css.replace(/([^\r\n,{}]+)(?=\s*{[^{}]*})/g, (match) => {
-      const trimmed = match.trim();
-      if (trimmed.startsWith("@")) return trimmed; // Skip @media, @keyframes, @page
-      return trimmed.split(",").map(selector => `#visual-canvas-root ${selector.trim()}`).join(", ");
-    });
-  }, [css]);
 
   const tokenTree = useMemo(() => {
     if (!selectedDocumentType?.fields) return [];
@@ -700,18 +541,14 @@ export default function HtmlTemplateCreatePage() {
             )}
 
             {editorMode === "visual" && (
-              <div className="w-full max-w-[800px] bg-white min-h-[1056px] shadow-lg rounded p-xl border border-outline-variant flex flex-col relative">
-                <style dangerouslySetInnerHTML={{ __html: scopedCss }} />
-                <div
-                  id="visual-canvas-root"
-                  ref={visualRef}
-                  contentEditable
-                  onInput={handleVisualChange}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={handleVisualDrop}
-                  className="w-full flex-1 min-h-[600px] focus:outline-none prose max-w-none"
-                />
-              </div>
+              <HtmlJinjaEditor
+                value={html}
+                onChange={(syncedHtml) => {
+                  setHtml(syncedHtml);
+                  setHtmlTouched(true);
+                }}
+                css={css}
+              />
             )}
 
             {editorMode === "preview" && (
