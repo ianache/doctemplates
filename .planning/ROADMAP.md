@@ -70,3 +70,20 @@ Plans:
 - [x] 12-02-PLAN.md — Move DesignPageCard, TokenExplorer, and HtmlJinjaEditor to subfolders under document-designs/components/
 - [x] 12-03-PLAN.md — Move AddContentModal, DesignPageInspector, MockDataPanel, and PreviewFrame to document-designs/components/organisms/
 - [x] 12-04-PLAN.md — Move SchemaFieldEditor and SchemaMetadataEditor to document-types/components/organisms/
+
+### Phase 13: implementar la propuesta de separacion de almacenamiento
+
+**Goal:** Decouple file storage in the backend by introducing a StorageProvider abstraction supporting local filesystem and S3-compatible providers (MinIO, Oracle Object Storage).
+**Requirements:** STORAGE-01, STORAGE-02, STORAGE-03, STORAGE-04
+**Depends on:** Phase 12
+**Plans:** 5 plans pending
+
+Plans:
+
+- [ ] 13-01-PLAN.md — Rename stored_path/file_path to storage_key in DB and generate migration.
+- [ ] 13-02-PLAN.md — Define StorageProvider interface, LocalStorageProvider and update config.py.
+- [ ] 13-03-PLAN.md — Refactor content_storage.py, pdf_generator.py and API routers to consume StorageProvider.
+- [ ] 13-04-PLAN.md — Implement S3StorageProvider using boto3 and add environment variables.
+- [ ] 13-05-PLAN.md — Create test_storage_providers.py and verify all backend tests pass.
+
+
