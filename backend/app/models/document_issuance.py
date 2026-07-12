@@ -18,7 +18,7 @@ class DocumentIssuance(Base):
     design_version_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("document_designs.id", ondelete="RESTRICT")
     )
-    file_path: Mapped[str]
+    storage_key: Mapped[str]
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
     input_data: Mapped[dict] = mapped_column(JSON)
     metadata_values: Mapped[dict | None] = mapped_column(JSON, default=None)

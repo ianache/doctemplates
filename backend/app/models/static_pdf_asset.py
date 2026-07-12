@@ -13,7 +13,7 @@ class StaticPdfAsset(Base):
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     original_filename: Mapped[str]
     stored_filename: Mapped[str] = mapped_column(index=True)
-    stored_path: Mapped[str]
+    storage_key: Mapped[str]
     page_count: Mapped[int]
     page_start: Mapped[int | None]
     page_end: Mapped[int | None]
