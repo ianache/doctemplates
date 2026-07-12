@@ -69,26 +69,28 @@ function templateToHtml(template: string): string {
       if (child.nodeType === Node.TEXT_NODE) {
         const text = child.nodeValue || "";
         if (text.includes("{%") || text.includes("{{")) {
-          const tempDiv = document.createElement("div");
-          let htmlSnippet = text;
+          const fragment = doc.createDocumentFragment();
+          const parts = text.split(/(\{%[\s\S]*?%\})|(\{\{[\s\S]*?\}\})/g);
+          
+          for (let i = 0; i < parts.length; i++) {
+            const part = parts[i];
+            if (part === undefined || part === "") continue;
 
-          // Convert {% ... %}
-          htmlSnippet = htmlSnippet.replace(/\{%([\s\S]*?)%\}/g, (match) => {
-            const encoded = btoa(unescape(encodeURIComponent(match)));
-            return `<span class="jinja-statement bg-primary-fixed text-primary px-xs py-0.5 rounded font-mono text-xs mx-0.5 select-none" data-jinja-raw="${encoded}" contenteditable="false">${match}</span>`;
-          });
-
-          // Convert {{ ... }}
-          htmlSnippet = htmlSnippet.replace(/\{\{([\s\S]*?)\}\}/g, (match) => {
-            const encoded = btoa(unescape(encodeURIComponent(match)));
-            return `<span class="jinja-expression bg-surface-container-highest text-on-surface px-xs py-0.5 rounded font-mono text-xs mx-0.5 select-none" data-jinja-raw="${encoded}" contenteditable="false">${match}</span>`;
-          });
-
-          tempDiv.innerHTML = htmlSnippet;
-
-          const fragment = document.createDocumentFragment();
-          while (tempDiv.firstChild) {
-            fragment.appendChild(tempDiv.firstChild);
+            if (part.startsWith("{%") && part.endsWith("%}")) {
+              const encoded = btoa(unescape(encodeURIComponent(part)));
+              const commentNode = doc.createComment(`JINJA_STMT:${encoded}`);
+              fragment.appendChild(commentNode);
+            } else if (part.startsWith("{{") && part.endsWith("}}")) {
+              const encoded = btoa(unescape(encodeURIComponent(part)));
+              const span = doc.createElement("span");
+              span.className = "jinja-expression bg-surface-container-highest text-on-surface px-xs py-0.5 rounded font-mono text-xs mx-0.5 select-none";
+              span.textContent = part;
+              span.setAttribute("contenteditable", "false");
+              span.setAttribute("data-jinja-raw", encoded);
+              fragment.appendChild(span);
+            } else {
+              fragment.appendChild(doc.createTextNode(part));
+            }
           }
           child.replaceWith(fragment);
         }
@@ -114,14 +116,30 @@ function templateToHtml(template: string): string {
 
 function htmlToTemplate(html: string): string {
   if (!html) return "";
-  return html.replace(/<span[^>]*?data-jinja-raw="([^"]+)"[^>]*?>[\s\S]*?<\/span>/g, (match, encoded) => {
+  
+  let result = html;
+  
+  // 1. Decode statement comments
+  result = result.replace(/<!--\s*JINJA_STMT:([A-Za-z0-9+/=]+)\s*-->/g, (match, encoded) => {
     try {
       return decodeURIComponent(escape(atob(encoded)));
     } catch (e) {
-      console.error("Failed to decode Jinja raw data in regex", e);
+      console.error("Failed to decode Jinja statement comment", e);
       return match;
     }
   });
+
+  // 2. Decode expression spans
+  result = result.replace(/<span[^>]*?data-jinja-raw="([^"]+)"[^>]*?>[\s\S]*?<\/span>/g, (match, encoded) => {
+    try {
+      return decodeURIComponent(escape(atob(encoded)));
+    } catch (e) {
+      console.error("Failed to decode Jinja expression span", e);
+      return match;
+    }
+  });
+
+  return result;
 }
 
 export default function HtmlTemplateCreatePage() {
