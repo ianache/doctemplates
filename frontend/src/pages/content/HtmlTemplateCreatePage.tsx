@@ -57,6 +57,73 @@ function getDragTextForNode(node: SchemaFieldTreeNode, fields: any[]): string {
   return `{{ ${node.fullPath} }}`;
 }
 
+function templateToHtml(template: string): string {
+  if (!template) return "";
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(template, "text/html");
+
+  const walk = (parent: Node) => {
+    const children = Array.from(parent.childNodes);
+    for (const child of children) {
+      if (child.nodeType === Node.TEXT_NODE) {
+        const text = child.nodeValue || "";
+        if (text.includes("{%") || text.includes("{{")) {
+          const tempDiv = document.createElement("div");
+          let htmlSnippet = text;
+
+          // Convert {% ... %}
+          htmlSnippet = htmlSnippet.replace(/\{%([\s\S]*?)%\}/g, (match) => {
+            const encoded = btoa(unescape(encodeURIComponent(match)));
+            return `<span class="jinja-statement bg-primary-fixed text-primary px-xs py-0.5 rounded font-mono text-xs mx-0.5 select-none" data-jinja-raw="${encoded}" contenteditable="false">${match}</span>`;
+          });
+
+          // Convert {{ ... }}
+          htmlSnippet = htmlSnippet.replace(/\{\{([\s\S]*?)\}\}/g, (match) => {
+            const encoded = btoa(unescape(encodeURIComponent(match)));
+            return `<span class="jinja-expression bg-surface-container-highest text-on-surface px-xs py-0.5 rounded font-mono text-xs mx-0.5 select-none" data-jinja-raw="${encoded}" contenteditable="false">${match}</span>`;
+          });
+
+          tempDiv.innerHTML = htmlSnippet;
+
+          const fragment = document.createDocumentFragment();
+          while (tempDiv.firstChild) {
+            fragment.appendChild(tempDiv.firstChild);
+          }
+          child.replaceWith(fragment);
+        }
+      } else if (child.nodeType === Node.ELEMENT_NODE) {
+        const el = child as HTMLElement;
+        const tagName = el.tagName.toLowerCase();
+        if (tagName !== "script" && tagName !== "style") {
+          walk(child);
+        }
+      }
+    }
+  };
+
+  walk(doc.body);
+
+  const hasHtmlTag = /<html/i.test(template);
+  if (hasHtmlTag) {
+    return "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
+  } else {
+    return doc.body.innerHTML;
+  }
+}
+
+function htmlToTemplate(html: string): string {
+  if (!html) return "";
+  return html.replace(/<span[^>]*?data-jinja-raw="([^"]+)"[^>]*?>[\s\S]*?<\/span>/g, (match, encoded) => {
+    try {
+      return decodeURIComponent(escape(atob(encoded)));
+    } catch (e) {
+      console.error("Failed to decode Jinja raw data in regex", e);
+      return match;
+    }
+  });
+}
+
 export default function HtmlTemplateCreatePage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -107,7 +174,7 @@ export default function HtmlTemplateCreatePage() {
             }
             setTimeout(() => {
               if (visualRef.current) {
-                visualRef.current.innerHTML = t.html;
+                visualRef.current.innerHTML = templateToHtml(t.html);
               }
             }, 0);
           }
@@ -160,7 +227,7 @@ export default function HtmlTemplateCreatePage() {
           setHtml(defaultHtml);
           setTimeout(() => {
             if (visualRef.current) {
-              visualRef.current.innerHTML = defaultHtml;
+              visualRef.current.innerHTML = templateToHtml(defaultHtml);
             }
           }, 0);
         }
@@ -174,7 +241,7 @@ export default function HtmlTemplateCreatePage() {
 
   const handleVisualChange = () => {
     if (visualRef.current) {
-      setHtml(visualRef.current.innerHTML);
+      setHtml(htmlToTemplate(visualRef.current.innerHTML));
       setHtmlTouched(true);
     }
   };
@@ -184,7 +251,7 @@ export default function HtmlTemplateCreatePage() {
     if (mode === "visual") {
       setTimeout(() => {
         if (visualRef.current) {
-          visualRef.current.innerHTML = html;
+          visualRef.current.innerHTML = templateToHtml(html);
         }
       }, 0);
     }
@@ -288,11 +355,14 @@ export default function HtmlTemplateCreatePage() {
     const isExpression = token.includes("for") || token.includes("endfor") || token.includes("if");
     const node = document.createElement("span");
     node.className = isExpression
-      ? "bg-primary-fixed text-primary px-xs py-0.5 rounded font-mono text-xs mx-0.5 select-none"
-      : "bg-surface-container-highest text-on-surface px-xs py-0.5 rounded font-mono text-xs mx-0.5 select-none";
+      ? "jinja-statement bg-primary-fixed text-primary px-xs py-0.5 rounded font-mono text-xs mx-0.5 select-none"
+      : "jinja-expression bg-surface-container-highest text-on-surface px-xs py-0.5 rounded font-mono text-xs mx-0.5 select-none";
     node.textContent = token;
     // Set contenteditable false on token to make it atomic
     node.setAttribute("contenteditable", "false");
+
+    const encoded = btoa(unescape(encodeURIComponent(token)));
+    node.setAttribute("data-jinja-raw", encoded);
 
     range.insertNode(node);
     range.collapse(false);
