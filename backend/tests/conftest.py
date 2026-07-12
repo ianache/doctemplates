@@ -56,14 +56,52 @@ def db_session(test_engine) -> Generator[SQLAlchemySession, None, None]:
 
 
 @pytest.fixture
-def client(db_session: SQLAlchemySession) -> Generator[TestClient, None, None]:
-    """FastAPI TestClient with `get_db` overridden to use the test DB session."""
+def client(
+    db_session: SQLAlchemySession,
+    rsa_keypair: tuple[bytes, bytes],
+    mint_test_jwt: Callable[..., str],
+) -> Generator[TestClient, None, None]:
+    """FastAPI TestClient with `get_db` overridden to use the test DB session.
+
+    Intercepts requests setting 'docmanagement_session' cookie to automatically
+    mint a mock JWT and inject it as a Bearer Authorization header.
+    """
+    from app.models.session import Session as SessionModel
 
     def _get_db_override() -> Generator[SQLAlchemySession, None, None]:
         yield db_session
 
     app.dependency_overrides[get_db] = _get_db_override
-    with TestClient(app) as test_client:
+
+    class BearerTestClient(TestClient):
+        def request(self, method: str, url: str, **kwargs):
+            session_cookie = self.cookies.get("docmanagement_session")
+            if not session_cookie:
+                cookies = kwargs.get("cookies")
+                if cookies is not None:
+                    session_cookie = cookies.get("docmanagement_session")
+
+            if session_cookie:
+                session = db_session.query(SessionModel).filter_by(id=session_cookie).first()
+                if session:
+                    import datetime
+                    claims = {
+                        "sub": session.user.sub,
+                        "email": session.user.email,
+                        "aud": settings.oidc_api_audience,
+                        "iss": settings.oidc_issuer,
+                        "exp": (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=5)).timestamp(),
+                    }
+                    token = mint_test_jwt(claims)
+                    headers = kwargs.get("headers")
+                    if headers is None:
+                        headers = {}
+                        kwargs["headers"] = headers
+                    headers["Authorization"] = f"Bearer {token}"
+
+            return super().request(method, url, **kwargs)
+
+    with BearerTestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.pop(get_db, None)
 
@@ -96,17 +134,11 @@ def mint_test_jwt(rsa_keypair: tuple[bytes, bytes]) -> Callable[..., str]:
     return mint
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def mock_jwks_client(monkeypatch: pytest.MonkeyPatch, rsa_keypair: tuple[bytes, bytes]):
     """Monkeypatches `app.auth.jwks._get_jwks_client` to return a stub whose
     `get_signing_key_from_jwt(token)` resolves to the test RSA public key
     regardless of token/kid.
-
-    Forward dependency: `app.auth.jwks` does not exist yet in this Wave 0
-    plan - it is created by 01-04-PLAN's Task 1. Until then this fixture is
-    inert: the monkeypatch target module import is attempted and skipped
-    gracefully if it fails, so this fixture is safe to request even before
-    that module exists.
     """
     _, public_pem = rsa_keypair
     public_key = load_pem_public_key(public_pem)
