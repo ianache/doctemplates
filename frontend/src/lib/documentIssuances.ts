@@ -1,6 +1,6 @@
 import { apiFetch, jsonOrError } from "./api";
 
-export type DocumentIssuanceStatus = "success" | "failure";
+export type DocumentIssuanceStatus = "queued" | "processing" | "success" | "failure";
 export type DocumentTracelogType = "generation" | "download" | "share" | string;
 
 export interface DocumentIssuanceFilters {
@@ -27,6 +27,12 @@ export interface DocumentIssuanceListItem {
   created_at: string;
   preview_url: string;
   download_url: string;
+  celery_task_id?: string | null;
+  error_message?: string | null;
+  queued_at?: string | null;
+  started_at?: string | null;
+  completed_at?: string | null;
+  retry_count?: number;
 }
 
 export type DocumentIssuanceDetail = DocumentIssuanceListItem;

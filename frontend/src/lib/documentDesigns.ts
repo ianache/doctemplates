@@ -206,3 +206,16 @@ export async function updateDocumentDesign(
     }),
   );
 }
+
+export async function generateDocumentDesign(
+  designId: string,
+  payload: Record<string, unknown> = {},
+): Promise<any> {
+  return jsonOrError(
+    await apiFetch(`/api/document-designs/${designId}/generate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }),
+  );
+}

@@ -12,16 +12,22 @@ import {
 } from "../../lib/documentIssuances";
 
 const STATUS_LABELS: Record<DocumentIssuanceStatus, string> = {
+  queued: "Queued",
+  processing: "Processing",
   success: "Success",
   failure: "Failure",
 };
 
 const STATUS_STYLES: Record<DocumentIssuanceStatus, string> = {
+  queued: "text-amber-600",
+  processing: "text-blue-600",
   success: "text-green-700",
   failure: "text-error",
 };
 
 const STATUS_DOT: Record<DocumentIssuanceStatus, string> = {
+  queued: "bg-amber-600",
+  processing: "bg-blue-600",
   success: "bg-green-700",
   failure: "bg-error",
 };
@@ -45,22 +51,42 @@ export default function DocumentLibraryPage() {
   const [appliedFilters, setAppliedFilters] = useState<DocumentIssuanceFilters>(EMPTY_FILTERS);
   const [items, setItems] = useState<DocumentIssuanceListItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-
   useEffect(() => {
     let cancelled = false;
-    setError(null);
-    listDocumentIssuances(appliedFilters)
-      .then((data) => {
-        if (!cancelled) setItems(data);
-      })
-      .catch((err) => {
-        if (!cancelled) {
+    let timeoutId: any = null;
+    let pollCount = 0;
+
+    const fetchData = () => {
+      setError(null);
+      listDocumentIssuances(appliedFilters)
+        .then((data) => {
+          if (cancelled) return;
+          setItems(data);
+
+          // Check if there are any non-terminal jobs
+          const hasNonTerminal = data.some(
+            (item) => item.status === "queued" || item.status === "processing"
+          );
+
+          if (hasNonTerminal) {
+            pollCount++;
+            // Calculate delay: 2s for first 60s (30 polls), then 5s
+            const delay = pollCount <= 30 ? 2000 : 5000;
+            timeoutId = setTimeout(fetchData, delay);
+          }
+        })
+        .catch((err) => {
+          if (cancelled) return;
           setItems([]);
           setError(err instanceof Error ? err.message : "We couldn't load document issuances.");
-        }
-      });
+        });
+    };
+
+    fetchData();
+
     return () => {
       cancelled = true;
+      if (timeoutId) clearTimeout(timeoutId);
     };
   }, [appliedFilters]);
 
@@ -122,6 +148,8 @@ export default function DocumentLibraryPage() {
             onChange={(event) => updateFilter("status", event.target.value)}
           >
             <option value="">All Status</option>
+            <option value="queued">Queued</option>
+            <option value="processing">Processing</option>
             <option value="success">Success</option>
             <option value="failure">Failure</option>
           </select>

@@ -1,6 +1,8 @@
 import type { DocumentIssuanceDetail } from "../../lib/documentIssuances";
 
 const STATUS_LABELS: Record<string, string> = {
+  queued: "Queued",
+  processing: "Processing",
   success: "Success",
   failure: "Failure",
 };
@@ -45,6 +47,46 @@ export default function IssuanceProperties({ detail }: IssuancePropertiesProps) 
               {formatDate(detail.created_at)}
             </dd>
           </div>
+          {detail.queued_at && (
+            <div className="flex justify-between py-xs gap-md">
+              <dt className="text-on-surface-variant break-all select-all">Queued At</dt>
+              <dd className="font-semibold text-right break-all select-all">
+                {formatDate(detail.queued_at)}
+              </dd>
+            </div>
+          )}
+          {detail.started_at && (
+            <div className="flex justify-between py-xs gap-md">
+              <dt className="text-on-surface-variant break-all select-all">Started At</dt>
+              <dd className="font-semibold text-right break-all select-all">
+                {formatDate(detail.started_at)}
+              </dd>
+            </div>
+          )}
+          {detail.completed_at && (
+            <div className="flex justify-between py-xs gap-md">
+              <dt className="text-on-surface-variant break-all select-all">Completed At</dt>
+              <dd className="font-semibold text-right break-all select-all">
+                {formatDate(detail.completed_at)}
+              </dd>
+            </div>
+          )}
+          {typeof detail.retry_count === "number" && detail.retry_count > 0 && (
+            <div className="flex justify-between py-xs gap-md">
+              <dt className="text-on-surface-variant break-all select-all">Retries</dt>
+              <dd className="font-semibold text-right break-all select-all">
+                {detail.retry_count}
+              </dd>
+            </div>
+          )}
+          {detail.celery_task_id && (
+            <div className="flex flex-col py-xs gap-xs">
+              <dt className="text-on-surface-variant">Task ID</dt>
+              <dd className="font-mono text-body-sm break-all select-all text-on-surface">
+                {detail.celery_task_id}
+              </dd>
+            </div>
+          )}
           <div className="flex flex-col py-xs gap-xs">
             <dt className="text-on-surface-variant">Issuance ID</dt>
             <dd className="font-mono text-body-sm break-all select-all text-on-surface">

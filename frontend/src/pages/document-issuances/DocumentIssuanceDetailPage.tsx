@@ -48,20 +48,34 @@ export default function DocumentIssuanceDetailPage() {
   useEffect(() => {
     if (!id) return;
     let cancelled = false;
-    setError(null);
-    Promise.all([getDocumentIssuance(id), getDocumentTracelogs(id)])
-      .then(([issuance, logs]) => {
-        if (cancelled) return;
-        setDetail(issuance);
-        setTracelogs(logs);
-      })
-      .catch((err) => {
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : "We couldn't load this document issuance.");
-        }
-      });
+    let timeoutId: any = null;
+    let pollCount = 0;
+
+    const fetchStatus = () => {
+      Promise.all([getDocumentIssuance(id), getDocumentTracelogs(id)])
+        .then(([issuance, logs]) => {
+          if (cancelled) return;
+          setDetail(issuance);
+          setTracelogs(logs);
+
+          if (issuance && (issuance.status === "queued" || issuance.status === "processing")) {
+            pollCount++;
+            const delay = pollCount <= 30 ? 2000 : 5000;
+            timeoutId = setTimeout(fetchStatus, delay);
+          }
+        })
+        .catch((err) => {
+          if (!cancelled) {
+            setError(err instanceof Error ? err.message : "We couldn't load this document issuance.");
+          }
+        });
+    };
+
+    fetchStatus();
+
     return () => {
       cancelled = true;
+      if (timeoutId) clearTimeout(timeoutId);
     };
   }, [id]);
 
@@ -69,7 +83,7 @@ export default function DocumentIssuanceDetailPage() {
   const [previewError, setPreviewError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!detail) return;
+    if (!detail || detail.status !== "success") return;
     let cancelled = false;
     let objectUrl: string | null = null;
     setBlobUrl(null);
@@ -169,7 +183,7 @@ export default function DocumentIssuanceDetailPage() {
               type="button"
               className="rounded bg-primary px-md py-xs text-sm font-bold text-white hover:bg-primary/90 disabled:opacity-50"
               onClick={handleDownload}
-              disabled={downloading}
+              disabled={downloading || detail.status !== "success"}
             >
               {downloading ? "Downloading..." : "Download PDF"}
             </button>
@@ -177,7 +191,7 @@ export default function DocumentIssuanceDetailPage() {
               type="button"
               className="rounded border border-primary px-md py-xs text-sm font-bold text-primary hover:bg-primary/10 disabled:opacity-50"
               onClick={handleShare}
-              disabled={sharing}
+              disabled={sharing || detail.status !== "success"}
             >
               {sharing ? "Sharing..." : "Share"}
             </button>
@@ -196,7 +210,15 @@ export default function DocumentIssuanceDetailPage() {
         <div className="space-y-lg">
           <div>
             <h2 className="mb-sm font-headings text-[18px] font-bold text-on-surface">PDF Preview</h2>
-            {previewError ? (
+            {detail.status === "failure" ? (
+              <div className="rounded-lg border border-error bg-surface-container-low p-lg text-center">
+                <span className="material-symbols-outlined text-[48px] text-error mb-2">error</span>
+                <h3 className="font-headings text-[18px] font-bold text-on-surface mb-2">Generation Failed</h3>
+                <p className="text-sm text-error max-w-lg mx-auto font-mono bg-surface-container-lowest p-md rounded border border-outline-variant">
+                  {detail.error_message || "An unknown error occurred during PDF generation."}
+                </p>
+              </div>
+            ) : previewError ? (
               <p className="rounded border border-error/30 p-md text-sm text-error">{previewError}</p>
             ) : blobUrl ? (
               <iframe
@@ -204,6 +226,13 @@ export default function DocumentIssuanceDetailPage() {
                 src={blobUrl}
                 className="h-[720px] w-full rounded border border-outline-variant bg-surface-container-lowest"
               />
+            ) : detail.status === "queued" || detail.status === "processing" ? (
+              <div className="flex h-[720px] w-full flex-col items-center justify-center gap-md rounded border border-outline-variant bg-surface-container-lowest">
+                <span className="material-symbols-outlined animate-spin text-[32px] text-primary">progress_activity</span>
+                <p className="text-sm font-bold text-secondary">
+                  {detail.status === "queued" ? "Waiting in queue..." : "Generating PDF document..."}
+                </p>
+              </div>
             ) : (
               <div className="flex h-[720px] w-full items-center justify-center rounded border border-outline-variant bg-surface-container-lowest">
                 <span className="material-symbols-outlined animate-spin text-secondary">progress_activity</span>
