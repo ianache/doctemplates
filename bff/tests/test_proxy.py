@@ -201,3 +201,39 @@ def test_proxy_refresh_failure_clears_cookie(
 
     # Verify session cookie was deleted
     assert test_client.cookies.get(settings.session_cookie_name) in (None, "")
+
+
+def test_proxy_async_202_status_code(
+    client: tuple[TestClient, callable, list],
+) -> None:
+    test_client, add_handler, requests_received = client
+
+    # Mock backend response returning 202
+    add_handler(
+        method="POST",
+        url_part="api/document-designs/design-123/generate",
+        status_code=202,
+        json_data={"id": "issuance-123", "status": "queued"},
+    )
+
+    response = test_client.post("/api/document-designs/design-123/generate", json={})
+    assert response.status_code == 202
+    assert response.json() == {"id": "issuance-123", "status": "queued"}
+
+
+def test_proxy_readiness_409_status_code(
+    client: tuple[TestClient, callable, list],
+) -> None:
+    test_client, add_handler, requests_received = client
+
+    # Mock backend response returning 409
+    add_handler(
+        method="GET",
+        url_part="api/issuances/issuance-123/download",
+        status_code=409,
+        json_data={"detail": "Document generation is not complete"},
+    )
+
+    response = test_client.get("/api/issuances/issuance-123/download")
+    assert response.status_code == 409
+    assert response.json() == {"detail": "Document generation is not complete"}
