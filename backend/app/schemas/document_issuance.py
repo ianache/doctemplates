@@ -19,12 +19,19 @@ class DocumentIssuanceOut(BaseModel):
 
     id: UUID
     design_version_id: UUID
-    file_path: str
+    file_path: str | None = None
     user_id: UUID
     input_data: dict
     metadata_values: dict | None = None
     status: str
     created_at: datetime
+
+    celery_task_id: str | None = None
+    error_message: str | None = None
+    queued_at: datetime | None = None
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+    retry_count: int = 0
 
 
 class DocumentIssuanceLibraryItem(BaseModel):

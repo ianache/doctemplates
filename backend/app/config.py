@@ -37,5 +37,10 @@ class Settings(BaseSettings):
     storage_s3_bucket_static_pdfs: str = "docmanagement-static-pdfs"
     storage_s3_bucket_issuances: str = "docmanagement-issuances"
 
+    # Celery Settings
+    celery_broker_url: str = "redis://redis:6379/0"
+    celery_result_backend: str = "redis://redis:6379/1"
+    celery_task_always_eager: bool = False
+
 
 settings = Settings()
