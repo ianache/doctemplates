@@ -165,4 +165,8 @@ def mock_jwks_client(monkeypatch: pytest.MonkeyPatch, rsa_keypair: tuple[bytes, 
 def force_celery_eager():
     """Forces Celery to run in eager (synchronous) mode during test execution."""
     settings.celery_task_always_eager = True
+    from app.workers.celery_app import celery_app
+    celery_app.conf.task_always_eager = True
+    celery_app.conf.result_backend = "cache+memory://"
+
 

@@ -19,7 +19,7 @@ def generate_document_pdf(issuance_id: str) -> None:
     """Task to generate a composed PDF document asynchronously."""
     db = SessionLocal()
     try:
-        issuance_uuid = uuid.UUID(issuance_id)
+        issuance_uuid = issuance_id if isinstance(issuance_id, uuid.UUID) else uuid.UUID(issuance_id)
         # Lock issuance row for update to prevent concurrent task runs from racing
         issuance = (
             db.query(DocumentIssuance)
@@ -99,7 +99,7 @@ def generate_document_pdf(issuance_id: str) -> None:
         # Open a new transaction to record the failure status securely
         fail_db = SessionLocal()
         try:
-            issuance_uuid = uuid.UUID(issuance_id)
+            issuance_uuid = issuance_id if isinstance(issuance_id, uuid.UUID) else uuid.UUID(issuance_id)
             issuance = fail_db.query(DocumentIssuance).filter(DocumentIssuance.id == issuance_uuid).first()
             if issuance:
                 issuance.status = "failure"

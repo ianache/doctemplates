@@ -98,7 +98,7 @@ def test_nested_case_insensitive_pdf_generation(
         f"/api/document-designs/{design.id}/generate",
         json=payload
     )
-    assert response.status_code == 201
+    assert response.status_code == 202
     body = response.json()
     assert body["id"] is not None
 
