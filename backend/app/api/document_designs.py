@@ -638,18 +638,20 @@ def generate_document(
         queued_at=datetime.utcnow(),
     )
     db.add(issuance)
-    db.flush()
+    db.commit()
+    db.refresh(issuance)
 
     # Enqueue task
     try:
         task_id = enqueue_document_generation(str(issuance.id))
         issuance.celery_task_id = task_id
+        db.commit()
     except Exception as e:
         issuance.status = "failure"
         issuance.error_message = f"Failed to enqueue: {str(e)}"
         issuance.completed_at = datetime.utcnow()
+        db.commit()
 
-    db.commit()
     db.refresh(issuance)
     return issuance
 

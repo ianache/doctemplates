@@ -125,7 +125,7 @@ def test_worker_success_path(
     assert updated.error_message is None
 
     # Verify storage contains the file
-    from app.services.content_storage import get_storage_provider
+    from app.dependencies import get_storage_provider
     storage = get_storage_provider()
     assert storage.exists(updated.storage_key) is True
     assert storage.read(updated.storage_key) == b"%PDF-dummy-success"
