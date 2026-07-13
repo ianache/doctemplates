@@ -32,8 +32,13 @@ def test_engine():
     docker-compose, stood up in 01-02-PLAN). Only invoked lazily by tests
     that actually depend on `db_session`/`client`.
     """
+    from sqlalchemy import text
     engine = create_engine(settings.test_database_url)
-    Base.metadata.drop_all(bind=engine)
+    with engine.connect() as conn:
+        conn.execute(text("DROP SCHEMA public CASCADE;"))
+        conn.execute(text("CREATE SCHEMA public;"))
+        conn.execute(text("GRANT ALL ON SCHEMA public TO public;"))
+        conn.commit()
     Base.metadata.create_all(bind=engine)
     yield engine
     engine.dispose()
