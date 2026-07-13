@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "docmanagement.fullname" . }}-bff
+  labels:
+    {{- include "docmanagement.labels" . | nindent 4 }}
+    app.kubernetes.io/component: bff
+spec:
+  replicas: {{ .Values.bff.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "docmanagement.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: bff
+  template:
+    metadata:
+      labels:
+        {{- include "docmanagement.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: bff
+    spec:
+      containers:
+        - name: bff
+          image: "{{ .Values.bff.image.repository }}:{{ .Values.bff.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.bff.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          env:
+            - name: OIDC_ISSUER
+              value: {{ .Values.keycloak.issuer | quote }}
+            - name: OIDC_CLIENT_ID
+              value: "docmanagement-backend"
+            - name: OIDC_CLIENT_SECRET
+              value: {{ .Values.keycloak.backendClientSecret | quote }}
+            - name: SESSION_SECRET
+              value: {{ .Values.bff.session.secret | quote }}
+            - name: SESSION_COOKIE_NAME
+              value: {{ .Values.bff.session.cookieName | quote }}
+            - name: SESSION_TTL_SECONDS
+              value: {{ .Values.bff.session.ttlSeconds | quote }}
+            - name: SESSION_COOKIE_SECURE
+              value: {{ .Values.bff.session.cookieSecure | quote }}
+            - name: BACKEND_URL
+              value: "http://{{ include "docmanagement.fullname" . }}-backend:{{ .Values.backend.service.port }}"
+            - name: FRONTEND_ORIGIN
+              value: "http://{{ (index .Values.ingress.hosts 0).host }}"
+          resources:
+            {{- toYaml .Values.bff.resources | nindent 12 }}

@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "docmanagement.fullname" . }}-backend
+  labels:
+    {{- include "docmanagement.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backend
+spec:
+  replicas: {{ .Values.backend.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "docmanagement.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: backend
+  template:
+    metadata:
+      labels:
+        {{- include "docmanagement.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: backend
+    spec:
+      containers:
+        - name: backend
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          env:
+            - name: DATABASE_URL
+              value: "postgresql+psycopg://{{ .Values.postgresql.username }}:{{ .Values.postgresql.password }}@{{ .Values.postgresql.host }}:{{ .Values.postgresql.port }}/{{ .Values.postgresql.database }}"
+            - name: TEST_DATABASE_URL
+              value: "postgresql+psycopg://{{ .Values.postgresql.username }}:{{ .Values.postgresql.password }}@{{ .Values.postgresql.host }}:{{ .Values.postgresql.port }}/{{ .Values.postgresql.database }}_test"
+            - name: OIDC_ISSUER
+              value: {{ .Values.keycloak.issuer | quote }}
+            - name: OIDC_ISSUER_ALIASES
+              value: {{ .Values.keycloak.issuer | quote }}
+            - name: OIDC_JWKS_URL
+              value: {{ .Values.keycloak.jwksUrl | quote }}
+            - name: OIDC_API_AUDIENCE
+              value: "docmanagement-backend"
+            - name: FRONTEND_ORIGIN
+              value: "http://{{ (index .Values.ingress.hosts 0).host }}"
+            - name: CONTENT_STORAGE_ROOT
+              value: "/app/.content-storage"
+            - name: STORAGE_PROVIDER_TYPE
+              value: {{ .Values.backend.storage.providerType | quote }}
+            - name: STORAGE_S3_ENDPOINT_URL
+              value: {{ .Values.backend.storage.s3.endpointUrl | quote }}
+            - name: STORAGE_S3_ACCESS_KEY
+              value: {{ .Values.backend.storage.s3.accessKey | quote }}
+            - name: STORAGE_S3_SECRET_KEY
+              value: {{ .Values.backend.storage.s3.secretKey | quote }}
+            - name: STORAGE_S3_REGION
+              value: {{ .Values.backend.storage.s3.region | quote }}
+            - name: STORAGE_S3_BUCKET_STATIC_PDFS
+              value: {{ .Values.backend.storage.s3.bucketStaticPdfs | quote }}
+            - name: STORAGE_S3_BUCKET_ISSUANCES
+              value: {{ .Values.backend.storage.s3.bucketIssuances | quote }}
+          volumeMounts:
+            - name: content-storage
+              mountPath: /app/.content-storage
+          resources:
+            {{- toYaml .Values.backend.resources | nindent 12 }}
+      volumes:
+        - name: content-storage
+          {{- if .Values.backend.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "docmanagement.fullname" . }}-backend-pvc
+          {{- else }}
+          emptyDir: {}
+          {{- end }}

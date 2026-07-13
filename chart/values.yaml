@@ -1,0 +1,90 @@
+global:
+  environment: production
+
+# Common database config
+postgresql:
+  host: postgres
+  port: 5432
+  username: docmanagement
+  database: docmanagement
+  password: "change_me"
+
+# Common keycloak config
+keycloak:
+  issuer: http://keycloak:8080/realms/docmanagement
+  jwksUrl: http://keycloak:8080/realms/docmanagement/protocol/openid-connect/certs
+  backendClientSecret: "change_me_secret"
+
+# Frontend component config
+frontend:
+  replicaCount: 1
+  image:
+    repository: docmanagement-frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 5173
+  apiBaseUrl: "http://docmanagement.local"
+  resources: {}
+
+# BFF component config
+bff:
+  replicaCount: 1
+  image:
+    repository: docmanagement-bff
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8000
+  session:
+    cookieName: bff_session
+    ttlSeconds: 604800
+    cookieSecure: "True"
+    secret: "change_me_session_secret"
+  resources: {}
+
+# Backend component config
+backend:
+  replicaCount: 1
+  image:
+    repository: docmanagement-backend
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8000
+  persistence:
+    enabled: false
+    storageClass: ""
+    size: 10Gi
+  storage:
+    providerType: local
+    s3:
+      endpointUrl: "http://minio:9000"
+      accessKey: "admin"
+      secretKey: "password123"
+      region: "us-east-1"
+      bucketStaticPdfs: "docmanagement-static-pdfs"
+      bucketIssuances: "docmanagement-issuances"
+  resources: {}
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  hosts:
+    - host: docmanagement.local
+      paths:
+        - path: /
+          pathType: Prefix
+          backend: frontend
+        - path: /api/bff
+          pathType: Prefix
+          backend: bff
+        - path: /api
+          pathType: Prefix
+          backend: backend
