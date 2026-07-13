@@ -1,0 +1,403 @@
+<!DOCTYPE html><html class="light" lang="en"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Hanken+Grotesk:wght@600;700&amp;family=JetBrains+Mono&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"><script id="tailwind-config">try{
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed": "#e3e2e2",
+                        "outline": "#8e706b",
+                        "primary": "#610000",
+                        "on-primary-container": "#ff907f",
+                        "on-surface-variant": "#5a403c",
+                        "inverse-primary": "#ffb4a8",
+                        "error-container": "#ffdad6",
+                        "on-primary": "#ffffff",
+                        "on-surface": "#261816",
+                        "surface-container-low": "#fff0ee",
+                        "secondary": "#5e5e5e",
+                        "on-tertiary-fixed-variant": "#464747",
+                        "inverse-on-surface": "#ffedea",
+                        "surface-tint": "#b52619",
+                        "secondary-container": "#e2e2e2",
+                        "secondary-fixed-dim": "#c6c6c6",
+                        "on-secondary-fixed-variant": "#474747",
+                        "secondary-fixed": "#e2e2e2",
+                        "on-tertiary-container": "#afaeae",
+                        "error": "#ba1a1a",
+                        "surface-dim": "#efd4d0",
+                        "on-tertiary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "primary-fixed": "#ffdad4",
+                        "on-secondary-fixed": "#1b1b1b",
+                        "surface-container-highest": "#f8dcd8",
+                        "on-tertiary-fixed": "#1b1c1c",
+                        "on-background": "#261816",
+                        "primary-container": "#8b0000",
+                        "background": "#fff8f6",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#f8dcd8",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed": "#410000",
+                        "on-primary-fixed-variant": "#920703",
+                        "tertiary-container": "#424242",
+                        "surface-container": "#ffe9e6",
+                        "outline-variant": "#e3beb8",
+                        "surface-container-high": "#fee2dd",
+                        "surface": "#fff8f6",
+                        "tertiary-fixed-dim": "#c7c6c6",
+                        "inverse-surface": "#3d2c2a",
+                        "tertiary": "#2b2c2c",
+                        "primary-fixed-dim": "#ffb4a8",
+                        "on-secondary-container": "#646464",
+                        "on-error-container": "#93000a",
+                        "surface-bright": "#fff8f6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "base": "4px",
+                        "panel-width-tools": "320px",
+                        "xl": "32px",
+                        "panel-width-side": "280px",
+                        "xs": "8px",
+                        "sm": "12px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "gutter": "1px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["Inter"],
+                        "headline-xl": ["Hanken Grotesk"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Hanken Grotesk"],
+                        "code-sm": ["JetBrains Mono"],
+                        "body-sm": ["Inter"],
+                        "headline-lg": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["11px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "headline-xl": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "code-sm": ["12px", { "lineHeight": "18px", "fontWeight": "400" }],
+                        "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                },
+            },
+        }
+    }catch(_e){}</script><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script></head><body class="font-body-md text-on-surface select-none">
+<!-- Global Navigation Shell -->
+<aside class="fixed left-0 top-0 h-full w-[80px] bg-surface flex flex-col py-lg border-r border-outline-variant z-50">
+<div class="flex flex-col items-center gap-lg">
+<div class="w-10 h-10 bg-primary flex items-center justify-center rounded-lg shadow-sm mb-lg">
+<span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;" data-original-icon="inventory_2">inventory_2</span>
+</div>
+<!-- SideNavBar Active: Jobs -->
+<nav class="flex flex-col items-center w-full gap-sm">
+<button class="w-full py-sm flex flex-col items-center text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200">
+<span class="material-symbols-outlined" data-original-icon="dashboard">dashboard</span>
+</button>
+<button class="w-full py-sm flex flex-col items-center text-primary border-r-2 border-primary transition-colors duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">list_alt</span>
+</button>
+<button class="w-full py-sm flex flex-col items-center text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200">
+<span class="material-symbols-outlined" data-original-icon="inventory_2">inventory_2</span>
+</button>
+<button class="w-full py-sm flex flex-col items-center text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<button class="w-full py-sm flex flex-col items-center text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200">
+<span class="material-symbols-outlined">help</span>
+</button>
+</nav>
+</div>
+<div class="mt-auto flex flex-col items-center">
+<div class="w-10 h-10 rounded-full border border-outline-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Professional corporate headshot of a senior system administrator in a high-tech office environment, soft cinematic lighting, minimalist aesthetic, sharp focus on facial features, professional attire." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDg_dXyKn-LvsOnoOFXb4UDu77uMuykTdHRg4LYvGfQo7xYLsVN-nwU_tk2AM-HkJK3bk68SOn6RcAbrZD6L4R-LqZFHw-j7sl5vxTGwXbfTxbXAkfxQB7E1B5YUmkUgfO1Mq8cX4a0mHkDIR5B24BkL5hmgFLEqP5tzXYnT-uDcM-j7ZEYaEV36cZx12LCFu-BPxPl9i7cEPez5BbhUmuYsjhMI2S-V13fqBbzC2GLJ7qPCiUvCzWM74AaQ1c8sfsBiRyDP-klhbc">
+</div>
+</div>
+</aside>
+<!-- Main Workspace -->
+<main class="ml-[80px] flex flex-col min-h-screen">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center px-lg h-16 bg-surface border-b border-outline-variant sticky top-0 z-40">
+<div class="flex items-center gap-md">
+<div class="flex items-center gap-md"><button class="p-xs text-on-surface-variant hover:text-primary transition-all duration-200"><span class="material-symbols-outlined">menu</span></button><div class="flex items-center gap-xs font-body-md"><span class="text-on-surface-variant hover:text-primary cursor-pointer">Home</span><span class="material-symbols-outlined text-[16px] text-on-surface-variant">chevron_right</span><span class="text-primary font-semibold">generation_job</span></div></div>
+<div class="h-6 w-px bg-outline-variant mx-xs"></div>
+<div class="flex items-center bg-surface-container-low px-sm py-1 rounded border border-outline-variant">
+<span class="material-symbols-outlined text-on-surface-variant text-[18px] mr-xs">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-body-sm w-64 p-0 placeholder:text-on-surface-variant/50" placeholder="Search by Job ID or Name..." type="text">
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="p-xs text-on-surface-variant hover:text-primary transition-all duration-200">
+<span class="material-symbols-outlined" data-original-icon="notifications">notifications</span>
+</button>
+<button class="p-xs text-on-surface-variant hover:text-primary transition-all duration-200">
+<span class="material-symbols-outlined">history</span>
+</button>
+
+
+</div>
+</header>
+<!-- Content Canvas -->
+<div class="p-lg flex flex-col gap-lg">
+<!-- Page Header & Summary Bar -->
+<div class="flex flex-col lg:flex-row justify-between lg:items-end gap-md">
+<div>
+<h2 class="font-headline-xl text-headline-xl text-on-surface">Generation Jobs</h2>
+<p class="font-body-md text-on-surface-variant">Manage and monitor document processing queues across all archival departments.</p>
+</div>
+<div class="flex gap-gutter bg-outline-variant border border-outline-variant p-[1px] rounded shadow-sm">
+<div class="bg-surface px-md py-sm flex flex-col min-w-[120px]">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">In Progress</span>
+<span class="font-headline-md text-headline-md text-blue-600">24</span>
+</div>
+<div class="bg-surface px-md py-sm flex flex-col min-w-[120px]">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Failed (Today)</span>
+<span class="font-headline-md text-headline-md text-primary">03</span>
+</div>
+<div class="bg-surface px-md py-sm flex flex-col min-w-[120px]">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Total Success</span>
+<span class="font-headline-md text-headline-md text-green-700">1,204</span>
+</div>
+</div>
+</div>
+<!-- Filter Bar -->
+<div class="flex flex-wrap items-center gap-md bg-surface p-md border border-outline-variant rounded shadow-sm">
+<div class="flex flex-col gap-1">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Status</label>
+<select class="border-outline-variant bg-surface-container-low rounded text-body-sm focus:border-primary focus:ring-primary py-xs pr-8">
+<option>All Statuses</option>
+<option>Queued</option>
+<option>Processing</option>
+<option>Success</option>
+<option>Failure</option>
+</select>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Date Range</label>
+<div class="flex items-center border border-outline-variant bg-surface-container-low rounded px-xs py-[6px]">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant mr-xs" data-original-icon="calendar_today">calendar_today</span>
+<span class="text-body-sm">Oct 24, 2023 - Today</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Doc Type</label>
+<select class="border-outline-variant bg-surface-container-low rounded text-body-sm focus:border-primary focus:ring-primary py-xs pr-8">
+<option>All Documents</option>
+<option>Legal Contract</option>
+<option>Technical Blueprint</option>
+<option>Financial Report</option>
+</select>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Created By</label>
+<input class="border-outline-variant bg-surface-container-low rounded text-body-sm focus:border-primary focus:ring-primary py-xs w-40" placeholder="Filter user..." type="text">
+</div>
+<div class="ml-auto flex items-center gap-sm self-end">
+<button class="bg-primary text-white px-md py-[10px] rounded flex items-center gap-xs font-label-caps text-label-caps uppercase hover:bg-primary-container transition-colors">
+<span class="material-symbols-outlined text-[18px]">refresh</span>
+                        Refresh
+                    </button>
+</div>
+</div>
+<!-- Jobs Table -->
+<div class="bg-surface border border-outline-variant rounded overflow-hidden shadow-sm flex-grow">
+<div class="overflow-x-auto custom-scrollbar">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container border-b border-outline-variant">
+<th class="px-md py-sm font-label-caps text-label-caps text-on-surface-variant uppercase">Job ID</th>
+<th class="px-md py-sm font-label-caps text-label-caps text-on-surface-variant uppercase">Document Name</th>
+<th class="px-md py-sm font-label-caps text-label-caps text-on-surface-variant uppercase">Type</th>
+<th class="px-md py-sm font-label-caps text-label-caps text-on-surface-variant uppercase">Created By</th>
+<th class="px-md py-sm font-label-caps text-label-caps text-on-surface-variant uppercase">Start Time</th>
+<th class="px-md py-sm font-label-caps text-label-caps text-on-surface-variant uppercase">Duration</th>
+<th class="px-md py-sm font-label-caps text-label-caps text-on-surface-variant uppercase">Status</th>
+<th class="px-md py-sm font-label-caps text-label-caps text-on-surface-variant uppercase text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/30">
+<!-- Row 1: Success -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-md py-md font-code-sm text-code-sm text-on-surface-variant">#GEN-2023-9812</td>
+<td class="px-md py-md font-body-md text-on-surface font-semibold">Q3_Financial_Audit_v2.pdf</td>
+<td class="px-md py-md text-body-sm">Financial Report</td>
+<td class="px-md py-md">
+<div class="flex items-center gap-xs">
+<div class="w-5 h-5 rounded-full bg-secondary text-[10px] text-white flex items-center justify-center">JD</div>
+<span class="text-body-sm">Jane Doe</span>
+</div>
+</td>
+<td class="px-md py-md text-body-sm text-on-surface-variant">14:02:12</td>
+<td class="px-md py-md text-body-sm text-on-surface-variant">12.4s</td>
+<td class="px-md py-md">
+<span class="bg-green-100 text-green-800 border border-green-200 px-xs py-0.5 rounded-sm font-label-caps text-[10px] uppercase">Success</span>
+</td>
+<td class="px-md py-md text-right">
+<div class="flex items-center justify-end gap-xs">
+<button class="text-primary hover:bg-primary/5 p-1 rounded transition-colors" title="Download">
+<span class="material-symbols-outlined text-[20px]" data-original-icon="download">download</span>
+</button>
+<button class="text-on-surface-variant hover:bg-on-surface-variant/5 p-1 rounded transition-colors" title="View Details">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2: Processing -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-md py-md font-code-sm text-code-sm text-on-surface-variant">#GEN-2023-9815</td>
+<td class="px-md py-md font-body-md text-on-surface font-semibold">Legal_Compliance_2024.docx</td>
+<td class="px-md py-md text-body-sm">Legal Contract</td>
+<td class="px-md py-md">
+<div class="flex items-center gap-xs">
+<div class="w-5 h-5 rounded-full bg-tertiary text-[10px] text-white flex items-center justify-center">MS</div>
+<span class="text-body-sm">Marcus S.</span>
+</div>
+</td>
+<td class="px-md py-md text-body-sm text-on-surface-variant">14:15:45</td>
+<td class="px-md py-md text-body-sm text-on-surface-variant">...</td>
+<td class="px-md py-md">
+<span class="bg-yellow-100 text-yellow-800 border border-yellow-200 px-xs py-0.5 rounded-sm font-label-caps text-[10px] uppercase inline-flex items-center gap-1">
+<span class="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse"></span>
+                                        Processing
+                                    </span>
+</td>
+<td class="px-md py-md text-right">
+<button class="text-primary hover:bg-error-container hover:text-error px-sm py-1 border border-outline-variant rounded font-label-caps text-[10px] uppercase transition-colors">Cancel</button>
+</td>
+</tr>
+<!-- Row 3: Failure -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-md py-md font-code-sm text-code-sm text-on-surface-variant">#GEN-2023-9818</td>
+<td class="px-md py-md font-body-md text-on-surface font-semibold">Architectural_Draft_Tower_B.pdf</td>
+<td class="px-md py-md text-body-sm">Technical Blueprint</td>
+<td class="px-md py-md">
+<div class="flex items-center gap-xs">
+<div class="w-5 h-5 rounded-full bg-primary text-[10px] text-white flex items-center justify-center">SYS</div>
+<span class="text-body-sm">Automation</span>
+</div>
+</td>
+<td class="px-md py-md text-body-sm text-on-surface-variant">14:18:02</td>
+<td class="px-md py-md text-body-sm text-on-surface-variant">1.5s</td>
+<td class="px-md py-md">
+<span class="bg-red-100 text-red-800 border border-red-200 px-xs py-0.5 rounded-sm font-label-caps text-[10px] uppercase">Failure</span>
+</td>
+<td class="px-md py-md text-right">
+<div class="flex items-center justify-end gap-sm">
+<button class="text-primary font-label-caps text-[10px] uppercase hover:underline">Retry</button>
+<button class="text-on-surface-variant font-label-caps text-[10px] uppercase hover:underline">View Error</button>
+</div>
+</td>
+</tr>
+<!-- Row 4: Queued -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-md py-md font-code-sm text-code-sm text-on-surface-variant">#GEN-2023-9820</td>
+<td class="px-md py-md font-body-md text-on-surface font-semibold">Employee_Handbook_Draft.pdf</td>
+<td class="px-md py-md text-body-sm">General Doc</td>
+<td class="px-md py-md">
+<div class="flex items-center gap-xs">
+<div class="w-5 h-5 rounded-full bg-secondary text-[10px] text-white flex items-center justify-center">AL</div>
+<span class="text-body-sm">Anna Lee</span>
+</div>
+</td>
+<td class="px-md py-md text-body-sm text-on-surface-variant">--:--:--</td>
+<td class="px-md py-md text-body-sm text-on-surface-variant">--</td>
+<td class="px-md py-md">
+<span class="bg-blue-100 text-blue-800 border border-blue-200 px-xs py-0.5 rounded-sm font-label-caps text-[10px] uppercase">Queued</span>
+</td>
+<td class="px-md py-md text-right">
+<button class="text-on-surface-variant hover:text-primary px-sm py-1 border border-outline-variant rounded font-label-caps text-[10px] uppercase transition-colors">Cancel</button>
+</td>
+</tr>
+<!-- Row 5: Success -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-md py-md font-code-sm text-code-sm text-on-surface-variant">#GEN-2023-9801</td>
+<td class="px-md py-md font-body-md text-on-surface font-semibold">Inventory_Asset_Log_Oct23.xlsx</td>
+<td class="px-md py-md text-body-sm">Spreadsheet</td>
+<td class="px-md py-md">
+<div class="flex items-center gap-xs">
+<div class="w-5 h-5 rounded-full bg-tertiary text-[10px] text-white flex items-center justify-center">MS</div>
+<span class="text-body-sm">Marcus S.</span>
+</div>
+</td>
+<td class="px-md py-md text-body-sm text-on-surface-variant">11:30:15</td>
+<td class="px-md py-md text-body-sm text-on-surface-variant">45.2s</td>
+<td class="px-md py-md">
+<span class="bg-green-100 text-green-800 border border-green-200 px-xs py-0.5 rounded-sm font-label-caps text-[10px] uppercase">Success</span>
+</td>
+<td class="px-md py-md text-right">
+<div class="flex items-center justify-end gap-xs">
+<button class="text-primary hover:bg-primary/5 p-1 rounded transition-colors">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+<button class="text-on-surface-variant hover:bg-on-surface-variant/5 p-1 rounded transition-colors">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Pagination/Footer -->
+<div class="bg-surface-container px-md py-sm flex items-center justify-between border-t border-outline-variant">
+<span class="text-body-sm text-on-surface-variant">Showing 1 to 5 of 124 jobs</span>
+<div class="flex items-center gap-xs">
+<button class="p-1 text-on-surface-variant hover:text-primary disabled:opacity-30" disabled="">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<div class="flex gap-1">
+<button class="w-8 h-8 flex items-center justify-center rounded bg-primary text-white text-body-sm font-semibold">1</button>
+<button class="w-8 h-8 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container-high text-body-sm transition-colors">2</button>
+<button class="w-8 h-8 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container-high text-body-sm transition-colors">3</button>
+</div>
+<button class="p-1 text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- System Status Bar -->
+<footer class="mt-auto bg-inverse-surface text-surface text-body-sm px-lg py-2 flex justify-between items-center z-40">
+<div class="flex items-center gap-md">
+<span class="flex items-center gap-1"><span class="w-1.5 h-1.5 bg-green-400 rounded-full"></span> Queue Engine: Active</span>
+<span class="text-surface-variant text-[10px]">|</span>
+<span class="flex items-center gap-1"><span class="w-1.5 h-1.5 bg-green-400 rounded-full"></span> DB Connection: Stable</span>
+</div>
+<div class="flex items-center gap-sm">
+<span class="text-surface-variant uppercase text-[10px] font-bold tracking-widest">Version 2.4.1-stable</span>
+</div>
+</footer>
+</main>
+<script class="">
+        // Micro-interaction: Table row hover effect logic (handled by Tailwind, but JS can add details)
+        document.querySelectorAll('tbody tr').forEach(row => {
+            row.addEventListener('mouseenter', () => {
+                row.querySelector('td:last-child').classList.add('opacity-100');
+            });
+        });
+
+        // Basic Alert for Buttons
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const action = btn.innerText.trim() || btn.getAttribute('title');
+                if (action) {
+                    console.log(`Action Triggered: ${action}`);
+                    // Minimalist toast logic could go here
+                }
+            });
+        });
+    </script>
+
+</body></html>
