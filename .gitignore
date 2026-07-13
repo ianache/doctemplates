@@ -22,4 +22,4 @@ backend/server*.log
 
 # Agent workflows
 .agents/
-.planning/
+#.planning/

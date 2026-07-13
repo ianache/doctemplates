@@ -86,10 +86,10 @@ Plans:
 - [x] 13-04-PLAN.md — Implement S3StorageProvider using boto3 and add environment variables.
 - [x] 13-05-PLAN.md — Create test_storage_providers.py and verify all backend tests pass.
 
-### Phase 14: implementar .scopes\PRD4.md
+### Phase 14: Async PDF Generation Jobs with Celery/Redis and Job UI
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Implement asynchronous PDF document generation with Celery/Redis workers, persistent issuance job lifecycle states, Docker Compose runtime support, and frontend/BFF job management UI that builds on the existing generated-documents library/detail patterns.
+**Requirements:** ASYNC-01, ASYNC-02, ASYNC-03, ASYNC-04, ASYNC-05, ASYNC-06, JOBUI-01, JOBUI-02, JOBUI-03
 **Depends on:** Phase 13
 **Plans:** 0 plans
 
