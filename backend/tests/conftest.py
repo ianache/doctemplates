@@ -33,6 +33,7 @@ def test_engine():
     that actually depend on `db_session`/`client`.
     """
     from sqlalchemy import text
+    import app.db as db_module
     engine = create_engine(settings.test_database_url)
     with engine.connect() as conn:
         conn.execute(text("DROP SCHEMA public CASCADE;"))
@@ -40,6 +41,10 @@ def test_engine():
         conn.execute(text("GRANT ALL ON SCHEMA public TO public;"))
         conn.commit()
     Base.metadata.create_all(bind=engine)
+    
+    # Configure global SessionLocal to bind to the test engine
+    db_module.SessionLocal.configure(bind=engine)
+    
     yield engine
     engine.dispose()
 
