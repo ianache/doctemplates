@@ -172,14 +172,16 @@ def test_generate_document_creates_generation_tracelog(
 ) -> None:
     user = _auth_client(client, db_session)
     design = _create_design(db_session, user)
+    
+    # Mock generation in the Celery worker
     monkeypatch.setattr(
-        "app.api.document_designs.generate_composed_pdf",
+        "app.workers.document_generation.generate_composed_pdf",
         lambda *args, **kwargs: b"%PDF-1.4\n%%EOF",
     )
 
     response = client.post(f"/api/document-designs/{design.id}/generate", json={"name": "Acme"})
 
-    assert response.status_code == 201
+    assert response.status_code == 202
     data = response.json()
     issuance = db_session.get(DocumentIssuance, data["id"])
     assert issuance is not None
@@ -190,3 +192,4 @@ def test_generate_document_creates_generation_tracelog(
     assert tracelog.user_id == user.id
     assert tracelog.metadata_["source"] == "POST /api/document-designs/{design_id}/generate"
     assert tracelog.metadata_["design_id"] == str(design.id)
+

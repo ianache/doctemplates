@@ -159,3 +159,10 @@ def mock_jwks_client(monkeypatch: pytest.MonkeyPatch, rsa_keypair: tuple[bytes, 
     stub = _StubJWKSClient()
     monkeypatch.setattr(jwks_module, "_get_jwks_client", lambda: stub)
     return stub
+
+
+@pytest.fixture(scope="session", autouse=True)
+def force_celery_eager():
+    """Forces Celery to run in eager (synchronous) mode during test execution."""
+    settings.celery_task_always_eager = True
+

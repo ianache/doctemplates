@@ -334,3 +334,62 @@ def test_tracelogs_are_returned_chronologically(
     assert response.status_code == 200
     assert [row["event_type"] for row in response.json()] == ["generation", "share", "download"]
     assert [row["metadata"]["order"] for row in response.json()] == [1, 2, 3]
+
+
+def test_list_issuances_filters_queued_and_processing(
+    client: TestClient,
+    db_session: SQLAlchemySession,
+    tmp_path: Path,
+) -> None:
+    user = _auth_client(client, db_session)
+    design = _create_design(db_session, user, name="Status Filter Contract")
+    q_iss = _create_issuance(db_session, user, design, tmp_path, status="queued")
+    p_iss = _create_issuance(db_session, user, design, tmp_path, status="processing")
+
+    # Filter queued
+    resp_q = client.get("/api/issuances", params={"status": "queued"})
+    assert resp_q.status_code == 200
+    assert [row["id"] for row in resp_q.json()] == [str(q_iss.id)]
+
+    # Filter processing
+    resp_p = client.get("/api/issuances", params={"status": "processing"})
+    assert resp_p.status_code == 200
+    assert [row["id"] for row in resp_p.json()] == [str(p_iss.id)]
+
+
+def test_download_and_share_guard_rejects_non_success_states(
+    client: TestClient,
+    db_session: SQLAlchemySession,
+    tmp_path: Path,
+) -> None:
+    user = _auth_client(client, db_session)
+    design = _create_design(db_session, user, name="Guard Contract")
+    q_iss = _create_issuance(db_session, user, design, tmp_path, status="queued")
+    f_iss = _create_issuance(db_session, user, design, tmp_path, status="failure")
+    # Set failure error message
+    f_iss.error_message = "Rendering engine timed out"
+    db_session.commit()
+
+    # Download queued -> 409
+    resp_dl_q = client.get(f"/api/issuances/{q_iss.id}/download")
+    assert resp_dl_q.status_code == 409
+    assert "generation is not complete" in resp_dl_q.json()["detail"]
+
+    # Preview queued -> 409
+    resp_pv_q = client.get(f"/api/issuances/{q_iss.id}/preview")
+    assert resp_pv_q.status_code == 409
+
+    # Share queued -> 409
+    resp_sh_q = client.post(f"/api/issuances/{q_iss.id}/share")
+    assert resp_sh_q.status_code == 409
+
+    # Public download queued -> 409
+    signature_q = generate_issuance_signature(q_iss.id)
+    resp_pub_q = client.get(f"/api/public/document-issuances/{q_iss.id}/download?signature={signature_q}")
+    assert resp_pub_q.status_code == 409
+
+    # Download failure -> 409 with error message
+    resp_dl_f = client.get(f"/api/issuances/{f_iss.id}/download")
+    assert resp_dl_f.status_code == 409
+    assert "Rendering engine timed out" in resp_dl_f.json()["detail"]
+

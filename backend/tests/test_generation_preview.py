@@ -156,7 +156,7 @@ def test_generate(client: TestClient, db_session: SQLAlchemySession, tmp_path: P
 
     # Generate
     response = client.post(f"/api/document-designs/{design.id}/generate", json=payload)
-    assert response.status_code == 201
+    assert response.status_code == 202
     data = response.json()
     assert "id" in data
     assert data["design_version_id"] == str(design.id)
@@ -202,7 +202,7 @@ def test_generate_validation(client: TestClient, db_session: SQLAlchemySession, 
         "activo": True,
     }
     response = client.post(f"/api/document-designs/{draft_design.id}/generate", json=draft_payload)
-    assert response.status_code == 201
+    assert response.status_code == 202
     db_session.refresh(draft_design)
     assert draft_design.status == "active"
     assert draft_design.version_group_id == draft_design.id
@@ -233,7 +233,7 @@ def test_generate_validation(client: TestClient, db_session: SQLAlchemySession, 
 
     # Superseded should generate successfully
     response = client.post(f"/api/document-designs/{superseded_design.id}/generate", json=payload)
-    assert response.status_code == 201
+    assert response.status_code == 202
     saved_path = Path(response.json()["file_path"])
     if saved_path.exists():
         saved_path.unlink()
@@ -328,7 +328,7 @@ def test_download(client: TestClient, db_session: SQLAlchemySession, tmp_path: P
         "activo": True,
     }
     gen_response = client.post(f"/api/document-designs/{design.id}/generate", json=payload)
-    assert gen_response.status_code == 201
+    assert gen_response.status_code == 202
     issuance_data = gen_response.json()
     issuance_id = issuance_data["id"]
     file_path = Path(issuance_data["file_path"])
@@ -412,7 +412,7 @@ def test_metadata_validation_and_search(client: TestClient, db_session: SQLAlche
     }
     
     response = client.post(f"/api/document-designs/{design.id}/generate", json=payload)
-    assert response.status_code == 201
+    assert response.status_code == 202
     data = response.json()
     assert "metadata_values" in data
     assert data["metadata_values"] == {
