@@ -90,3 +90,12 @@ class S3StorageProvider(StorageProvider):
             media_type="application/pdf",
             headers=headers,
         )
+
+    def exists(self, key: str, category: str = "issuances") -> bool:
+        cleaned_key = self._clean_key(key)
+        bucket = self._get_bucket(category)
+        try:
+            self.s3.head_object(Bucket=bucket, Key=cleaned_key)
+            return True
+        except Exception:
+            return False

@@ -50,3 +50,10 @@ class LocalStorageProvider(StorageProvider):
             media_type="application/pdf",
             headers=headers,
         )
+
+    def exists(self, key: str, category: str = "issuances") -> bool:
+        try:
+            path = self._get_path(key, category)
+            return path.exists()
+        except Exception:
+            return False

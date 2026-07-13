@@ -31,3 +31,8 @@ class StorageProvider(ABC):
     def get_download_response(self, key: str, filename: str, category: str, disposition: str = "attachment") -> Response:
         """Return a FastAPI Response (e.g. FileResponse or StreamingResponse) for downloading/previewing the file."""
         pass
+
+    @abstractmethod
+    def exists(self, key: str, category: str = "issuances") -> bool:
+        """Check if file exists for the given key and category."""
+        pass

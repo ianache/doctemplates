@@ -173,8 +173,13 @@ def mock_jwks_client(monkeypatch: pytest.MonkeyPatch, rsa_keypair: tuple[bytes, 
 
 @pytest.fixture(scope="session", autouse=True)
 def force_celery_eager():
-    """Forces Celery to run in eager (synchronous) mode during test execution."""
+    """Forces Celery to run in eager (synchronous) mode during test execution
+    and forces local storage provider for test hermeticity."""
     settings.celery_task_always_eager = True
+    settings.storage_provider_type = "local"
+    from app.dependencies import get_storage_provider
+    get_storage_provider.cache_clear()
+    
     from app.workers.celery_app import celery_app
     celery_app.conf.task_always_eager = True
     celery_app.conf.result_backend = "cache+memory://"

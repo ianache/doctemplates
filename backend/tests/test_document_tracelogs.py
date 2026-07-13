@@ -190,6 +190,6 @@ def test_generate_document_creates_generation_tracelog(
     tracelog = issuance.tracelogs[0]
     assert tracelog.event_type == "generation"
     assert tracelog.user_id == user.id
-    assert tracelog.metadata_["source"] == "POST /api/document-designs/{design_id}/generate"
+    assert tracelog.metadata_["source"] == "Celery Worker"
     assert tracelog.metadata_["design_id"] == str(design.id)
 
