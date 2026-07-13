@@ -85,3 +85,14 @@ Plans:
 - [x] 13-03-PLAN.md — Refactor content_storage.py, pdf_generator.py and API routers to consume StorageProvider.
 - [x] 13-04-PLAN.md — Implement S3StorageProvider using boto3 and add environment variables.
 - [x] 13-05-PLAN.md — Create test_storage_providers.py and verify all backend tests pass.
+
+### Phase 14: implementar .scopes\PRD4.md
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 13
+**Plans:** 0 plans
+
+Plans:
+
+- [ ] TBD (run /gsd-plan-phase 14 to break down)

@@ -2,19 +2,17 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Nested Objects and Case-Insensitive Templates
-current_phase: 13
-current_phase_name: implementar-la-propuesta-de-separacion-de-almacenamiento
 status: complete
 stopped_at: Completed Phase 13
-last_updated: "2026-07-12T23:00:00.000Z"
-last_activity: 2026-07-12
-last_activity_desc: Phase 13 completed successfully
+last_updated: "2026-07-13T04:49:12.124Z"
 progress:
-  total_phases: 8
+  total_phases: 9
   completed_phases: 7
-  total_plans: 24
-  completed_plans: 24
-  percent: 100
+  total_plans: 20
+  completed_plans: 20
+  percent: 78
+current_phase: 13
+current_phase_name: implementar-la-propuesta-de-separacion-de-almacenamiento
 ---
 
 # Project State
@@ -138,6 +136,7 @@ None.
 ### Roadmap Evolution
 
 - Phase 11 added: Necesito introducir un componente bff entre frontend y backend aislando la logica del core en el backend
+- Phase 14 added: implementar .scopes\PRD4.md
 
 ## Session Continuity
 
