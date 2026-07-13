@@ -43,6 +43,7 @@
 | 8. Template AST & Static Validation | v2.0 | 1/1 | Complete | 2026-07-10 |
 | 9. Search Documents Library & Audit Trace | v2.0 | 3/3 | Complete | 2026-07-11 |
 | 10. Complex Schema UI & Nested Data Previsualization | v2.0 | 5/5 | Complete | 2026-07-11 |
+| 14. Async PDF Generation Jobs with Celery/Redis and Job UI | v2.0 | 5/5 | Complete | 2026-07-13 |
 
 ### Phase 11: Necesito introducir un componente bff entre frontend y backend aislando la logica del core en el backend
 
@@ -91,8 +92,12 @@ Plans:
 **Goal:** Implement asynchronous PDF document generation with Celery/Redis workers, persistent issuance job lifecycle states, Docker Compose runtime support, and frontend/BFF job management UI that builds on the existing generated-documents library/detail patterns.
 **Requirements:** ASYNC-01, ASYNC-02, ASYNC-03, ASYNC-04, ASYNC-05, ASYNC-06, JOBUI-01, JOBUI-02, JOBUI-03
 **Depends on:** Phase 13
-**Plans:** 0 plans
+**Plans:** 5/5 plans complete
 
 Plans:
 
-- [ ] TBD (run /gsd-plan-phase 14 to break down)
+- [x] 14-01-PLAN.md — Verify `celery[redis]` package legitimacy before dependency install.
+- [x] 14-02-PLAN.md — Backend async issuance model, migration, enqueue API, and readiness guards.
+- [x] 14-03-PLAN.md — Celery worker, Redis service, and Docker Compose runtime.
+- [x] 14-04-PLAN.md — BFF/frontend generated-documents job management UI.
+- [x] 14-05-PLAN.md — Cross-layer backend, worker, BFF, frontend, and compose verification.

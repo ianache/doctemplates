@@ -2,17 +2,17 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Nested Objects and Case-Insensitive Templates
-status: complete
-stopped_at: Completed Phase 13
-last_updated: "2026-07-13T04:49:12.124Z"
+status: completed
+stopped_at: Phase 14 completed successfully
+last_updated: "2026-07-13T06:50:00.000Z"
 progress:
   total_phases: 9
-  completed_phases: 7
-  total_plans: 20
-  completed_plans: 20
-  percent: 78
-current_phase: 13
-current_phase_name: implementar-la-propuesta-de-separacion-de-almacenamiento
+  completed_phases: 8
+  total_plans: 25
+  completed_plans: 25
+  percent: 100
+current_phase: 14
+current_phase_name: async-pdf-generation-jobs-with-celery-redis-and-job-ui
 ---
 
 # Project State
@@ -22,14 +22,14 @@ current_phase_name: implementar-la-propuesta-de-separacion-de-almacenamiento
 See: .planning/PROJECT.md (updated 2026-07-09)
 
 **Core value:** Operational users can visually compose a document design (templates + fixed content, in order) and reliably generate a correct final PDF from it via API, without engineering involvement per document type.
-**Current focus:** Phase 13 completed successfully
+**Current focus:** Milestone v2.0 completed
 
 ## Current Position
 
-- Phase: 13 (implementar-la-propuesta-de-separacion-de-almacenamiento) — COMPLETE
+- Phase: 14 (Async PDF Generation Jobs with Celery/Redis and Job UI) — COMPLETED
 - Plan: 5 of 5
 - Status: Completed
-- Last activity: 2026-07-12 — Phase 13 completed successfully
+- Last activity: 2026-07-13 — Phase 14 completed successfully
 
 ## Performance Metrics
 
