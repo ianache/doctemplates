@@ -599,7 +599,7 @@ def validate_metadata_values(
     return coerced
 
 
-@router.post("/{design_id}/generate", response_model=DocumentIssuanceOut, status_code=201)
+@router.post("/{design_id}/generate", response_model=DocumentIssuanceOut, status_code=202)
 def generate_document(
     design_id: UUID,
     payload: dict = Body(default={}),
@@ -623,31 +623,32 @@ def generate_document(
     # Validate metadata
     coerced_metadata = validate_metadata_values(metadata, design.document_type.metadata_definitions)
 
-    # Generate PDF bytes
-    pdf_bytes = generate_composed_pdf(design, data, db, storage_provider, mock_fallback=False)
+    from datetime import datetime
+    from app.services.issuance_jobs import enqueue_document_generation
 
     issuance_id = uuid.uuid4()
-    storage_key = storage_provider.save(f"{issuance_id}.pdf", pdf_bytes, category="issuances")
-
     issuance = DocumentIssuance(
         id=issuance_id,
         design_version_id=design.id,
-        storage_key=storage_key,
+        storage_key=None,
         user_id=user.id,
         input_data=data,
         metadata_values=coerced_metadata,
-        status="success",
+        status="queued",
+        queued_at=datetime.utcnow(),
     )
-    tracelog = DocumentTracelog(
-        issuance=issuance,
-        user_id=user.id,
-        event_type="generation",
-        metadata_={
-            "source": "POST /api/document-designs/{design_id}/generate",
-            "design_id": str(design.id),
-        },
-    )
-    db.add_all([issuance, tracelog])
+    db.add(issuance)
+    db.flush()
+
+    # Enqueue task
+    try:
+        task_id = enqueue_document_generation(str(issuance.id))
+        issuance.celery_task_id = task_id
+    except Exception as e:
+        issuance.status = "failure"
+        issuance.error_message = f"Failed to enqueue: {str(e)}"
+        issuance.completed_at = datetime.utcnow()
+
     db.commit()
     db.refresh(issuance)
     return issuance

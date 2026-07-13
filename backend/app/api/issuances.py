@@ -97,6 +97,24 @@ def _append_tracelog(
     db.commit()
 
 
+def _verify_issuance_ready(issuance: DocumentIssuance) -> None:
+    if issuance.status in ("queued", "processing"):
+        raise HTTPException(
+            status_code=409,
+            detail="Document generation is not complete"
+        )
+    if issuance.status == "failure":
+        raise HTTPException(
+            status_code=409,
+            detail=issuance.error_message or "Document generation failed"
+        )
+    if not issuance.storage_key:
+        raise HTTPException(
+            status_code=409,
+            detail="Document PDF is not ready"
+        )
+
+
 @public_router.get("/{issuance_id}/download")
 def public_download_issuance(
     issuance_id: UUID,
@@ -109,6 +127,7 @@ def public_download_issuance(
         raise HTTPException(status_code=403, detail="Invalid document signature")
 
     issuance = _require_issuance(db, issuance_id)
+    _verify_issuance_ready(issuance)
     response = _pdf_response(issuance, storage_provider)
     _append_tracelog(
         db,
@@ -124,7 +143,7 @@ def public_download_issuance(
 def list_issuances(
     design_name: str | None = None,
     id: UUID | None = None,
-    status: Literal["success", "failure"] | None = None,
+    status: Literal["queued", "processing", "success", "failure"] | None = None,
     created_from: date | None = None,
     created_to: date | None = None,
     metadata_key: str | None = None,
@@ -180,6 +199,7 @@ def preview_issuance(
     storage_provider = Depends(get_storage_provider),
 ):
     issuance = _require_issuance(db, issuance_id)
+    _verify_issuance_ready(issuance)
     try:
         return storage_provider.get_download_response(
             issuance.storage_key,
@@ -200,6 +220,7 @@ def download_issuance(
     storage_provider = Depends(get_storage_provider),
 ):
     issuance = _require_issuance(db, issuance_id)
+    _verify_issuance_ready(issuance)
     response = _pdf_response(issuance, storage_provider)
     _append_tracelog(
         db,
@@ -219,6 +240,7 @@ def share_issuance(
     db: SQLAlchemySession = Depends(get_db),
 ) -> DocumentIssuanceShareOut:
     issuance = _require_issuance(db, issuance_id)
+    _verify_issuance_ready(issuance)
     signature = generate_issuance_signature(issuance.id)
     public_url = f"/api/public/document-issuances/{issuance.id}/download?signature={signature}"
     _append_tracelog(
