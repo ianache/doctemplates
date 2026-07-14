@@ -6,7 +6,7 @@ import PagedTable from "../../components/organisms/PagedTable";
 import type { Column } from "../../components/organisms/PagedTable";
 import { type DocumentTypeListItem, listDocumentTypes } from "../../lib/documentTypes";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 
 export default function DocumentTypeListPage() {
   const navigate = useNavigate();
@@ -14,6 +14,7 @@ export default function DocumentTypeListPage() {
   const [error, setError] = useState(false);
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
     let cancelled = false;
@@ -46,11 +47,16 @@ export default function DocumentTypeListPage() {
   }, [items, query]);
 
   const paged = useMemo(
-    () => filtered?.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE) ?? null,
-    [filtered, page],
+    () => filtered?.slice((page - 1) * pageSize, page * pageSize) ?? null,
+    [filtered, page, pageSize],
   );
 
   const total = filtered?.length ?? 0;
+
+  const handleChangePageSize = (nextSize: number) => {
+    setPageSize(nextSize);
+    setPage(1);
+  };
 
   const columns: Column<DocumentTypeListItem>[] = [
     {
@@ -156,10 +162,12 @@ export default function DocumentTypeListPage() {
           rows={paged ?? []}
           rowKey={(item) => item.id}
           page={page}
-          pageSize={PAGE_SIZE}
+          pageSize={pageSize}
           total={total}
           itemName="document types"
           onChangePage={setPage}
+          pageSizeOptions={PAGE_SIZE_OPTIONS}
+          onChangePageSize={handleChangePageSize}
           onRowClick={(item) => navigate(`/document-types/${item.id}/edit`)}
         />
       )}

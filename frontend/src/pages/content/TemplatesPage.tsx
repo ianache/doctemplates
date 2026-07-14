@@ -10,6 +10,8 @@ import { getDocumentType, listDocumentTypes, type DocumentTypeDetail, type Docum
 import PagedTable, { type Column } from "../../components/organisms/PagedTable";
 import TokenExplorer from "../document-designs/components/organisms/TokenExplorer";
 
+const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
+
 export default function TemplatesPage() {
   const [templates, setTemplates] = useState<HtmlTemplateListItem[] | null>(null);
   const [docTypes, setDocTypes] = useState<DocumentTypeListItem[] | null>(null);
@@ -33,7 +35,7 @@ export default function TemplatesPage() {
 
   // Pagination State
   const [page, setPage] = useState(1);
-  const PAGE_SIZE = 8;
+  const [pageSize, setPageSize] = useState(8);
 
   useEffect(() => {
     let cancelled = false;
@@ -131,9 +133,14 @@ export default function TemplatesPage() {
   }, [templates]);
 
   const paginatedTemplates = useMemo(() => {
-    const start = (page - 1) * PAGE_SIZE;
-    return filteredTemplates.slice(start, start + PAGE_SIZE);
-  }, [filteredTemplates, page, PAGE_SIZE]);
+    const start = (page - 1) * pageSize;
+    return filteredTemplates.slice(start, start + pageSize);
+  }, [filteredTemplates, page, pageSize]);
+
+  const handleChangePageSize = (nextSize: number) => {
+    setPageSize(nextSize);
+    setPage(1);
+  };
 
   const columns: Column<HtmlTemplateListItem>[] = [
     {
@@ -282,10 +289,12 @@ export default function TemplatesPage() {
             rows={paginatedTemplates}
             rowKey={(item) => item.id}
             page={page}
-            pageSize={PAGE_SIZE}
+            pageSize={pageSize}
             total={filteredTemplates.length}
             itemName="templates"
             onChangePage={setPage}
+            pageSizeOptions={PAGE_SIZE_OPTIONS}
+            onChangePageSize={handleChangePageSize}
             onRowClick={(row) => setSelectedTemplateId(row.id)}
             selectedRowId={selectedTemplateId}
           />

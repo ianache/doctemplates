@@ -9,6 +9,8 @@ import {
 import { listDocumentTypes, type DocumentTypeListItem } from "../../lib/documentTypes";
 import PagedTable, { type Column } from "../../components/organisms/PagedTable";
 
+const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
+
 export default function StaticPdfsPage() {
   const [pdfAssets, setPdfAssets] = useState<StaticPdfAssetListItem[] | null>(null);
   const [docTypes, setDocTypes] = useState<DocumentTypeListItem[] | null>(null);
@@ -16,7 +18,7 @@ export default function StaticPdfsPage() {
 
   // Pagination State
   const [page, setPage] = useState(1);
-  const PAGE_SIZE = 8;
+  const [pageSize, setPageSize] = useState(8);
 
   // Filter States
   const [filenameKeyword, setFilenameKeyword] = useState("");
@@ -95,9 +97,14 @@ export default function StaticPdfsPage() {
   }, [pdfAssets, appliedFilenameKeyword, appliedDocTypeId, appliedUploadDate]);
 
   const paginatedPdfs = useMemo(() => {
-    const start = (page - 1) * PAGE_SIZE;
-    return filteredPdfs.slice(start, start + PAGE_SIZE);
-  }, [filteredPdfs, page, PAGE_SIZE]);
+    const start = (page - 1) * pageSize;
+    return filteredPdfs.slice(start, start + pageSize);
+  }, [filteredPdfs, page, pageSize]);
+
+  const handleChangePageSize = (nextSize: number) => {
+    setPageSize(nextSize);
+    setPage(1);
+  };
 
   const columns: Column<StaticPdfAssetListItem>[] = [
     {
@@ -255,10 +262,12 @@ export default function StaticPdfsPage() {
             rows={paginatedPdfs}
             rowKey={(item) => item.id}
             page={page}
-            pageSize={PAGE_SIZE}
+            pageSize={pageSize}
             total={filteredPdfs.length}
             itemName="PDF assets"
             onChangePage={setPage}
+            pageSizeOptions={PAGE_SIZE_OPTIONS}
+            onChangePageSize={handleChangePageSize}
             onRowClick={(row) => setSelectedPdfId(row.id)}
             selectedRowId={selectedPdfId}
           />
