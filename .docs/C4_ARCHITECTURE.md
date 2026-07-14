@@ -30,15 +30,15 @@ Este nivel detalla los componentes lógicos que conforman la aplicación, incluy
 
 ```mermaid
 graph TB
-    subgraph Cliente (Navegador)
+    subgraph "Cliente (Navegador)"
         SPA[Frontend SPA - React / Vite]
     end
 
-    subgraph Perímetro de Red / Ingress
+    subgraph "Perímetro de Red / Ingress"
         BFF[BFF - Backend-For-Frontend]
     end
 
-    subgraph Núcleo de Aplicación
+    subgraph "Núcleo de Aplicación"
         Backend[Backend Core - FastAPI]
         Worker[Celery Worker - Procesamiento Asíncrono]
         Redis[(Broker de Tareas - Redis)]
@@ -76,25 +76,25 @@ Detalle de los componentes internos del contenedor del **Backend Core** y del **
 
 ```mermaid
 graph DP
-    subgraph API Routers
+    subgraph "API Routers"
         R1[/api/static-pdfs]
         R2[/api/document-types]
         R3[/api/document-designs]
         R4[/api/document-issuances]
     end
 
-    subgraph Componentes de Lógica y Servicios
+    subgraph "Componentes de Lógica y Servicios"
         Validation[Design Validation Service]
         Composer[PDF Generator / Composer]
         StorageService[Content Storage Service]
         QueueService[Issuance Jobs Enqueuer]
     end
 
-    subgraph Worker de Segundo Plano
+    subgraph "Worker de Segundo Plano"
         CeleryWorker[Celery Worker Task]
     end
 
-    subgraph Abstracción de Almacenamiento
+    subgraph "Abstracción de Almacenamiento"
         base[StorageProvider Interface]
         local[LocalStorageProvider]
         s3[S3StorageProvider]
