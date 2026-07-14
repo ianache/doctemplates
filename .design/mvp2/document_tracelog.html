@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Technical Audit Log | MAQUETACIÓN</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Hanken+Grotesk:wght@600;700&amp;family=JetBrains+Mono&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed": "#e2e2e2",
+                        "on-tertiary-fixed-variant": "#464747",
+                        "secondary-fixed-dim": "#c6c6c6",
+                        "on-tertiary-fixed": "#1b1c1c",
+                        "primary-fixed-dim": "#ffb4a8",
+                        "outline-variant": "#e3beb8",
+                        "on-secondary": "#ffffff",
+                        "surface-container": "#ffe9e6",
+                        "tertiary-fixed": "#e3e2e2",
+                        "on-primary-container": "#ff907f",
+                        "surface-dim": "#efd4d0",
+                        "surface-container-highest": "#f8dcd8",
+                        "on-secondary-fixed": "#1b1b1b",
+                        "on-background": "#261816",
+                        "surface-container-high": "#fee2dd",
+                        "on-primary-fixed": "#410000",
+                        "surface": "#fff8f6",
+                        "primary-container": "#8b0000",
+                        "outline": "#8e706b",
+                        "on-tertiary": "#ffffff",
+                        "inverse-on-surface": "#ffedea",
+                        "on-error-container": "#93000a",
+                        "error-container": "#ffdad6",
+                        "tertiary": "#2b2c2c",
+                        "surface-variant": "#f8dcd8",
+                        "on-tertiary-container": "#afaeae",
+                        "tertiary-container": "#424242",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface": "#261816",
+                        "on-secondary-fixed-variant": "#474747",
+                        "error": "#ba1a1a",
+                        "inverse-surface": "#3d2c2a",
+                        "secondary-container": "#e2e2e2",
+                        "on-surface-variant": "#5a403c",
+                        "secondary": "#5e5e5e",
+                        "tertiary-fixed-dim": "#c7c6c6",
+                        "surface-container-low": "#fff0ee",
+                        "surface-tint": "#b52619",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#ffb4a8",
+                        "surface-bright": "#fff8f6",
+                        "on-secondary-container": "#646464",
+                        "background": "#fff8f6",
+                        "primary": "#610000",
+                        "on-primary-fixed-variant": "#920703",
+                        "on-error": "#ffffff",
+                        "primary-fixed": "#ffdad4"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "xs": "8px",
+                        "lg": "24px",
+                        "sm": "12px",
+                        "xl": "32px",
+                        "panel-width-tools": "320px",
+                        "panel-width-side": "280px",
+                        "md": "16px",
+                        "base": "4px",
+                        "gutter": "1px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["Inter"],
+                        "code-sm": ["JetBrains Mono"],
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "body-lg": ["Inter"],
+                        "headline-xl": ["Hanken Grotesk"],
+                        "headline-md": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "code-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "body-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-xl": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #e3beb8; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #8e706b; }
+        
+        .timeline-line::before {
+            content: '';
+            position: absolute;
+            left: 21px;
+            top: 24px;
+            bottom: 0;
+            width: 1px;
+            background-color: #e3beb8;
+        }
+        .timeline-item:last-child .timeline-line::before {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center w-full h-16 px-md bg-surface dark:bg-surface fixed top-0 z-50 border-b border-outline-variant dark:border-outline">
+<div class="flex items-center gap-md">
+<span class="text-headline-md font-headline-md font-bold text-primary dark:text-inverse-primary">MAQUETACIÓN</span>
+<nav class="hidden md:flex gap-lg ml-xl">
+<a class="text-on-surface-variant dark:text-secondary-fixed-dim hover:bg-surface-container-low transition-colors px-sm py-1" href="#">Dashboard</a>
+<a class="text-primary dark:text-inverse-primary font-bold border-b-2 border-primary px-sm py-1" href="#">Documents</a>
+<a class="text-on-surface-variant dark:text-secondary-fixed-dim hover:bg-surface-container-low transition-colors px-sm py-1" href="#">Workflow</a>
+</nav>
+</div>
+<div class="flex items-center gap-sm">
+<button class="material-symbols-outlined text-on-surface-variant p-2 hover:bg-surface-container-low transition-colors">notifications</button>
+<button class="material-symbols-outlined text-on-surface-variant p-2 hover:bg-surface-container-low transition-colors">account_circle</button>
+</div>
+</header>
+<!-- SideNavBar (DocManager Rail) -->
+<aside class="flex flex-col h-screen fixed left-0 top-0 pt-16 z-40 bg-surface dark:bg-surface border-r border-outline-variant dark:border-outline w-[280px] hidden md:flex">
+<div class="p-md border-b border-outline-variant">
+<div class="flex items-center gap-sm mb-base">
+<div class="w-8 h-8 bg-primary flex items-center justify-center rounded">
+<span class="material-symbols-outlined text-white text-[20px]">description</span>
+</div>
+<div>
+<h2 class="text-label-caps font-label-caps text-on-surface">DocManager</h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Admin v1.0</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 py-md overflow-y-auto">
+<div class="px-sm mb-xs">
+<p class="text-[10px] font-bold uppercase tracking-widest text-outline px-sm mb-xs">Main Navigation</p>
+<a class="flex items-center gap-md px-sm py-base mb-1 hover:bg-surface-variant transition-all rounded text-on-surface-variant" href="#">
+<span class="material-symbols-outlined text-[20px]">home</span>
+<span class="text-label-caps font-label-caps">Home</span>
+</a>
+<a class="flex items-center gap-md px-sm py-base mb-1 bg-primary-container text-on-primary-container border-r-4 border-primary transition-all rounded" href="#">
+<span class="material-symbols-outlined text-[20px]">description</span>
+<span class="text-label-caps font-label-caps">Documents</span>
+</a>
+<a class="flex items-center gap-md px-sm py-base mb-1 hover:bg-surface-variant transition-all rounded text-on-surface-variant" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="text-label-caps font-label-caps">Templates</span>
+</a>
+<a class="flex items-center gap-md px-sm py-base mb-1 hover:bg-surface-variant transition-all rounded text-on-surface-variant" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+<span class="text-label-caps font-label-caps">Settings</span>
+</a>
+</div>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<main class="pt-16 md:pl-[280px] h-screen flex flex-col">
+<!-- Dashboard Header -->
+<section class="p-md md:p-xl border-b border-outline-variant bg-white flex flex-col md:flex-row md:items-center justify-between gap-md">
+<div>
+<nav class="flex items-center gap-xs text-body-sm text-outline mb-xs">
+<span>Documents</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span>Legal-Arch-2024-X</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-primary font-bold">Audit Log</span>
+</nav>
+<h1 class="text-headline-xl font-headline-xl text-on-surface">Technical Audit Log</h1>
+<p class="text-body-md font-body-md text-on-surface-variant">Comprehensive history of revisions, approvals, and compliance checks.</p>
+</div>
+<div class="flex gap-sm">
+<button class="px-md py-xs bg-white border border-secondary text-on-surface font-label-caps uppercase text-[12px] flex items-center gap-xs hover:bg-secondary-container transition-colors">
+<span class="material-symbols-outlined text-[18px]">download</span> Export PDF
+                </button>
+<button class="px-md py-xs bg-primary text-white font-label-caps uppercase text-[12px] flex items-center gap-xs hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-[18px]">add</span> Log Entry
+                </button>
+</div>
+</section>
+<!-- Audit Layout Grid -->
+<div class="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-gutter bg-outline-variant">
+<!-- Left Side: Timeline Canvas -->
+<section class="bg-background p-md md:p-xl overflow-y-auto">
+<div class="max-w-3xl mx-auto">
+<div class="flex items-center justify-between mb-lg">
+<h3 class="text-label-caps font-label-caps text-on-surface uppercase tracking-wider">Historical Timeline</h3>
+<div class="flex items-center gap-xs">
+<span class="text-body-sm text-on-surface-variant">Filter by:</span>
+<select class="bg-transparent border-none text-body-sm font-bold text-primary focus:ring-0 cursor-pointer">
+<option>All Events</option>
+<option>Approvals</option>
+<option>Rejections</option>
+</select>
+</div>
+</div>
+<!-- Timeline -->
+<div class="space-y-0">
+<!-- Timeline Entry 1 -->
+<div class="relative timeline-item pb-lg group">
+<div class="timeline-line"></div>
+<div class="flex gap-md">
+<div class="relative z-10 w-11 h-11 flex-shrink-0 bg-primary-container text-on-primary-container rounded flex items-center justify-center border-2 border-white">
+<span class="material-symbols-outlined text-[20px]">assignment_turned_in</span>
+</div>
+<div class="flex-1">
+<div class="flex flex-col md:flex-row md:items-center justify-between mb-xs">
+<h4 class="text-headline-md font-headline-md text-on-surface">Technical Review Started</h4>
+<span class="text-code-sm font-code-sm text-outline bg-surface-container px-2 py-1">2024-10-24 09:15 AM</span>
+</div>
+<div class="bg-white border border-outline-variant p-md rounded hover:border-primary transition-colors">
+<div class="flex items-center gap-sm mb-sm">
+<div class="w-6 h-6 rounded-full bg-secondary-fixed flex items-center justify-center text-[10px] font-bold">EM</div>
+<span class="text-body-sm font-bold text-on-surface">Elena Martinez</span>
+<span class="text-body-sm text-on-surface-variant">• Project Lead</span>
+</div>
+<p class="text-body-md text-on-surface-variant leading-relaxed">
+                                            Initial validation of structural integrity and material specifications initiated. Routing document to senior engineering pool for secondary verification.
+                                        </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Timeline Entry 2 -->
+<div class="relative timeline-item pb-lg group">
+<div class="timeline-line"></div>
+<div class="flex gap-md">
+<div class="relative z-10 w-11 h-11 flex-shrink-0 bg-green-100 text-green-800 rounded flex items-center justify-center border-2 border-white">
+<span class="material-symbols-outlined text-[20px]">verified</span>
+</div>
+<div class="flex-1">
+<div class="flex flex-col md:flex-row md:items-center justify-between mb-xs">
+<h4 class="text-headline-md font-headline-md text-on-surface">Approved by Senior Engineer</h4>
+<span class="text-code-sm font-code-sm text-outline bg-surface-container px-2 py-1">2024-10-24 02:40 PM</span>
+</div>
+<div class="bg-white border border-outline-variant p-md rounded hover:border-green-600 transition-colors">
+<div class="flex items-center gap-sm mb-sm">
+<div class="w-6 h-6 rounded-full bg-secondary-fixed flex items-center justify-center text-[10px] font-bold">JW</div>
+<span class="text-body-sm font-bold text-on-surface">James Wilson</span>
+<span class="text-body-sm text-on-surface-variant">• Senior Structural Engineer</span>
+</div>
+<p class="text-body-md text-on-surface-variant leading-relaxed">
+                                            All structural calculations have been verified against Eurocode 3 standards. Load-bearing capacities are within acceptable safety margins for the specified use case.
+                                        </p>
+<div class="mt-md pt-md border-t border-dashed border-outline-variant flex gap-sm overflow-x-auto">
+<div class="flex items-center gap-xs px-2 py-1 border border-outline-variant rounded bg-surface-container-low text-body-sm">
+<span class="material-symbols-outlined text-[16px]">file_present</span> calculos_v1.2.pdf
+                                            </div>
+<div class="flex items-center gap-xs px-2 py-1 border border-outline-variant rounded bg-surface-container-low text-body-sm">
+<span class="material-symbols-outlined text-[16px]">image</span> blueprint_revA.dwg
+                                            </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Timeline Entry 3 -->
+<div class="relative timeline-item pb-lg group">
+<div class="timeline-line"></div>
+<div class="flex gap-md">
+<div class="relative z-10 w-11 h-11 flex-shrink-0 bg-error-container text-error rounded flex items-center justify-center border-2 border-white">
+<span class="material-symbols-outlined text-[20px]">report</span>
+</div>
+<div class="flex-1">
+<div class="flex flex-col md:flex-row md:items-center justify-between mb-xs">
+<h4 class="text-headline-md font-headline-md text-on-surface">Rejected - Missing Specifications</h4>
+<span class="text-code-sm font-code-sm text-outline bg-surface-container px-2 py-1">2024-10-25 11:20 AM</span>
+</div>
+<div class="bg-white border-2 border-primary p-md rounded shadow-sm">
+<div class="flex items-center gap-sm mb-sm">
+<div class="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-[10px] font-bold">SC</div>
+<span class="text-body-sm font-bold text-on-surface">Sarah Chen</span>
+<span class="text-body-sm text-on-surface-variant">• Compliance Auditor</span>
+</div>
+<p class="text-body-md text-on-surface-variant leading-relaxed mb-sm">
+                                            Critical omission in documentation: fire safety rating certifications for Section B-4 are missing. Review cannot proceed to final signatory phase without valid fire resistance documentation.
+                                        </p>
+<div class="bg-error-container/10 p-sm border-l-4 border-primary text-body-sm text-primary">
+<strong>Required Action:</strong> Re-upload certification document 22-A and resubmit for technical audit.
+                                        </div>
+</div>
+</div>
+</div>
+</div>
+<!-- Timeline Entry 4 -->
+<div class="relative timeline-item pb-lg group">
+<div class="timeline-line"></div>
+<div class="flex gap-md">
+<div class="relative z-10 w-11 h-11 flex-shrink-0 bg-surface-container-highest text-on-surface rounded flex items-center justify-center border-2 border-white">
+<span class="material-symbols-outlined text-[20px]">history_edu</span>
+</div>
+<div class="flex-1">
+<div class="flex flex-col md:flex-row md:items-center justify-between mb-xs">
+<h4 class="text-headline-md font-headline-md text-on-surface">Revision Uploaded</h4>
+<span class="text-code-sm font-code-sm text-outline bg-surface-container px-2 py-1">2024-10-26 08:00 AM</span>
+</div>
+<div class="bg-white border border-outline-variant p-md rounded hover:border-primary transition-colors">
+<div class="flex items-center gap-sm mb-sm">
+<div class="w-6 h-6 rounded-full bg-secondary-fixed flex items-center justify-center text-[10px] font-bold">EM</div>
+<span class="text-body-sm font-bold text-on-surface">Elena Martinez</span>
+<span class="text-body-sm text-on-surface-variant">• Project Lead</span>
+</div>
+<p class="text-body-md text-on-surface-variant leading-relaxed">
+                                            Uploaded missing fire safety rating (Doc ID: FR-9912) and updated technical annex. Returning to Auditor Sarah Chen for re-evaluation.
+                                        </p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Right Side: Property Inspector -->
+<aside class="bg-surface border-l border-outline-variant h-full flex flex-col hidden lg:flex">
+<div class="p-md border-b border-outline-variant">
+<h3 class="text-label-caps font-label-caps text-on-surface uppercase mb-xs">Document Properties</h3>
+<p class="text-body-sm text-on-surface-variant">Metadata and state overview</p>
+</div>
+<div class="flex-1 overflow-y-auto p-md space-y-lg">
+<!-- Doc Status Card -->
+<div class="bg-white border border-outline-variant p-md rounded">
+<div class="flex items-center justify-between mb-md">
+<span class="text-body-sm font-bold">Status</span>
+<span class="px-2 py-0.5 bg-error-container text-error text-[10px] font-bold rounded uppercase">Action Required</span>
+</div>
+<div class="space-y-sm">
+<div class="flex justify-between text-body-sm">
+<span class="text-on-surface-variant">Version:</span>
+<span class="font-code-sm">v2.1.0-RC1</span>
+</div>
+<div class="flex justify-between text-body-sm">
+<span class="text-on-surface-variant">Integrity:</span>
+<span class="text-green-600 font-bold">Verified</span>
+</div>
+<div class="flex justify-between text-body-sm">
+<span class="text-on-surface-variant">Priority:</span>
+<span class="text-primary font-bold">P1 - High</span>
+</div>
+</div>
+</div>
+<!-- Stakeholders List -->
+<div class="space-y-md">
+<h4 class="text-label-caps font-label-caps text-outline uppercase text-[10px]">Reviewers</h4>
+<div class="space-y-sm">
+<div class="flex items-center gap-sm group cursor-pointer">
+<div class="w-8 h-8 rounded bg-surface-container-highest flex items-center justify-center text-[12px] font-bold">JW</div>
+<div class="flex-1">
+<p class="text-body-sm font-bold">James Wilson</p>
+<p class="text-[10px] text-on-surface-variant uppercase">Technical Lead</p>
+</div>
+<span class="material-symbols-outlined text-green-600 text-[18px]">check_circle</span>
+</div>
+<div class="flex items-center gap-sm group cursor-pointer">
+<div class="w-8 h-8 rounded bg-surface-container-highest flex items-center justify-center text-[12px] font-bold">SC</div>
+<div class="flex-1">
+<p class="text-body-sm font-bold">Sarah Chen</p>
+<p class="text-[10px] text-on-surface-variant uppercase">Audit &amp; Comp</p>
+</div>
+<span class="material-symbols-outlined text-primary text-[18px]">error</span>
+</div>
+<div class="flex items-center gap-sm group cursor-pointer opacity-50">
+<div class="w-8 h-8 rounded bg-surface-container-highest flex items-center justify-center text-[12px] font-bold">RB</div>
+<div class="flex-1">
+<p class="text-body-sm font-bold">Robert Black</p>
+<p class="text-[10px] text-on-surface-variant uppercase">Final Signatory</p>
+</div>
+<span class="material-symbols-outlined text-outline text-[18px]">schedule</span>
+</div>
+</div>
+</div>
+<!-- Asset Map (Thumbnails) -->
+<div class="space-y-md">
+<h4 class="text-label-caps font-label-caps text-outline uppercase text-[10px]">Reference Assets</h4>
+<div class="grid grid-cols-2 gap-sm">
+<div class="aspect-square bg-white border border-outline-variant p-1 relative group cursor-pointer overflow-hidden rounded">
+<img class="w-full h-full object-cover" data-alt="A macro photograph of an architectural blueprint on heavy white paper, featuring crisp black lines, red structural notations, and professional drafting annotations in a minimalist studio setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9UMNd8izZ16rxSdnnm56hWU5ECjGcXcNTwh6uYCLVaArofAo8CZ47Mshz7eAcr90Oq_NAdVMA8Eq-zxpsh1GSRS-k5XJmPYRJiCDV73JYQ7zt-UMHQVw-k-w-6xyLoQwlgr4XbZeYUfPeJGSLdbqdxkheiADiO91szeK6FSde70pOQFe0eFNwRn2cWVEoYNviuYuVaQPScjpt_yVlbC2KW5JPerLnMCK05oRcOgVZE6Tbdahepu4i2C675OZQU6uBNGuk8He78x8"/>
+<div class="absolute inset-0 bg-primary/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+<span class="material-symbols-outlined">zoom_in</span>
+</div>
+</div>
+<div class="aspect-square bg-white border border-outline-variant p-1 relative group cursor-pointer overflow-hidden rounded">
+<img class="w-full h-full object-cover" data-alt="Close-up of a high-resolution 3D engineering render of a steel structure joint, with industrial red coating and precise bolt detailing, set against a sterile laboratory white background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsuFFK0Om4-peCb-TZCI3buNy_IMV2RgUrMsikfyOJnSBjEBb2F4ck6M4psoeQB5_IG-tsPE6zAm_rcj0AkFhwQRoca6Qax25M-HRN6V4d8K3dEDulHwgZEs8U4yuSZHf3xzFfHC2UJ3mcaoBbZl5faVrCMf3cUWbnXtCBXSFpBe7A2HogWHES5AaplhIcn5tH5DVm19WxJIY9WAeoTRSdbCBwxbFp2-V83cw_qR94fBQiazVefQTyDT0pQ0ah2dFNbL2jz9luz-8"/>
+<div class="absolute inset-0 bg-primary/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+<span class="material-symbols-outlined">zoom_in</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Activity Summary -->
+<div class="bg-surface-container p-md rounded border border-primary-container/20">
+<h4 class="text-body-sm font-bold text-primary mb-xs">Audit Insight</h4>
+<p class="text-body-sm text-on-surface-variant">The review cycle is currently 14 hours behind the target completion window due to the 'Missing Specifications' rejection.</p>
+</div>
+</div>
+</aside>
+</div>
+</main>
+<!-- Mobile Bottom Navigation -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-surface border-t border-outline-variant flex items-center justify-around z-50">
+<button class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined">home</span>
+<span class="text-[10px] font-bold uppercase">Home</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">description</span>
+<span class="text-[10px] font-bold uppercase">Docs</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[10px] font-bold uppercase">Templates</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[10px] font-bold uppercase">Settings</span>
+</button>
+</nav>
+<script>
+        // Micro-interactions for hovering timeline entries
+        document.querySelectorAll('.timeline-item').forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                const badge = item.querySelector('.z-10');
+                if(badge) badge.style.transform = 'scale(1.1)';
+            });
+            item.addEventListener('mouseleave', () => {
+                const badge = item.querySelector('.z-10');
+                if(badge) badge.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body></html>

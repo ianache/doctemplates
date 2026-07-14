@@ -16,7 +16,7 @@ wheels/
 .claude/
 .codegraph/
 .codex/
-.design/
+#.design/
 .tokensave/
 backend/server*.log
 

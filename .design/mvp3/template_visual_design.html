@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Precision Archival - Document Design Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;900&amp;family=Inter:wght@400;700&amp;family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-bright": "#fff8f6",
+                        "on-error": "#ffffff",
+                        "inverse-surface": "#3d2c2a",
+                        "on-surface": "#261816",
+                        "outline": "#8e706b",
+                        "outline-variant": "#e3beb8",
+                        "on-primary-fixed-variant": "#920703",
+                        "surface-dim": "#efd4d0",
+                        "primary-fixed": "#ffdad4",
+                        "secondary-container": "#e2e2e2",
+                        "on-primary-fixed": "#410000",
+                        "inverse-primary": "#ffb4a8",
+                        "surface-container-highest": "#f8dcd8",
+                        "secondary": "#5e5e5e",
+                        "inverse-on-surface": "#ffedea",
+                        "on-tertiary-container": "#afaeae",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-fixed-variant": "#474747",
+                        "surface-container-high": "#fee2dd",
+                        "surface-container": "#ffe9e6",
+                        "primary-container": "#8b0000",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed": "#e3e2e2",
+                        "primary": "#610000",
+                        "surface-variant": "#f8dcd8",
+                        "secondary-fixed-dim": "#c6c6c6",
+                        "on-primary": "#ffffff",
+                        "tertiary-container": "#424242",
+                        "on-secondary-fixed": "#1b1b1b",
+                        "secondary-fixed": "#e2e2e2",
+                        "on-tertiary-fixed": "#1b1c1c",
+                        "on-secondary": "#ffffff",
+                        "surface-container-low": "#fff0ee",
+                        "surface": "#fff8f6",
+                        "error-container": "#ffdad6",
+                        "primary-fixed-dim": "#ffb4a8",
+                        "background": "#fff8f6",
+                        "surface-tint": "#b52619",
+                        "on-error-container": "#93000a",
+                        "on-primary-container": "#ff907f",
+                        "on-background": "#261816",
+                        "on-secondary-container": "#646464",
+                        "tertiary-fixed-dim": "#c7c6c6",
+                        "on-surface-variant": "#5a403c",
+                        "on-tertiary-fixed-variant": "#464747",
+                        "tertiary": "#2b2c2c",
+                        "error": "#ba1a1a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "xs": "8px",
+                        "panel-width-tools": "320px",
+                        "base": "4px",
+                        "lg": "24px",
+                        "sm": "12px",
+                        "md": "16px",
+                        "xl": "32px",
+                        "gutter": "1px",
+                        "panel-width-side": "280px"
+                    },
+                    "fontFamily": {
+                        "headline-xl": ["Hanken Grotesk"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Hanken Grotesk"],
+                        "label-caps": ["Inter"],
+                        "code-sm": ["JetBrains Mono"],
+                        "body-sm": ["Inter"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-xl": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "code-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "body-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .page-canvas-bg {
+            background-image: 
+                linear-gradient(45deg, #efefef 25%, transparent 25%), 
+                linear-gradient(-45deg, #efefef 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #efefef 75%), 
+                linear-gradient(-45deg, transparent 75%, #efefef 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md min-h-screen flex overflow-hidden">
+<!-- Global Side Navigation (SideNavBar JSON) -->
+<aside class="fixed left-0 top-0 h-full w-[280px] bg-surface-container-low dark:bg-surface-container-lowest border-r border-outline-variant dark:border-outline flex flex-col z-50">
+<div class="p-lg">
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">Precision Archival</h1>
+<p class="text-body-sm text-on-surface-variant opacity-70">System Admin</p>
+</div>
+<nav class="flex-1 px-md py-sm space-y-base">
+<!-- Documents -->
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-highest dark:hover:bg-surface-container-high transition-colors rounded-lg group" href="#">
+<span class="material-symbols-outlined text-primary" data-icon="folder_open">folder_open</span>
+<span class="font-body-md text-body-md">Documents</span>
+</a>
+<!-- Assets -->
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-highest dark:hover:bg-surface-container-high transition-colors rounded-lg group" href="#">
+<span class="material-symbols-outlined" data-icon="insert_drive_file">insert_drive_file</span>
+<span class="font-body-md text-body-md">Assets</span>
+</a>
+<!-- Templates -->
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-highest dark:hover:bg-surface-container-high transition-colors rounded-lg group" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span class="font-body-md text-body-md">Templates</span>
+</a>
+<!-- Document Designs (Active State based on intent) -->
+<a class="flex items-center gap-md px-md py-sm text-primary dark:text-inverse-primary bg-surface-container-high dark:bg-surface-container-highest border-r-2 border-primary rounded-lg group transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard_customize">dashboard_customize</span>
+<span class="font-body-md text-body-md font-bold">Document Designs</span>
+</a>
+<!-- Settings -->
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-highest dark:hover:bg-surface-container-high transition-colors rounded-lg group" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-body-md text-body-md">Settings</span>
+</a>
+</nav>
+<div class="p-md border-t border-outline-variant">
+<div class="flex items-center gap-md px-md py-sm">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center">
+<span class="text-on-primary-container font-bold text-xs">PA</span>
+</div>
+<div class="overflow-hidden">
+<p class="text-body-sm font-bold truncate">alice@example.com</p>
+<p class="text-xs text-on-surface-variant">Admin Level 4</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Workspace -->
+<main class="ml-[280px] flex-1 flex flex-col min-h-screen">
+<!-- Top App Bar (TopAppBar JSON) -->
+<header class="h-16 flex justify-between items-center px-lg w-full bg-surface dark:bg-on-surface border-b border-outline-variant dark:border-outline sticky top-0 z-40">
+<div class="flex items-center gap-xl flex-1">
+<span class="font-headline-lg text-headline-lg font-black text-primary dark:text-inverse-primary">Precision Archival</span>
+<div class="relative w-full max-w-md focus-within:ring-1 focus-within:ring-primary rounded">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" data-icon="search">search</span>
+<input class="w-full bg-surface-container-low border-none rounded py-1.5 pl-10 text-body-md focus:ring-0" placeholder="Search document designs..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="p-xs text-on-surface-variant hover:text-primary transition-all">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-xs text-on-surface-variant hover:text-primary transition-all">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</button>
+<div class="h-8 w-px bg-outline-variant mx-sm"></div>
+<button class="px-md py-base border border-outline rounded font-label-caps text-on-surface hover:bg-surface-container transition-colors">Sign Out</button>
+</div>
+</header>
+<!-- Content Area -->
+<div class="flex-1 flex overflow-hidden">
+<!-- Document List / Page Manager -->
+<section class="w-[480px] bg-surface-bright flex flex-col border-r border-outline-variant overflow-y-auto">
+<div class="p-lg border-b border-outline-variant sticky top-0 bg-surface-bright z-10">
+<div class="flex justify-between items-start mb-md">
+<div>
+<h2 class="font-headline-xl text-headline-xl">BANBIF2</h2>
+<p class="text-body-sm text-on-surface-variant">No description provided</p>
+</div>
+<span class="px-sm py-0.5 bg-surface-container-high text-primary font-label-caps rounded">CURRENT</span>
+</div>
+<div class="grid grid-cols-2 gap-md mb-lg">
+<div>
+<p class="font-label-caps text-on-surface-variant mb-base">DOCUMENT TYPE</p>
+<p class="text-body-md font-bold">Portada</p>
+</div>
+<div>
+<p class="font-label-caps text-on-surface-variant mb-base">CREATED BY</p>
+<p class="text-body-md">alice@example.com</p>
+</div>
+<div>
+<p class="font-label-caps text-on-surface-variant mb-base">CREATED AT</p>
+<p class="text-body-md">7/9/2026</p>
+</div>
+<div>
+<p class="font-label-caps text-on-surface-variant mb-base">PAGES</p>
+<p class="text-body-md">4</p>
+</div>
+</div>
+<div class="flex gap-sm">
+<button class="flex-1 bg-primary text-white font-label-caps py-sm rounded hover:opacity-90 transition-opacity">EDIT DESIGN</button>
+<button class="flex-1 border border-primary text-primary font-label-caps py-sm rounded hover:bg-surface-container-low transition-colors">VERSION HISTORY</button>
+</div>
+</div>
+<div class="p-md space-y-md">
+<div class="p-md bg-surface-container-low border border-outline-variant rounded flex items-start gap-md">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="info">info</span>
+<p class="text-body-sm text-on-surface-variant leading-tight">Version 2 is now current. Version 1 has been preserved in version history records.</p>
+</div>
+<!-- Page Cards -->
+<div class="space-y-sm">
+<!-- Item 1 -->
+<div class="group relative bg-white border border-outline-variant hover:border-primary transition-all p-md rounded cursor-pointer">
+<div class="flex justify-between items-start mb-xs">
+<span class="font-label-caps text-on-surface-variant">PAGE 1 · TEMPLATE</span>
+<span class="material-symbols-outlined opacity-0 group-hover:opacity-40 transition-opacity" data-icon="drag_indicator">drag_indicator</span>
+</div>
+<h3 class="font-headline-md text-headline-md mb-base">Bienvenida al Cliente</h3>
+<div class="flex justify-between items-center">
+<p class="text-body-sm text-on-surface-variant">3 tokens</p>
+<button class="px-sm py-1 border border-outline-variant rounded text-xs font-label-caps hover:bg-surface-container-low transition-colors" onclick="selectTemplate('Bienvenida al Cliente')">PREVIEW DATA</button>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="group relative bg-white border border-outline-variant hover:border-primary transition-all p-md rounded cursor-pointer">
+<div class="flex justify-between items-start mb-xs">
+<span class="font-label-caps text-on-surface-variant">PAGE 2 · PDF</span>
+<span class="material-symbols-outlined opacity-0 group-hover:opacity-40 transition-opacity" data-icon="drag_indicator">drag_indicator</span>
+</div>
+<h3 class="font-headline-md text-headline-md mb-base">Términos y Condiciones</h3>
+<div class="flex justify-between items-center">
+<p class="text-body-sm text-on-surface-variant">1 page · pages 1-1</p>
+<button class="px-sm py-1 border border-outline-variant rounded text-xs font-label-caps hover:bg-surface-container-low transition-colors" onclick="selectTemplate('Términos y Condiciones')">PREVIEW DATA</button>
+</div>
+</div>
+<!-- Item 3 (Active) -->
+<div class="group relative bg-white border-2 border-primary shadow-sm p-md rounded cursor-pointer">
+<div class="flex justify-between items-start mb-xs">
+<div class="flex items-center gap-xs">
+<span class="font-label-caps text-primary font-bold">PAGE 3 · TEMPLATE</span>
+<span class="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></span>
+</div>
+<span class="material-symbols-outlined text-primary/40" data-icon="drag_indicator">drag_indicator</span>
+</div>
+<h3 class="font-headline-md text-headline-md mb-base">Política de Seguridad</h3>
+<div class="flex justify-between items-center">
+<p class="text-body-sm text-on-surface-variant font-bold">3 tokens</p>
+<button class="px-sm py-1 bg-primary text-white rounded text-xs font-label-caps hover:opacity-90 transition-colors" onclick="selectTemplate('Política de Seguridad')">PREVIEWING</button>
+</div>
+</div>
+<!-- Item 4 -->
+<div class="group relative bg-white border border-outline-variant hover:border-primary transition-all p-md rounded cursor-pointer">
+<div class="flex justify-between items-start mb-xs">
+<span class="font-label-caps text-on-surface-variant">PAGE 4 · PDF</span>
+<span class="material-symbols-outlined opacity-0 group-hover:opacity-40 transition-opacity" data-icon="drag_indicator">drag_indicator</span>
+</div>
+<h3 class="font-headline-md text-headline-md mb-base">Asistencia Vial</h3>
+<div class="flex justify-between items-center">
+<p class="text-body-sm text-on-surface-variant">1 page · pages 1-1</p>
+<button class="px-sm py-1 border border-outline-variant rounded text-xs font-label-caps hover:bg-surface-container-low transition-colors" onclick="selectTemplate('Asistencia Vial')">PREVIEW DATA</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Main Canvas / Preview Area -->
+<section class="flex-1 bg-surface-container page-canvas-bg flex flex-col items-center p-xl overflow-y-auto">
+<!-- Page Preview Block -->
+<div class="w-[595px] h-[842px] bg-white border border-outline-variant shadow-lg flex flex-col p-12 transition-all transform scale-95 origin-top mb-12">
+<div class="flex justify-between items-center mb-12">
+<div class="w-24 h-12 bg-primary flex items-center justify-center">
+<span class="text-white font-bold text-xs uppercase tracking-widest">Logo</span>
+</div>
+<div class="text-right">
+<p class="font-headline-md text-headline-md">POLÍTICA DE SEGURIDAD</p>
+<p class="text-xs text-on-surface-variant font-label-caps">CÓDIGO: SEC-2024-B2</p>
+</div>
+</div>
+<div class="space-y-lg flex-1">
+<div class="h-4 bg-surface-container-low w-3/4 rounded"></div>
+<div class="h-4 bg-surface-container-low w-1/2 rounded"></div>
+<div class="py-xl">
+<div class="border-l-4 border-primary pl-md py-sm bg-surface-container-low rounded-r">
+<p class="font-body-md text-on-surface italic">"El cliente <span class="bg-primary-fixed px-1 text-primary font-bold">[[CUSTOMER_NAME]]</span> acepta los términos de seguridad integral con fecha <span class="bg-primary-fixed px-1 text-primary font-bold">[[EFFECTIVE_DATE]]</span> asociados al contrato <span class="bg-primary-fixed px-1 text-primary font-bold">[[CONTRACT_ID]]</span>."</p>
+</div>
+</div>
+<div class="space-y-sm">
+<div class="h-4 bg-surface-container-low w-full rounded"></div>
+<div class="h-4 bg-surface-container-low w-full rounded"></div>
+<div class="h-4 bg-surface-container-low w-5/6 rounded"></div>
+</div>
+<div class="mt-xl pt-xl border-t border-outline-variant grid grid-cols-2 gap-xl">
+<div class="space-y-md">
+<div class="h-2 bg-surface-container-low w-1/2 rounded"></div>
+<div class="h-12 border-b border-outline-variant w-full"></div>
+<p class="text-[10px] font-label-caps text-on-surface-variant uppercase">Firma del Apoderado</p>
+</div>
+<div class="space-y-md">
+<div class="h-2 bg-surface-container-low w-1/2 rounded"></div>
+<div class="h-12 border-b border-outline-variant w-full"></div>
+<p class="text-[10px] font-label-caps text-on-surface-variant uppercase">Firma del Cliente</p>
+</div>
+</div>
+</div>
+<div class="mt-auto flex justify-between items-end border-t border-outline-variant pt-md">
+<p class="text-[10px] text-on-surface-variant">Precision Archival System v4.2.0-STABLE</p>
+<p class="text-[10px] text-on-surface-variant">Page 3 of 4</p>
+</div>
+</div>
+<div class="flex items-center gap-md bg-white px-md py-sm rounded-full shadow-md border border-outline-variant mb-lg">
+<button class="material-symbols-outlined p-base hover:bg-surface-container rounded" data-icon="zoom_out">zoom_out</button>
+<span class="text-xs font-label-caps w-12 text-center">95%</span>
+<button class="material-symbols-outlined p-base hover:bg-surface-container rounded" data-icon="zoom_in">zoom_in</button>
+<div class="w-px h-4 bg-outline-variant"></div>
+<button class="material-symbols-outlined p-base hover:bg-surface-container rounded" data-icon="fit_screen">fit_screen</button>
+</div>
+</section>
+<!-- Property Inspector / Data Injection -->
+<section class="w-[panel-width-tools] bg-surface flex flex-col border-l border-outline-variant overflow-y-auto">
+<div class="p-lg border-b border-outline-variant">
+<div class="flex items-center justify-between mb-sm">
+<h2 class="font-headline-md text-headline-md">Inspector</h2>
+<span class="material-symbols-outlined text-on-surface-variant cursor-help" data-icon="info">info</span>
+</div>
+<p class="text-xs font-label-caps text-on-surface-variant uppercase tracking-wider">Example Data Mocking</p>
+</div>
+<div class="p-lg space-y-lg">
+<!-- Template Context -->
+<div>
+<label class="font-label-caps text-on-surface-variant mb-xs block">ACTIVE TEMPLATE</label>
+<div class="bg-surface-container-low p-md rounded border border-outline-variant">
+<p class="text-body-sm font-bold" id="inspector-title">Politica de Seguridad</p>
+</div>
+</div>
+<!-- Fields Mapping -->
+<div>
+<label class="font-label-caps text-on-surface-variant mb-md block">DATA TOKENS</label>
+<div class="space-y-sm">
+<div class="p-sm bg-surface-container-low rounded border border-outline-variant focus-within:border-primary transition-colors">
+<label class="text-[10px] font-label-caps text-primary-container font-black mb-1 block uppercase">CUSTOMER_NAME</label>
+<input class="w-full bg-transparent border-none p-0 text-body-md focus:ring-0" type="text" value="Juan Pérez Rodríguez"/>
+</div>
+<div class="p-sm bg-surface-container-low rounded border border-outline-variant focus-within:border-primary transition-colors">
+<label class="text-[10px] font-label-caps text-primary-container font-black mb-1 block uppercase">EFFECTIVE_DATE</label>
+<input class="w-full bg-transparent border-none p-0 text-body-md focus:ring-0" type="text" value="12/04/2024"/>
+</div>
+<div class="p-sm bg-surface-container-low rounded border border-outline-variant focus-within:border-primary transition-colors">
+<label class="text-[10px] font-label-caps text-primary-container font-black mb-1 block uppercase">CONTRACT_ID</label>
+<input class="w-full bg-transparent border-none p-0 text-body-md focus:ring-0" type="text" value="BB-992384-X"/>
+</div>
+</div>
+</div>
+<!-- Raw JSON Config -->
+<div>
+<div class="flex items-center justify-between mb-xs">
+<label class="font-label-caps text-on-surface-variant block">RAW CONFIG (JSON)</label>
+<button class="text-[10px] text-primary font-bold hover:underline">BEAUTIFY</button>
+</div>
+<div class="bg-surface-container-highest p-md rounded border border-outline font-code-sm text-code-sm min-h-[120px] relative">
+<code class="block whitespace-pre text-on-surface-variant">
+{
+  "meta": {
+    "version": "2.1",
+    "env": "staging"
+  },
+  "bindings": [
+    "CUSTOMER_NAME",
+    "EFFECTIVE_DATE",
+    "CONTRACT_ID"
+  ]
+}
+                            </code>
+<button class="absolute top-2 right-2 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="content_copy">content_copy</span>
+</button>
+</div>
+</div>
+<div class="pt-xl">
+<button class="w-full py-sm border border-primary text-primary font-label-caps rounded flex items-center justify-center gap-sm hover:bg-primary hover:text-white transition-all group">
+<span class="material-symbols-outlined text-md group-hover:scale-110 transition-transform" data-icon="visibility">visibility</span>
+                            FULL PREVIEW (PDF)
+                        </button>
+</div>
+</div>
+<!-- Footer Interaction -->
+<div class="mt-auto p-lg border-t border-outline-variant bg-surface-container-low">
+<div class="flex items-center gap-sm mb-md">
+<div class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
+<p class="text-xs text-on-surface-variant">Ready to compile</p>
+</div>
+<button class="w-full bg-primary text-white font-label-caps py-md rounded shadow-sm hover:shadow-md active:scale-[0.98] transition-all">GENERATE PACKAGE</button>
+</div>
+</section>
+</div>
+</main>
+<!-- Contextual FAB (Only on specific high-level screens) -->
+<button class="fixed bottom-lg right-[340px] w-14 h-14 bg-primary text-white rounded-full shadow-xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-30 group">
+<span class="material-symbols-outlined text-2xl" data-icon="add">add</span>
+<span class="absolute right-full mr-md px-md py-sm bg-on-surface text-white text-xs font-label-caps rounded opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all pointer-events-none whitespace-nowrap">Create Template</span>
+</button>
+<script>
+        function selectTemplate(name) {
+            const inspectorTitle = document.getElementById('inspector-title');
+            inspectorTitle.innerText = name;
+            
+            // Highlight the selection visual logic
+            console.log("Switching preview context to: " + name);
+            // In a real app, this would trigger data re-binding
+        }
+
+        // Lightweight atmospheric effect for the canvas
+        document.addEventListener('mousemove', (e) => {
+            const canvas = document.querySelector('.page-canvas-bg');
+            if (canvas) {
+                const moveX = (e.clientX / window.innerWidth - 0.5) * 10;
+                const moveY = (e.clientY / window.innerHeight - 0.5) * 10;
+                // Subtle parallax for a professional feel
+                // canvas.style.backgroundPosition = `${moveX}px ${moveY}px`;
+            }
+        });
+    </script>
+</body></html>

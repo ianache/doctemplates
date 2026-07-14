@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MAQUETACIÓN - Enterprise Admin Workspace</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#610000",
+                        "primary-container": "#8b0000",
+                        "on-primary": "#ffffff",
+                        "surface": "#ffffff",
+                        "surface-dim": "#fcf9f8",
+                        "background": "#f8f9fa",
+                        "outline": "#d1d5db",
+                        "outline-variant": "#e5e7eb",
+                        "on-surface": "#111827",
+                        "on-surface-variant": "#4b5563",
+                        "secondary-container": "#f3f4f6",
+                        "surface-container-low": "#f9fafb",
+                        "surface-container": "#f3f4f6",
+                        "surface-container-high": "#e5e7eb",
+                        "surface-container-highest": "#d1d5db"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "1px",
+                        "md": "16px",
+                        "xl": "32px",
+                        "base": "4px",
+                        "xs": "8px",
+                        "panel-width-side": "280px",
+                        "sm": "12px",
+                        "panel-width-tools": "320px",
+                        "lg": "24px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter", "sans-serif"],
+                        "body-md": ["Inter", "sans-serif"],
+                        "code-sm": ["JetBrains Mono", "monospace"],
+                        "headline-xl": ["Hanken Grotesk", "sans-serif"],
+                        "body-sm": ["Inter", "sans-serif"],
+                        "headline-md": ["Hanken Grotesk", "sans-serif"],
+                        "headline-lg": ["Hanken Grotesk", "sans-serif"],
+                        "label-caps": ["Inter", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "code-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "headline-xl": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.06em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            user-select: none;
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+        
+        .tiled-grid {
+            display: grid;
+            grid-template-columns: 64px 300px 1fr 340px;
+            height: 100vh;
+        }
+
+        .canvas-bg {
+            background-color: #f3f4f6;
+            background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .shadow-soft {
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+        
+        .shadow-panel {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .input-focus:focus-within {
+            border-color: #610000;
+            box-shadow: 0 0 0 1px #610000;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md overflow-hidden">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 left-0 w-full h-16 bg-white flex justify-between items-center px-lg border-b border-outline-variant z-50 shadow-sm">
+<div class="flex items-center gap-md">
+<button class="p-2 hover:bg-surface-container transition-colors rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant">menu</span>
+</button>
+<div class="h-6 w-px bg-outline-variant mx-1"></div>
+<span class="text-headline-md font-headline-md text-primary tracking-tight">MAQUETACIÓN</span>
+</div>
+<div class="flex items-center gap-md">
+<div class="flex items-center bg-surface-container rounded-lg px-sm py-1.5 border border-outline-variant">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px] mr-2">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-body-sm w-48 placeholder:text-on-surface-variant" placeholder="Buscar archivos..." type="text"/>
+</div>
+<button class="p-2 hover:bg-surface-container transition-colors rounded-lg relative">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full border-2 border-white"></span>
+</button>
+<button class="flex items-center gap-2 pl-2 pr-1 py-1 hover:bg-surface-container transition-colors rounded-full border border-outline-variant">
+<span class="text-body-sm font-medium pr-1">Admin User</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[32px]" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</header>
+<!-- Main Workspace Layout -->
+<div class="tiled-grid pt-16">
+<!-- Rail Navigation (Zone 1) -->
+<aside class="flex flex-col items-center py-lg gap-lg bg-white border-r border-outline-variant shadow-sm z-40">
+<nav class="flex flex-col gap-4 items-center w-full">
+<button class="w-11 h-11 flex items-center justify-center rounded-xl bg-primary text-white shadow-md hover:brightness-110 transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+</button>
+<button class="w-11 h-11 flex items-center justify-center rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all">
+<span class="material-symbols-outlined">description</span>
+</button>
+<button class="w-11 h-11 flex items-center justify-center rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all">
+<span class="material-symbols-outlined">dashboard</span>
+</button>
+<button class="w-11 h-11 flex items-center justify-center rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all">
+<span class="material-symbols-outlined">analytics</span>
+</button>
+<div class="w-8 h-px bg-outline-variant my-2"></div>
+<button class="w-11 h-11 flex items-center justify-center rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</nav>
+</aside>
+<!-- Asset Manager (Zone 2: Maqueta Documento) -->
+<aside class="flex flex-col bg-white border-r border-outline-variant overflow-y-auto">
+<div class="p-lg border-b border-outline-variant sticky top-0 bg-white z-10">
+<h2 class="text-label-caps font-label-caps text-on-surface-variant uppercase tracking-widest mb-md">Maqueta Documento</h2>
+<div class="relative group">
+<input class="w-full h-10 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-1 focus:ring-primary focus:border-primary outline-none px-md text-body-sm font-medium transition-all" placeholder="NOMBRE DEL PROYECTO" type="text"/>
+<span class="absolute right-3 top-2.5 material-symbols-outlined text-body-sm text-on-surface-variant">edit</span>
+</div>
+</div>
+<div class="p-lg flex flex-col gap-lg">
+<!-- Document Template Cards -->
+<div class="group relative bg-white border-2 border-primary rounded-xl p-3 cursor-pointer shadow-md transition-all hover:translate-y-[-2px]">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-2">
+<span class="px-1.5 py-0.5 bg-primary/10 text-primary rounded text-[10px] font-bold uppercase">#P1 PDF</span>
+<span class="w-2 h-2 rounded-full bg-green-500"></span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant/40 hover:text-on-surface cursor-grab">drag_indicator</span>
+</div>
+<div class="aspect-[3/4] bg-surface-dim border border-outline-variant rounded-lg flex items-center justify-center mb-3 shadow-inner overflow-hidden group-hover:border-primary/30 transition-colors">
+<div class="w-full h-full flex flex-col items-center justify-center bg-white/50 backdrop-blur-sm">
+<span class="material-symbols-outlined text-primary/20 text-4xl mb-2">article</span>
+<span class="text-label-caps font-bold text-on-surface-variant/60">PORTADA</span>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<p class="text-body-sm font-semibold text-on-surface">Portada Principal</p>
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity">more_vert</span>
+</div>
+</div>
+<div class="group relative bg-white border border-outline-variant rounded-xl p-3 cursor-pointer transition-all hover:border-primary/40 hover:shadow-lg hover:translate-y-[-2px]">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-2">
+<span class="px-1.5 py-0.5 bg-gray-100 text-on-surface-variant rounded text-[10px] font-bold uppercase">#P2 DOC</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant/20 hover:text-on-surface cursor-grab">drag_indicator</span>
+</div>
+<div class="aspect-[3/4] bg-surface-dim border border-outline-variant rounded-lg flex items-center justify-center mb-3 shadow-inner group-hover:bg-primary/5 transition-colors">
+<span class="text-label-caps font-bold text-on-surface-variant/40">WELCOME</span>
+</div>
+<div class="flex items-center justify-between">
+<p class="text-body-sm font-medium text-on-surface-variant">Welcome Page</p>
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity">more_vert</span>
+</div>
+</div>
+<!-- Add New Button -->
+<button class="w-full h-24 border-2 border-dashed border-outline rounded-xl hover:border-primary hover:bg-primary/5 transition-all flex flex-col items-center justify-center gap-2 group">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all">
+<span class="material-symbols-outlined text-2xl">add</span>
+</div>
+<span class="text-label-caps font-bold text-on-surface-variant group-hover:text-primary tracking-wider">AÑADIR PÁGINA</span>
+</button>
+</div>
+</aside>
+<!-- Canvas Area (Zone 3: Document Preview) -->
+<main class="canvas-bg overflow-y-auto flex flex-col items-center py-xl relative">
+<div class="sticky top-4 w-full flex justify-center pb-lg z-20 pointer-events-none">
+<div class="bg-white shadow-lg border border-outline-variant px-6 py-2.5 rounded-full pointer-events-auto flex items-center gap-3">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="text-label-caps font-bold tracking-widest text-on-surface-variant">DOCUMENT PREVIEW — 2 PÁGINAS</span>
+<div class="w-px h-4 bg-outline-variant"></div>
+<div class="flex items-center gap-2">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors text-[20px]">zoom_in</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors text-[20px]">zoom_out</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors text-[20px]">fullscreen</button>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-xl w-full max-w-3xl px-lg">
+<!-- Page 1 Preview -->
+<div class="flex flex-col gap-4">
+<div class="bg-white shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-outline-variant rounded-sm w-full aspect-[1/1.414] relative flex flex-col items-center justify-center p-xl overflow-hidden group">
+<div class="absolute inset-0 bg-primary/[0.02] pointer-events-none"></div>
+<div class="z-10 w-full h-full flex flex-col items-center">
+<h1 class="text-headline-xl font-headline-xl text-primary text-center mb-lg">Page 1</h1>
+<div class="w-32 h-1 bg-primary mb-xl"></div>
+<div class="relative w-full shadow-2xl rounded-sm overflow-hidden border border-outline-variant group-hover:scale-[1.02] transition-transform duration-500">
+<img class="w-full h-72 object-cover" data-alt="Professional document layout" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD0GcGuPA0sQPCHJdIb0JcCLW7VGC9sLFkJs2pCitrvb-9JVgH6lftQUU-v0HqUJQ3zq2anAyQx94ANMRWiRxlzDJxTm9dlsUHjxkQKtdljixSTY1HmHd-waAldL6P-ebe6tvdAXh6Ermm3Zd7I2QXlaptODt_9txccKSit1Q6OunCGvUs33NZOscs3ouEWYNfVc3sP8nADEOdoroNGY2edbTpuhsMZeuwT9i-lDe0yvALlxKtLlEgU5umM2mHevezvtlFg0zu5OKw"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+</div>
+<div class="mt-xl flex flex-col gap-4 w-full">
+<div class="h-5 bg-surface-container-high rounded-full w-full"></div>
+<div class="h-5 bg-surface-container-high rounded-full w-5/6"></div>
+<div class="h-5 bg-surface-container-high rounded-full w-4/5"></div>
+</div>
+</div>
+</div>
+<div class="flex justify-between items-center px-2">
+<span class="text-label-caps font-bold text-on-surface-variant/80 tracking-widest uppercase">PORTADA PRINCIPAL.PDF</span>
+<span class="text-label-caps font-medium text-on-surface-variant/40">1 / 2</span>
+</div>
+</div>
+<!-- Page 2 Preview -->
+<div class="flex flex-col gap-4">
+<div class="bg-white shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-outline-variant rounded-sm w-full aspect-[1/1.414] relative flex flex-col items-center justify-center p-xl group">
+<div class="z-10 w-full h-full flex flex-col items-center">
+<h1 class="text-headline-xl font-headline-xl text-on-surface-variant text-center mb-lg">Page 2</h1>
+<div class="grid grid-cols-2 gap-8 w-full">
+<div class="h-40 bg-surface-container border border-outline-variant rounded-lg shadow-inner group-hover:bg-primary/5 transition-colors"></div>
+<div class="h-40 bg-surface-container border border-outline-variant rounded-lg shadow-inner group-hover:bg-primary/5 transition-colors"></div>
+</div>
+<div class="mt-xl flex flex-col gap-4 w-full">
+<div class="h-5 bg-surface-container-high rounded-full w-full"></div>
+<div class="h-5 bg-surface-container-high rounded-full w-full"></div>
+<div class="h-5 bg-surface-container-high rounded-full w-2/3"></div>
+</div>
+</div>
+</div>
+<div class="flex justify-between items-center px-2">
+<span class="text-label-caps font-bold text-on-surface-variant/80 tracking-widest uppercase">WELCOME_PAGE.DOC</span>
+<span class="text-label-caps font-medium text-on-surface-variant/40">2 / 2</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Property Inspector (Zone 4: Object Fields) -->
+<aside class="flex flex-col bg-white border-l border-outline-variant overflow-y-auto shadow-sm">
+<div class="p-lg border-b border-outline-variant sticky top-0 bg-white z-10 flex items-center justify-between">
+<h2 class="text-label-caps font-label-caps text-on-surface-variant uppercase tracking-widest">Object Fields</h2>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-on-surface">info</button>
+</div>
+<div class="p-lg flex flex-col gap-xl">
+<!-- Group: Cliente -->
+<section class="bg-surface-container-low p-md rounded-xl border border-outline-variant shadow-soft">
+<div class="flex items-center gap-xs mb-lg">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">corporate_fare</span>
+<span class="text-body-md font-bold uppercase tracking-wider text-on-surface">Cliente</span>
+</div>
+<div class="flex flex-col gap-lg">
+<div class="flex flex-col gap-2">
+<label class="text-label-caps text-on-surface-variant uppercase font-bold text-[10px]">Nombre</label>
+<div class="flex items-center gap-3 bg-white border border-outline-variant rounded-lg px-3 py-2 input-focus transition-all">
+<span class="material-symbols-outlined text-body-sm text-on-surface-variant/40">drag_pan</span>
+<input class="flex-1 border-none focus:ring-0 text-body-sm font-medium p-0" type="text" value="Empresa Constructora S.A."/>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-label-caps text-on-surface-variant uppercase font-bold text-[10px]">Código</label>
+<div class="flex items-center gap-3 bg-white border border-outline-variant rounded-lg px-3 py-2 input-focus transition-all">
+<span class="material-symbols-outlined text-body-sm text-on-surface-variant/40">drag_pan</span>
+<input class="flex-1 border-none focus:ring-0 text-code-sm font-code-sm p-0" type="text" value="7742-ARC"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Group: Canal -->
+<section class="bg-surface-container-low p-md rounded-xl border border-outline-variant shadow-soft">
+<div class="flex items-center gap-xs mb-lg">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">hub</span>
+<span class="text-body-md font-bold uppercase tracking-wider text-on-surface">Canal</span>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-label-caps text-on-surface-variant uppercase font-bold text-[10px]">Nombre</label>
+<div class="flex items-center gap-3 bg-white border border-outline-variant rounded-lg px-3 py-2 input-focus transition-all">
+<span class="material-symbols-outlined text-body-sm text-on-surface-variant/40">drag_pan</span>
+<select class="flex-1 border-none focus:ring-0 text-body-sm font-medium p-0 appearance-none bg-white">
+<option>B2B Direct</option>
+<option>Marketplace</option>
+<option>Agency</option>
+</select>
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">expand_more</span>
+</div>
+</div>
+</section>
+<!-- Group: Cita -->
+<section class="bg-surface-container-low p-md rounded-xl border border-outline-variant shadow-soft">
+<div class="flex items-center gap-xs mb-lg">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">calendar_today</span>
+<span class="text-body-md font-bold uppercase tracking-wider text-on-surface">Cita</span>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-label-caps text-on-surface-variant uppercase font-bold text-[10px]">Fecha</label>
+<div class="flex items-center gap-3 bg-white border border-outline-variant rounded-lg px-3 py-2 input-focus transition-all">
+<span class="material-symbols-outlined text-body-sm text-on-surface-variant/40">drag_pan</span>
+<input class="flex-1 border-none focus:ring-0 text-body-sm font-medium p-0" type="date" value="2024-05-15"/>
+</div>
+</div>
+</section>
+<!-- API Reference Block -->
+<div class="mt-auto pt-lg">
+<div class="p-md bg-[#1e1e1e] border border-black rounded-xl shadow-panel">
+<div class="flex items-center gap-2 mb-2">
+<span class="w-3 h-3 rounded-full bg-[#ff5f56]"></span>
+<span class="w-3 h-3 rounded-full bg-[#ffbd2e]"></span>
+<span class="w-3 h-3 rounded-full bg-[#27c93f]"></span>
+<span class="text-[10px] text-white/40 font-code-sm ml-2">API PAYLOAD</span>
+</div>
+<p class="text-code-sm font-code-sm text-[#ce9178] break-all leading-relaxed">
+<span class="text-[#569cd6]">POST</span> <span class="text-[#9cdcfe]">/documents/maq</span><br/>
+<span class="text-[#cccccc]">payload: {</span><br/>
+                              <span class="text-[#9cdcfe]">id</span>: <span class="text-[#ce9178]">"01"</span>,<br/>
+                              <span class="text-[#9cdcfe]">pages</span>: <span class="text-[#b5cea8]">2</span><br/>
+<span class="text-[#cccccc]">}</span>
+</p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+<!-- Micro-interaction Scripts -->
+<script>
+        document.querySelectorAll('button, .group').forEach(el => {
+            el.addEventListener('mousedown', () => {
+                el.style.transform = 'scale(0.97)';
+            });
+            el.addEventListener('mouseup', () => {
+                el.style.transform = '';
+            });
+            el.addEventListener('mouseleave', () => {
+                el.style.transform = '';
+            });
+        });
+
+        const searchInput = document.querySelector('input[placeholder="Buscar archivos..."]');
+        if(searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                console.log('API Filter:', e.target.value);
+            });
+        }
+    </script>
+</body></html>

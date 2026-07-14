@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Precision Archival | Visual Workflow Designer</title>
+<!-- Tailwind & Google Fonts -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Hanken+Grotesk:wght@600;700;900&family=JetBrains+Mono&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@100..900&family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<!-- Design System Config -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "on-secondary": "#ffffff",
+                "secondary-fixed": "#e2e2e2",
+                "inverse-on-surface": "#ffedea",
+                "surface-container-high": "#fee2dd",
+                "on-error": "#ffffff",
+                "surface-tint": "#b52619",
+                "on-secondary-container": "#646464",
+                "surface-variant": "#f8dcd8",
+                "on-tertiary-fixed-variant": "#464747",
+                "background": "#fff8f6",
+                "secondary-container": "#e2e2e2",
+                "surface-dim": "#efd4d0",
+                "error-container": "#ffdad6",
+                "on-tertiary": "#ffffff",
+                "tertiary-fixed-dim": "#c7c6c6",
+                "on-primary-fixed-variant": "#920703",
+                "tertiary-container": "#424242",
+                "surface-container-highest": "#f8dcd8",
+                "tertiary-fixed": "#e3e2e2",
+                "surface-bright": "#fff8f6",
+                "on-secondary-fixed-variant": "#474747",
+                "on-error-container": "#93000a",
+                "on-surface": "#261816",
+                "on-tertiary-fixed": "#1b1c1c",
+                "inverse-surface": "#3d2c2a",
+                "on-primary-fixed": "#410000",
+                "primary": "#610000",
+                "on-surface-variant": "#5a403c",
+                "on-primary-container": "#ff907f",
+                "on-tertiary-container": "#afaeae",
+                "secondary-fixed-dim": "#c6c6c6",
+                "on-secondary-fixed": "#1b1b1b",
+                "on-primary": "#ffffff",
+                "primary-fixed": "#ffdad4",
+                "outline-variant": "#e3blind8",
+                "error": "#ba1a1a",
+                "on-background": "#261816",
+                "inverse-primary": "#ffb4a8",
+                "secondary": "#5e5e5e",
+                "surface-container-low": "#fff0ee",
+                "primary-fixed-dim": "#ffb4a8",
+                "outline": "#8e706b",
+                "tertiary": "#2b2c2c",
+                "surface": "#fff8f6",
+                "primary-container": "#8b0000",
+                "surface-container-lowest": "#ffffff",
+                "surface-container": "#ffe9e6"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.125rem",
+                "lg": "0.25rem",
+                "xl": "0.5rem",
+                "full": "0.75rem"
+            },
+            "spacing": {
+                "lg": "24px",
+                "md": "16px",
+                "xs": "8px",
+                "panel-width-tools": "320px",
+                "panel-width-side": "280px",
+                "gutter": "1px",
+                "xl": "32px",
+                "sm": "12px",
+                "base": "4px"
+            },
+            "fontFamily": {
+                "label-caps": ["Inter"],
+                "body-md": ["Inter"],
+                "headline-xl": ["Hanken Grotesk"],
+                "headline-md": ["Hanken Grotesk"],
+                "code-sm": ["JetBrains Mono"],
+                "headline-lg": ["Hanken Grotesk"],
+                "body-sm": ["Inter"],
+                "body-lg": ["Inter"]
+            },
+            "fontSize": {
+                "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                "headline-xl": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                "code-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                "body-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        
+        /* Grid pattern for the canvas */
+        .canvas-grid {
+            background-color: #ffffff;
+            background-image: 
+                linear-gradient(#f0f0f0 1px, transparent 1px),
+                linear-gradient(90deg, #f0f0f0 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .node-selected {
+            border-color: #8b0000 !important;
+            box-shadow: 0 0 0 2px #8b0000;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #fff8f6;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #8e706b;
+            border-radius: 2px;
+        }
+
+        /* Micro-interactions */
+        .tool-icon:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md overflow-hidden h-screen flex flex-col">
+<!-- Top Navigation Bar (Shared Component Strategy) -->
+<header class="h-16 flex justify-between items-center px-lg w-full bg-surface-container-lowest border-b border-outline-variant z-50">
+<div class="flex items-center gap-md">
+<span class="font-headline-lg text-headline-lg font-black text-primary">Precision Archival</span>
+<div class="h-6 w-gutter bg-outline-variant mx-xs"></div>
+<h1 class="font-headline-md text-headline-md text-on-surface-variant">Visual Workflow Designer</h1>
+</div>
+<div class="flex items-center gap-md">
+<div class="flex items-center gap-xs text-on-surface-variant mr-lg">
+<span class="material-symbols-outlined text-md">cloud_done</span>
+<span class="text-body-sm font-label-caps uppercase">All changes saved</span>
+</div>
+<button class="flex items-center gap-xs px-md py-xs bg-secondary text-on-secondary rounded hover:bg-tertiary transition-all">
+<span class="material-symbols-outlined text-sm">play_arrow</span>
+<span class="text-label-caps uppercase">Test Flow</span>
+</button>
+<button class="flex items-center gap-xs px-md py-xs bg-primary-container text-on-primary rounded hover:opacity-90 transition-all font-bold">
+<span class="material-symbols-outlined text-sm">save</span>
+<span class="text-label-caps uppercase">Save Workflow</span>
+</button>
+</div>
+</header>
+<div class="flex-1 flex overflow-hidden">
+<!-- Left Sidebar: Flow Components -->
+<aside class="w-panel-width-side bg-surface-container-low border-r border-outline-variant flex flex-col">
+<div class="p-md border-b border-outline-variant">
+<h2 class="text-label-caps uppercase text-on-surface-variant mb-xs">Flow Components</h2>
+<p class="text-body-sm text-on-surface-variant opacity-70">Drag and drop nodes onto the canvas.</p>
+</div>
+<nav class="flex-1 overflow-y-auto p-md space-y-md">
+<!-- Node Tool Category -->
+<div>
+<span class="text-[10px] font-bold text-outline uppercase tracking-widest block mb-sm">Nodes</span>
+<div class="grid grid-cols-2 gap-xs">
+<div class="tool-icon flex flex-col items-center justify-center p-xs bg-surface-container-lowest border border-outline-variant rounded-lg cursor-grab active:cursor-grabbing hover:bg-surface-container-high transition-all group">
+<span class="material-symbols-outlined text-primary mb-1">play_circle</span>
+<span class="text-[11px] font-medium">Start Node</span>
+</div>
+<div class="tool-icon flex flex-col items-center justify-center p-xs bg-surface-container-lowest border border-outline-variant rounded-lg cursor-grab active:cursor-grabbing hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined text-secondary mb-1">task</span>
+<span class="text-[11px] font-medium">Task Node</span>
+</div>
+<div class="tool-icon flex flex-col items-center justify-center p-xs bg-surface-container-lowest border border-outline-variant rounded-lg cursor-grab active:cursor-grabbing hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined text-secondary mb-1">account_tree</span>
+<span class="text-[11px] font-medium">State Node</span>
+</div>
+<div class="tool-icon flex flex-col items-center justify-center p-xs bg-surface-container-lowest border border-outline-variant rounded-lg cursor-grab active:cursor-grabbing hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined text-primary mb-1">stop_circle</span>
+<span class="text-[11px] font-medium">End Node</span>
+</div>
+</div>
+</div>
+<!-- Connectors Tool Category -->
+<div>
+<span class="text-[10px] font-bold text-outline uppercase tracking-widest block mb-sm">Connectors</span>
+<div class="tool-icon flex items-center gap-md p-sm bg-surface-container-lowest border border-outline-variant rounded-lg cursor-grab active:cursor-grabbing hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined text-secondary">moving</span>
+<div>
+<p class="text-body-sm font-semibold">Transition</p>
+<p class="text-[10px] text-on-surface-variant">Logic-based connector</p>
+</div>
+</div>
+</div>
+<!-- Templates Category -->
+<div class="pt-lg">
+<span class="text-[10px] font-bold text-outline uppercase tracking-widest block mb-sm">Recent Flows</span>
+<ul class="space-y-base">
+<li class="flex items-center gap-xs p-xs text-body-sm hover:bg-surface-container-high rounded cursor-pointer">
+<span class="material-symbols-outlined text-xs">history</span>
+<span>Legal_Review_V4.arch</span>
+</li>
+<li class="flex items-center gap-xs p-xs text-body-sm hover:bg-surface-container-high rounded cursor-pointer">
+<span class="material-symbols-outlined text-xs">history</span>
+<span>Asset_Ingest_Prod.arch</span>
+</li>
+</ul>
+</div>
+</nav>
+<!-- Bottom Action -->
+<div class="p-md bg-surface-container border-t border-outline-variant">
+<button class="w-full flex items-center justify-center gap-xs py-xs border border-outline rounded text-label-caps uppercase hover:bg-surface-container-lowest transition-colors">
+<span class="material-symbols-outlined text-sm">add</span>
+                    New Template
+                </button>
+</div>
+</aside>
+<!-- Center Canvas Workspace -->
+<main class="flex-1 relative overflow-hidden flex flex-col">
+<!-- Canvas Toolbar -->
+<div class="absolute top-md left-md z-10 flex gap-xs bg-surface-container-lowest border border-outline-variant shadow-sm p-xs rounded">
+<button class="p-xs hover:bg-surface-container-high rounded" title="Zoom In"><span class="material-symbols-outlined text-md">zoom_in</span></button>
+<button class="p-xs hover:bg-surface-container-high rounded" title="Zoom Out"><span class="material-symbols-outlined text-md">zoom_out</span></button>
+<div class="w-gutter h-4 bg-outline-variant self-center"></div>
+<button class="p-xs hover:bg-surface-container-high rounded" title="Undo"><span class="material-symbols-outlined text-md">undo</span></button>
+<button class="p-xs hover:bg-surface-container-high rounded" title="Redo"><span class="material-symbols-outlined text-md">redo</span></button>
+<div class="w-gutter h-4 bg-outline-variant self-center"></div>
+<button class="p-xs hover:bg-surface-container-high rounded" title="Grid Settings"><span class="material-symbols-outlined text-md">grid_4x4</span></button>
+</div>
+<div class="absolute top-md right-md z-10">
+<div class="px-md py-xs bg-primary-fixed-dim border border-primary text-primary text-[10px] font-bold rounded uppercase tracking-widest">
+                    Live Preview Active
+                </div>
+</div>
+<!-- The Grid Canvas -->
+<div class="flex-1 canvas-grid relative cursor-crosshair overflow-auto p-32">
+<!-- SVG Connector Layer -->
+<svg class="absolute inset-0 w-[2000px] h-[2000px] pointer-events-none">
+<defs>
+<marker id="arrowhead" markerheight="7" markerwidth="10" orient="auto" refx="9" refy="3.5">
+<polygon fill="#5e5e5e" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+</defs>
+<!-- Path 1: Start to Initial Review -->
+<path d="M 120 180 L 240 180" fill="none" marker-end="url(#arrowhead)" stroke="#5e5e5e" stroke-width="2"></path>
+<!-- Path 2: Initial Review to Task Node (Selected) -->
+<path d="M 400 180 L 520 180" fill="none" marker-end="url(#arrowhead)" stroke="#5e5e5e" stroke-width="2"></path>
+<!-- Path 3: Task Node to Branch -->
+<path d="M 720 180 L 780 180 L 780 240 L 840 240" fill="none" marker-end="url(#arrowhead)" stroke="#5e5e5e" stroke-width="2"></path>
+</svg>
+<!-- Flow Nodes -->
+<!-- Start Node -->
+<div class="absolute left-[40px] top-[140px] w-20 h-20 bg-surface-container-lowest border border-outline rounded-full flex items-center justify-center flex-col group hover:shadow-lg transition-all cursor-move">
+<span class="material-symbols-outlined text-primary">play_circle</span>
+<span class="text-[10px] font-label-caps uppercase mt-1">Start</span>
+</div>
+<!-- Logic Node -->
+<div class="absolute left-[240px] top-[140px] w-40 h-20 bg-surface-container-lowest border border-outline rounded flex items-center p-sm gap-sm group hover:shadow-lg transition-all cursor-move">
+<div class="w-1 h-full bg-secondary rounded-full"></div>
+<div>
+<p class="text-body-sm font-bold">Metadata Check</p>
+<p class="text-[10px] text-on-surface-variant">Automated Rule</p>
+</div>
+</div>
+<!-- SELECTED Task Node -->
+<div class="absolute left-[520px] top-[140px] w-52 h-24 bg-surface-container-lowest border-2 node-selected rounded shadow-md flex flex-col p-sm gap-xs group cursor-move">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-md text-primary">task</span>
+<span class="bg-primary-container text-on-primary text-[8px] font-bold px-1 rounded">PENDING</span>
+</div>
+<div>
+<p class="text-body-md font-bold text-primary">Archival Technical Review</p>
+<p class="text-[11px] text-on-surface-variant">Assigned to: Technical Reviewer</p>
+</div>
+<div class="absolute -top-3 -right-3 w-6 h-6 bg-primary rounded-full flex items-center justify-center text-white shadow-md">
+<span class="material-symbols-outlined text-[14px]">edit</span>
+</div>
+</div>
+<!-- Next Node -->
+<div class="absolute left-[840px] top-[200px] w-40 h-20 bg-surface-container-lowest border border-outline-variant opacity-60 rounded flex items-center p-sm gap-sm cursor-move">
+<div class="w-1 h-full bg-outline rounded-full"></div>
+<div>
+<p class="text-body-sm font-bold">Legal Clearance</p>
+<p class="text-[10px] text-on-surface-variant">State Transition</p>
+</div>
+</div>
+</div>
+<!-- Property Overlay Info (Bottom) -->
+<div class="absolute bottom-md left-md right-md flex justify-between items-end pointer-events-none">
+<div class="bg-surface-container-lowest/80 backdrop-blur-sm border border-outline-variant p-sm rounded-lg pointer-events-auto flex gap-lg shadow-sm">
+<div class="flex items-center gap-xs">
+<span class="text-body-sm font-bold">Status:</span>
+<span class="flex items-center gap-1 text-[11px] text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full">
+<span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span> Valid Flow
+                        </span>
+</div>
+<div class="flex items-center gap-xs">
+<span class="text-body-sm font-bold">Complexity:</span>
+<span class="text-[11px] text-on-surface-variant">Low (4 Nodes)</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Right Sidebar: Properties Panel -->
+<aside class="w-panel-width-tools bg-surface-container-lowest border-l border-outline-variant flex flex-col">
+<div class="p-md border-b border-outline-variant flex justify-between items-center">
+<div>
+<h2 class="text-label-caps uppercase text-on-surface-variant">Properties Panel</h2>
+<p class="text-[10px] font-bold text-primary">Task Node Selected</p>
+</div>
+<button class="p-xs hover:bg-surface-container-high rounded text-on-surface-variant">
+<span class="material-symbols-outlined text-md">close</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto p-md space-y-lg">
+<!-- Task Name -->
+<div class="space-y-xs">
+<label class="font-label-caps uppercase text-on-surface-variant">Task Name</label>
+<input class="w-full bg-surface border-b border-outline text-body-md py-xs focus:border-primary focus:ring-0 transition-all outline-none" type="text" value="Archival Technical Review"/>
+</div>
+<!-- Allowed Roles (Multi-select style) -->
+<div class="space-y-xs">
+<label class="font-label-caps uppercase text-on-surface-variant">Allowed Roles</label>
+<div class="flex flex-wrap gap-xs pt-xs">
+<span class="flex items-center gap-1 bg-surface-container-high border border-outline-variant px-xs py-0.5 rounded text-[11px] text-on-surface font-medium">
+                            Admin <button class="material-symbols-outlined text-[12px] hover:text-primary">close</button>
+</span>
+<span class="flex items-center gap-1 bg-primary-fixed-dim border border-primary/30 px-xs py-0.5 rounded text-[11px] text-primary font-bold">
+                            Technical Reviewer <button class="material-symbols-outlined text-[12px] hover:text-primary">close</button>
+</span>
+<span class="flex items-center gap-1 bg-surface-container-high border border-outline-variant px-xs py-0.5 rounded text-[11px] text-on-surface font-medium">
+                            Legal <button class="material-symbols-outlined text-[12px] hover:text-primary">close</button>
+</span>
+<button class="flex items-center gap-1 bg-surface border border-dashed border-outline-variant px-xs py-0.5 rounded text-[11px] text-on-surface-variant hover:border-primary hover:text-primary transition-all">
+<span class="material-symbols-outlined text-[12px]">add</span> Add Role
+                        </button>
+</div>
+</div>
+<!-- Approval Pattern -->
+<div class="space-y-xs">
+<label class="font-label-caps uppercase text-on-surface-variant">Approval Pattern</label>
+<div class="relative">
+<select class="w-full appearance-none bg-surface border border-outline-variant rounded p-xs text-body-md pr-lg focus:border-primary focus:ring-0 transition-all cursor-pointer" id="approval-pattern">
+<option value="single">Single Approver</option>
+<option value="parallel">Parallel Approval</option>
+<option selected="" value="hierarchical">Hierarchical Approval</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-2 pointer-events-none text-on-surface-variant">expand_more</span>
+</div>
+</div>
+<!-- Threshold Slider (Conditional) -->
+<div class="space-y-xs pt-sm border-t border-outline-variant/30" id="threshold-container">
+<div class="flex justify-between items-center">
+<label class="font-label-caps uppercase text-on-surface-variant">Threshold %</label>
+<span class="font-code-sm text-primary font-bold" id="threshold-value">75%</span>
+</div>
+<input class="w-full h-1 bg-secondary-fixed rounded-lg appearance-none cursor-pointer accent-primary" id="threshold-range" max="100" min="0" type="range" value="75"/>
+<p class="text-[10px] text-on-surface-variant italic leading-tight">Percentage of approval required within the selected hierarchy group to move to next state.</p>
+</div>
+<!-- Advanced Settings (Accordion Style) -->
+<div class="pt-md">
+<button class="w-full flex justify-between items-center text-label-caps uppercase text-on-surface-variant py-xs border-b border-outline-variant/50">
+<span>Advanced Metadata</span>
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+<button class="w-full flex justify-between items-center text-label-caps uppercase text-on-surface-variant py-xs border-b border-outline-variant/50">
+<span>Automation Hooks</span>
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Footer Actions -->
+<div class="p-md bg-surface-container-low border-t border-outline-variant space-y-sm">
+<button class="w-full py-xs bg-primary text-white rounded font-bold text-label-caps uppercase hover:bg-primary/90 transition-colors">
+                    Apply Changes
+                </button>
+<button class="w-full py-xs border border-outline text-on-surface-variant rounded text-label-caps uppercase hover:bg-surface-container-high transition-colors">
+                    Reset Node
+                </button>
+</div>
+</aside>
+</div>
+<!-- Inline Interaction Logic -->
+<script>
+        // Micro-interaction for Threshold slider
+        const range = document.getElementById('threshold-range');
+        const valueDisplay = document.getElementById('threshold-value');
+        const patternSelect = document.getElementById('approval-pattern');
+        const thresholdContainer = document.getElementById('threshold-container');
+
+        range.addEventListener('input', (e) => {
+            valueDisplay.textContent = `${e.target.value}%`;
+        });
+
+        patternSelect.addEventListener('change', (e) => {
+            if (e.target.value === 'hierarchical') {
+                thresholdContainer.style.opacity = '1';
+                thresholdContainer.style.pointerEvents = 'auto';
+                thresholdContainer.classList.remove('grayscale');
+            } else {
+                thresholdContainer.style.opacity = '0.3';
+                thresholdContainer.style.pointerEvents = 'none';
+                thresholdContainer.classList.add('grayscale');
+            }
+        });
+
+        // Simple mock drag-over effect for canvas
+        const canvas = document.querySelector('.canvas-grid');
+        canvas.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            canvas.style.backgroundColor = '#fff0ee';
+        });
+        canvas.addEventListener('dragleave', (e) => {
+            canvas.style.backgroundColor = '#ffffff';
+        });
+        canvas.addEventListener('drop', (e) => {
+            e.preventDefault();
+            canvas.style.backgroundColor = '#ffffff';
+            // Mock drop animation or logic could go here
+        });
+    </script>
+</body></html>

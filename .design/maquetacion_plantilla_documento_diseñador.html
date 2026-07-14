@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MAQUETACIÓN - Precision Archival v1.0</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&amp;family=Hanken+Grotesk:wght@600;700;900&amp;family=JetBrains+Mono&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed-variant": "#920703",
+                        "secondary": "#5e5e5e",
+                        "on-primary-container": "#ff907f",
+                        "on-error": "#ffffff",
+                        "surface": "#fff8f6",
+                        "on-background": "#261816",
+                        "secondary-fixed": "#e2e2e2",
+                        "primary": "#610000",
+                        "on-secondary-container": "#646464",
+                        "on-primary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "primary-container": "#8b0000",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-low": "#fff0ee",
+                        "on-tertiary-fixed-variant": "#464747",
+                        "on-surface-variant": "#5a403c",
+                        "surface-container-highest": "#f8dcd8",
+                        "surface-container-high": "#fee2dd",
+                        "inverse-primary": "#ffb4a8",
+                        "on-tertiary-container": "#afaeae",
+                        "secondary-container": "#e2e2e2",
+                        "surface-container": "#ffe9e6",
+                        "outline": "#8e706b",
+                        "background": "#fff8f6",
+                        "on-surface": "#261816",
+                        "secondary-fixed-dim": "#c6c6c6",
+                        "tertiary-fixed-dim": "#c7c6c6",
+                        "surface-tint": "#b52619",
+                        "error-container": "#ffdad6",
+                        "primary-fixed": "#ffdad4",
+                        "on-secondary": "#ffffff",
+                        "inverse-surface": "#3d2c2a",
+                        "error": "#ba1a1a",
+                        "outline-variant": "#e3beb8",
+                        "tertiary-fixed": "#e3e2e2",
+                        "on-tertiary-fixed": "#1b1c1c",
+                        "on-primary-fixed": "#410000",
+                        "surface-dim": "#efd4d0",
+                        "inverse-on-surface": "#ffedea",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-fixed": "#1b1b1b",
+                        "surface-variant": "#f8dcd8",
+                        "tertiary-container": "#424242",
+                        "surface-bright": "#fff8f6",
+                        "tertiary": "#2b2c2c",
+                        "primary-fixed-dim": "#ffb4a8",
+                        "on-secondary-fixed-variant": "#474747"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "xs": "8px",
+                        "xl": "32px",
+                        "sm": "12px",
+                        "panel-width-tools": "320px",
+                        "panel-width-side": "280px",
+                        "md": "16px",
+                        "gutter": "1px",
+                        "lg": "24px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Inter"],
+                        "headline-md": ["Hanken Grotesk"],
+                        "body-lg": ["Inter"],
+                        "code-sm": ["JetBrains Mono"],
+                        "label-caps": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-xl": ["Hanken Grotesk"],
+                        "headline-lg": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "code-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-xl": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .canvas-bg {
+            background-image: 
+                radial-gradient(circle, #e3beb8 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .drop-target {
+            border: 2px dashed #610000 !important;
+            background-color: rgba(139, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md overflow-hidden h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center h-16 px-lg w-full z-50 bg-surface border-b border-outline-variant">
+<div class="flex items-center gap-md">
+<span class="font-headline-md text-headline-md font-black text-primary uppercase">MAQUETACIÓN</span>
+<nav class="hidden md:flex ml-lg gap-md">
+<a class="font-label-caps text-label-caps text-primary border-b-2 border-primary py-base" href="#">File</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-on-primary-fixed-variant transition-colors py-base" href="#">Edit</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-on-primary-fixed-variant transition-colors py-base" href="#">View</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-on-primary-fixed-variant transition-colors py-base" href="#">Insert</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-on-primary-fixed-variant transition-colors py-base" href="#">Format</a>
+</nav>
+</div>
+<div class="flex items-center gap-md">
+<div class="flex items-center gap-sm mr-md border-r border-outline-variant pr-md">
+<button class="material-symbols-outlined text-secondary hover:text-primary transition-colors">notifications</button>
+<button class="material-symbols-outlined text-secondary hover:text-primary transition-colors">cloud_done</button>
+</div>
+<button class="bg-primary text-on-primary px-md py-xs rounded hover:opacity-90 transition-opacity font-label-caps text-label-caps">Export PDF</button>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A professional studio portrait of a senior document manager with a clean, focused expression. The lighting is bright and high-contrast, matching a corporate minimalist aesthetic with a clean white background. The subject is wearing a sharp charcoal blazer over a crisp white shirt, symbolizing authority and precision in an archival layout software environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA566YZBJ7kssAfY4G59DlQCM5_FzRSSLIT2Yd-gEYjZ3juti3CY1yaFf9iQ9rK5A7FckbqE8W2OPGltj4seRVtCO9s_0ie5L-Bubk_oUnB99s-xsw_ow1NWC8CVyDS-qbi23Wu0DXTCAXuRVmfODk4phuCY01bcUikA97vNp2aRD0U4xVLjwhJ34HuRAC_bAyrrKfUjsC1JIHLGlbnDs-KOT5J8DOsvyYVglfvv1NPiJsIcYhoJ7xvKMxpKUtu8UDFhLbti_HSKgE"/>
+</div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- SideNavBar -->
+<aside class="flex flex-col h-full py-md bg-surface-container-lowest border-r border-outline-variant w-[80px] shrink-0 items-center">
+<div class="flex flex-col gap-lg items-center w-full">
+<button class="w-12 h-12 flex items-center justify-center text-primary font-bold border-l-2 border-primary bg-surface-container transition-colors">
+<span class="material-symbols-outlined">folder</span>
+</button>
+<button class="w-12 h-12 flex items-center justify-center text-secondary hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined">layers</span>
+</button>
+<button class="w-12 h-12 flex items-center justify-center text-secondary hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined">description</span>
+</button>
+<button class="w-12 h-12 flex items-center justify-center text-secondary hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined">account_tree</span>
+</button>
+<button class="w-12 h-12 flex items-center justify-center text-secondary hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+<div class="mt-auto flex flex-col gap-md items-center w-full pb-md">
+<button class="text-secondary hover:text-primary transition-colors">
+<span class="material-symbols-outlined">help</span>
+</button>
+<button class="text-secondary hover:text-primary transition-colors">
+<span class="material-symbols-outlined">history</span>
+</button>
+</div>
+</aside>
+<!-- Document Structure Panel (Left) -->
+<section class="w-panel-width-side border-r border-outline-variant bg-surface-container-lowest flex flex-col">
+<div class="p-md border-b border-outline-variant flex justify-between items-center bg-white">
+<h3 class="font-label-caps text-label-caps text-secondary">MAQUETA DOCUMENTO</h3>
+<button class="material-symbols-outlined text-sm text-primary">add_circle</button>
+</div>
+<div class="flex-1 overflow-y-auto p-md space-y-md">
+<!-- Page Thumbnail: Portada -->
+<div class="group relative bg-white border-2 border-primary p-base cursor-pointer">
+<div class="flex items-center justify-between mb-xs">
+<span class="text-[10px] font-bold text-primary">P1 PDF</span>
+<span class="material-symbols-outlined text-xs text-secondary opacity-0 group-hover:opacity-100">drag_indicator</span>
+</div>
+<div class="aspect-[1/1.4] bg-surface border border-outline-variant flex flex-col items-center justify-center p-sm text-center">
+<div class="w-full h-1 bg-outline-variant mb-xs"></div>
+<div class="w-3/4 h-1 bg-outline-variant mb-md"></div>
+<span class="font-label-caps text-[10px] uppercase text-primary font-bold">PORTADA</span>
+</div>
+</div>
+<!-- Page Thumbnail: Welcome -->
+<div class="group relative bg-white border border-outline-variant p-base hover:border-primary transition-colors cursor-pointer">
+<div class="flex items-center justify-between mb-xs">
+<span class="text-[10px] font-bold text-secondary">P2 TEMPLATE</span>
+<span class="material-symbols-outlined text-xs text-secondary opacity-0 group-hover:opacity-100">drag_indicator</span>
+</div>
+<div class="aspect-[1/1.4] bg-surface-container-low border border-outline-variant flex flex-col items-center justify-center p-sm">
+<div class="w-full space-y-1">
+<div class="w-full h-1 bg-outline-variant"></div>
+<div class="w-5/6 h-1 bg-outline-variant"></div>
+<div class="w-4/6 h-1 bg-outline-variant"></div>
+</div>
+<span class="font-label-caps text-[10px] uppercase text-secondary mt-md">Welcome Page</span>
+</div>
+</div>
+<!-- Add Button -->
+<button class="w-full aspect-[1/1.4] border-2 border-dashed border-outline-variant flex flex-col items-center justify-center text-outline hover:border-primary hover:text-primary transition-all">
+<span class="material-symbols-outlined text-3xl">add</span>
+<span class="font-label-caps text-[10px] mt-xs">NEW PAGE</span>
+</button>
+</div>
+</section>
+<!-- Editor Canvas (Center) -->
+<main class="flex-1 bg-surface-dim canvas-bg overflow-auto relative flex flex-col items-center p-xl">
+<!-- Toolbar for Canvas -->
+<div class="sticky top-0 mb-xl w-full max-w-[800px] flex justify-between items-center">
+<div class="flex gap-xs">
+<button class="bg-white border border-outline-variant p-xs rounded shadow-sm hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-lg">zoom_in</span>
+</button>
+<button class="bg-white border border-outline-variant p-xs rounded shadow-sm hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-lg">zoom_out</span>
+</button>
+</div>
+<div class="flex gap-md">
+<button class="bg-white border border-primary text-primary px-lg py-xs rounded font-label-caps text-label-caps hover:bg-surface-container transition-colors">Preview</button>
+<button class="bg-primary text-on-primary px-lg py-xs rounded font-label-caps text-label-caps hover:opacity-90 transition-opacity">Save Changes</button>
+</div>
+</div>
+<!-- Page Canvas Sheet -->
+<div class="w-full max-w-[800px] aspect-[1/1.414] bg-white shadow-xl border border-outline-variant p-[80px] relative">
+<!-- Document Header -->
+<div class="mb-xl">
+<div class="w-16 h-16 bg-primary-container mb-md"></div>
+<h1 class="font-headline-xl text-headline-xl text-on-background mb-sm">Contrato de Servicios</h1>
+<div class="h-1 w-full bg-outline-variant opacity-30"></div>
+</div>
+<!-- Content Area -->
+<div class="space-y-lg">
+<p class="font-body-lg text-body-lg text-secondary leading-relaxed">
+                        Este documento establece los términos de relación entre el profesional y el interesado. 
+                        A continuación se detallan los datos del beneficiario:
+                    </p>
+<!-- Highlighted Edit Zone -->
+<div class="drop-target border-2 border-dashed border-primary p-md rounded-lg relative min-h-[120px]">
+<span class="absolute -top-3 left-4 bg-primary text-on-primary text-[10px] font-bold px-sm py-0.5 rounded uppercase tracking-wider">Editor Activo</span>
+<div class="space-y-md">
+<div class="flex flex-wrap items-center gap-xs font-body-md text-body-md">
+<span>Nombre del Titular:</span>
+<span class="bg-surface-container-high border border-primary text-primary px-sm py-1 rounded-full font-code-sm text-code-sm flex items-center gap-xs">
+<span class="material-symbols-outlined text-sm">alternate_email</span>
+                                    {{cliente.nombre}}
+                                </span>
+</div>
+<div class="flex flex-wrap items-center gap-xs font-body-md text-body-md">
+<span>Fecha de Vencimiento:</span>
+<span class="bg-surface-container-high border border-primary text-primary px-sm py-1 rounded-full font-code-sm text-code-sm flex items-center gap-xs">
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+                                    {{cita.fecha}}
+                                </span>
+</div>
+<p class="italic text-secondary mt-md">Arrastre nuevos campos desde el panel derecho para vincular datos dinámicos.</p>
+</div>
+</div>
+<p class="font-body-lg text-body-lg text-secondary leading-relaxed">
+                        Cualquier modificación a este documento requerirá la aprobación de ambas partes y la firma digital vinculada.
+                    </p>
+</div>
+<!-- Page Number -->
+<div class="absolute bottom-md right-md text-secondary font-label-caps text-label-caps">
+                    PAGE 01 / 02
+                </div>
+</div>
+</main>
+<!-- Object Fields Panel (Right) -->
+<aside class="w-panel-width-tools bg-surface-container-lowest border-l border-outline-variant flex flex-col">
+<div class="p-md border-b border-outline-variant bg-white">
+<h3 class="font-label-caps text-label-caps text-secondary mb-md">OBJECT FIELDS</h3>
+<div class="relative">
+<input class="w-full bg-surface border-outline-variant rounded px-md py-xs text-body-sm focus:border-primary focus:ring-0" placeholder="Search fields..." type="text"/>
+<span class="material-symbols-outlined absolute right-2 top-1.5 text-secondary text-lg">search</span>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto">
+<!-- CLIENTE Category -->
+<div class="border-b border-outline-variant">
+<div class="p-sm flex items-center gap-xs bg-surface text-on-surface-variant font-label-caps text-[10px]">
+<span class="material-symbols-outlined text-base">folder_open</span>
+                        CLIENTE
+                    </div>
+<div class="p-xs space-y-1">
+<div class="flex items-center justify-between p-sm hover:bg-surface-container transition-colors cursor-grab group border border-transparent hover:border-outline-variant">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-secondary text-lg">drag_indicator</span>
+<span class="font-body-md text-body-md">Nombre</span>
+</div>
+<span class="font-code-sm text-code-sm text-outline opacity-0 group-hover:opacity-100 uppercase">string</span>
+</div>
+<div class="flex items-center justify-between p-sm hover:bg-surface-container transition-colors cursor-grab group border border-transparent hover:border-outline-variant">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-secondary text-lg">drag_indicator</span>
+<span class="font-body-md text-body-md">Código</span>
+</div>
+<span class="font-code-sm text-code-sm text-outline opacity-0 group-hover:opacity-100 uppercase">id</span>
+</div>
+</div>
+</div>
+<!-- CANAL Category -->
+<div class="border-b border-outline-variant">
+<div class="p-sm flex items-center gap-xs bg-surface text-on-surface-variant font-label-caps text-[10px]">
+<span class="material-symbols-outlined text-base">folder_open</span>
+                        CANAL
+                    </div>
+<div class="p-xs space-y-1">
+<div class="flex items-center justify-between p-sm hover:bg-surface-container transition-colors cursor-grab group border border-transparent hover:border-outline-variant">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-secondary text-lg">drag_indicator</span>
+<span class="font-body-md text-body-md">Nombre</span>
+</div>
+<span class="font-code-sm text-code-sm text-outline opacity-0 group-hover:opacity-100 uppercase">string</span>
+</div>
+</div>
+</div>
+<!-- CITA Category -->
+<div class="border-b border-outline-variant">
+<div class="p-sm flex items-center gap-xs bg-surface text-on-surface-variant font-label-caps text-[10px]">
+<span class="material-symbols-outlined text-base" style="font-variation-settings: 'FILL' 1;">folder</span>
+                        CITA
+                    </div>
+<div class="p-xs space-y-1">
+<div class="flex items-center justify-between p-sm bg-surface-container-high border-l-2 border-primary cursor-grab group">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary text-lg">drag_indicator</span>
+<span class="font-body-md text-body-md font-bold text-primary">Fecha</span>
+</div>
+<span class="font-code-sm text-code-sm text-primary uppercase">date</span>
+</div>
+<div class="flex items-center justify-between p-sm hover:bg-surface-container transition-colors cursor-grab group border border-transparent hover:border-outline-variant">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-secondary text-lg">drag_indicator</span>
+<span class="font-body-md text-body-md">Ubicación</span>
+</div>
+<span class="font-code-sm text-code-sm text-outline opacity-0 group-hover:opacity-100 uppercase">geo</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Contextual Properties -->
+<div class="p-md bg-white border-t border-outline-variant">
+<h4 class="font-label-caps text-[10px] text-secondary uppercase mb-sm">Properties: Selection</h4>
+<div class="space-y-md">
+<div>
+<label class="block font-label-caps text-[9px] text-secondary mb-1">DATA SOURCE</label>
+<select class="w-full bg-surface border-outline-variant text-body-sm py-1 rounded">
+<option>Dynamic Payload</option>
+<option>Static Text</option>
+</select>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-[9px] text-secondary">REQUIRED FIELD</span>
+<div class="w-8 h-4 bg-primary rounded-full relative cursor-pointer">
+<div class="absolute right-0.5 top-0.5 w-3 h-3 bg-white rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+</aside>
+</div>
+<!-- Micro-interaction Scripts -->
+<script>
+        document.querySelectorAll('.cursor-grab').forEach(item => {
+            item.addEventListener('mousedown', () => {
+                item.style.cursor = 'grabbing';
+            });
+            item.addEventListener('mouseup', () => {
+                item.style.cursor = 'grab';
+            });
+        });
+
+        // Simple mock of drag and drop visual feedback
+        const dropZone = document.querySelector('.drop-target');
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('bg-primary/10');
+        });
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('bg-primary/10');
+        });
+    </script>
+</body></html>
