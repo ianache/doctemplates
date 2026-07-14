@@ -49,6 +49,13 @@ class DocumentIssuanceLibraryItem(BaseModel):
     preview_url: str
     download_url: str
 
+    celery_task_id: str | None = None
+    error_message: str | None = None
+    queued_at: datetime | None = None
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+    retry_count: int = 0
+
 
 class DocumentIssuanceShareOut(BaseModel):
     public_url: str

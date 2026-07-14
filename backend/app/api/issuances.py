@@ -65,6 +65,12 @@ def _issuance_out(issuance: DocumentIssuance) -> DocumentIssuanceLibraryItem:
         created_at=issuance.created_at,
         preview_url=f"/api/issuances/{issuance.id}/preview",
         download_url=f"/api/issuances/{issuance.id}/download",
+        celery_task_id=issuance.celery_task_id,
+        error_message=issuance.error_message,
+        queued_at=issuance.queued_at,
+        started_at=issuance.started_at,
+        completed_at=issuance.completed_at,
+        retry_count=issuance.retry_count,
     )
 
 

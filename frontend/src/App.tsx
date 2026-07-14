@@ -16,6 +16,7 @@ import DocumentDesignDetailPage from "./pages/document-designs/DocumentDesignDet
 import VersionHistoryPage from "./pages/document-designs/VersionHistoryPage";
 import DocumentLibraryPage from "./pages/document-issuances/DocumentLibraryPage";
 import DocumentIssuanceDetailPage from "./pages/document-issuances/DocumentIssuanceDetailPage";
+import JobsMonitoringPage from "./pages/document-issuances/JobsMonitoringPage";
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
         <Route path="document-designs/:id/versions" element={<VersionHistoryPage />} />
         <Route path="document-issuances" element={<DocumentLibraryPage />} />
         <Route path="document-issuances/:id" element={<DocumentIssuanceDetailPage />} />
+        <Route path="generation-jobs" element={<JobsMonitoringPage />} />
         <Route path="content/templates" element={<TemplatesPage />} />
         <Route path="content/templates/new" element={<HtmlTemplateCreatePage />} />
         <Route path="content/templates/:id" element={<HtmlTemplateDetailPage />} />

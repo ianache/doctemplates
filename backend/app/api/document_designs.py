@@ -623,6 +623,17 @@ def generate_document(
     # Validate metadata
     coerced_metadata = validate_metadata_values(metadata, design.document_type.metadata_definitions)
 
+    # Validate and coerce input data payload against document type fields if fields are defined
+    if design.document_type.fields:
+        from app.services.pdf_generator import validate_and_coerce_payload
+        from fastapi import HTTPException
+        try:
+            validate_and_coerce_payload(data, design.document_type.fields)
+        except HTTPException as he:
+            raise he
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e))
+
     from datetime import datetime
     from app.services.issuance_jobs import enqueue_document_generation
 

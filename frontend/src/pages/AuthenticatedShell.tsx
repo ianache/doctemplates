@@ -7,6 +7,7 @@ const ROUTE_LABELS: Record<string, string> = {
   "document-types": "Document Types",
   "document-designs": "Document Designs",
   "document-issuances": "Documents Library",
+  "generation-jobs": "Generation Jobs",
   content: "Content Library",
   new: "New",
   versions: "Version History",
@@ -181,6 +182,24 @@ export default function AuthenticatedShell() {
             <span className="material-symbols-outlined shrink-0">dashboard_customize</span>
             <span className={`whitespace-nowrap transition-opacity duration-200 ${sidebarExpanded ? "opacity-100" : "w-0 overflow-hidden opacity-0"}`}>
               Document Designs
+            </span>
+          </NavLink>
+
+          {/* Generation Jobs */}
+          <NavLink
+            to="/generation-jobs"
+            className={({ isActive }) =>
+              `flex items-center gap-3 rounded px-sm py-sm transition-colors ${
+                isActive
+                  ? "bg-surface-container font-bold text-primary"
+                  : "text-secondary hover:bg-surface-container"
+              }`
+            }
+            title="Generation Jobs"
+          >
+            <span className="material-symbols-outlined shrink-0">list_alt</span>
+            <span className={`whitespace-nowrap transition-opacity duration-200 ${sidebarExpanded ? "opacity-100" : "w-0 overflow-hidden opacity-0"}`}>
+              Generation Jobs
             </span>
           </NavLink>
 

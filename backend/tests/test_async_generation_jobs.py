@@ -128,7 +128,7 @@ def test_worker_success_path(
     from app.dependencies import get_storage_provider
     storage = get_storage_provider()
     assert storage.exists(updated.storage_key) is True
-    assert storage.read(updated.storage_key) == b"%PDF-dummy-success"
+    assert storage.get(updated.storage_key, "issuances") == b"%PDF-dummy-success"
 
     # Verify tracelog
     tracelog = db_session.query(DocumentTracelog).filter_by(issuance_id=issuance.id).first()
@@ -160,7 +160,8 @@ def test_worker_failure_path(
     monkeypatch.setattr("app.workers.document_generation.generate_composed_pdf", raise_err)
 
     # Call worker task
-    generate_document_pdf(issuance.id)
+    with pytest.raises(Exception):
+        generate_document_pdf(issuance.id)
 
     # Reload from DB
     db_session.expire_all()
