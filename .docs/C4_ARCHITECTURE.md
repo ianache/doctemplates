@@ -75,7 +75,7 @@ graph TB
 Detalle de los componentes internos del contenedor del **Backend Core** y del **Worker**.
 
 ```mermaid
-graph DP
+graph TB
     subgraph "API Routers"
         R1[/api/static-pdfs]
         R2[/api/document-types]
