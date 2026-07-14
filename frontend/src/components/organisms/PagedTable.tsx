@@ -20,6 +20,8 @@ export interface PagedTableProps<T> {
   total: number;
   itemName?: string;
   onChangePage: (page: number) => void;
+  pageSizeOptions?: number[];
+  onChangePageSize?: (pageSize: number) => void;
   emptyState?: ReactNode;
   onRowClick?: (row: T) => void;
   selectedRowId?: string | null;
@@ -34,6 +36,8 @@ function PagedTable<T>({
   total,
   itemName = "items",
   onChangePage,
+  pageSizeOptions,
+  onChangePageSize,
   emptyState,
   onRowClick,
   selectedRowId,
@@ -72,6 +76,8 @@ function PagedTable<T>({
         total={total}
         itemName={itemName}
         onChangePage={onChangePage}
+        pageSizeOptions={pageSizeOptions}
+        onChangePageSize={onChangePageSize}
       />
     </div>
   );
