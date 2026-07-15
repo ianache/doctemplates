@@ -42,5 +42,11 @@ class Settings(BaseSettings):
     celery_result_backend: str = "redis://redis:6379/1"
     celery_task_always_eager: bool = False
 
+    ai_requests_enabled: bool = False
+    ai_provider_model: str = "gpt-4o-mini"
+    ai_request_timeout_seconds: int = 30
+    ai_max_input_chars: int = 20000
+    ai_max_output_tokens: int = 2000
+
 
 settings = Settings()

@@ -115,11 +115,11 @@ Plans:
 
 ### Phase 16: AI agent for page templating
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Add AI-assisted HTML template improvement proposals with validation, review, and controlled application to existing templates.
+**Requirements**: AI proposal generation, validation, history, and editor application
 **Depends on:** Phase 15
-**Plans:** 0 plans
+**Plans:** 1/1 plans complete
 
 Plans:
 
-- [ ] TBD (run /gsd-plan-phase 16 to break down)
+- [x] 16-01-PLAN.md — AI template proposal backend, frontend integration, and end-to-end verification (completed 2026-07-14)

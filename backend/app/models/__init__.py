@@ -6,6 +6,7 @@ from app.models.static_pdf_asset import StaticPdfAsset
 from app.models.document_design import DocumentDesign, DocumentDesignPage
 from app.models.document_issuance import DocumentIssuance
 from app.models.document_tracelog import DocumentTracelog
+from app.models.template_ai_proposal import HtmlTemplateAiProposal
 
 __all__ = [
     "User",
@@ -19,4 +20,5 @@ __all__ = [
     "DocumentDesignPage",
     "DocumentIssuance",
     "DocumentTracelog",
+    "HtmlTemplateAiProposal",
 ]

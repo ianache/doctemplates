@@ -8,6 +8,7 @@ from app.api.health import router as health_router
 from app.api.issuances import public_router as public_issuances_router
 from app.api.issuances import router as issuances_router
 from app.api.static_pdfs import router as static_pdfs_router
+from app.api.template_ai_proposals import router as template_ai_proposals_router
 from app.config import settings
 
 app = FastAPI(title="DocManagement API")
@@ -27,6 +28,7 @@ app.include_router(static_pdfs_router)
 app.include_router(document_designs_router)
 app.include_router(issuances_router)
 app.include_router(public_issuances_router)
+app.include_router(template_ai_proposals_router)
 
 
 @app.get("/")

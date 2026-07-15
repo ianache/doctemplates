@@ -5,6 +5,29 @@ from jinja2.visitor import NodeVisitor
 from fastapi import HTTPException
 
 TOKEN_PATTERN = re.compile(r"{{\s*([^{}]+?)\s*}}")
+JINJA_MARKER_PATTERN = re.compile(r"(\{\{[\s\S]*?\}\}|\{%[\s\S]*?%\})")
+
+
+def normalize_jinja_marker(marker: str) -> str:
+    marker = " ".join(marker.strip().split())
+    if marker.startswith("{{") and marker.endswith("}}"):
+        inner = marker[2:-2].strip()
+        return f"{{{{ {inner} }}}}"
+    if marker.startswith("{%") and marker.endswith("%}"):
+        inner = marker[2:-2].strip()
+        return f"{{% {inner} %}}"
+    return marker
+
+
+def extract_jinja_markers(html: str) -> set[str]:
+    return {normalize_jinja_marker(match.group(0)) for match in JINJA_MARKER_PATTERN.finditer(html or "")}
+
+
+def validate_preserved_jinja_markers(original_html: str, proposed_html: str) -> list[str]:
+    original_markers = extract_jinja_markers(original_html)
+    proposed_markers = extract_jinja_markers(proposed_html)
+    missing = sorted(original_markers - proposed_markers)
+    return [f"Missing preserved Jinja marker: {marker}" for marker in missing]
 
 
 def extract_template_tokens(html: str) -> list[str]:
@@ -288,4 +311,3 @@ def extract_template_tokens_ast_warnings(html: str, valid_ancestors: set[str]) -
             warnings.append(f"Token '{raw}' is not declared in schema")
 
     return sorted(list(set(warnings)))
-
