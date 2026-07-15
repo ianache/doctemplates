@@ -24,6 +24,14 @@ function parseMockData(mockDataJson: string): Record<string, unknown> | null {
   return parsed as Record<string, unknown>;
 }
 
+function formatAiError(error: unknown): string {
+  const message = error instanceof Error ? error.message : "AI proposal failed.";
+  if (message.includes("AI requests are disabled")) {
+    return "AI Improve is disabled in this environment. Set AI_REQUESTS_ENABLED=true and configure a provider API key on the backend, then restart the service.";
+  }
+  return message;
+}
+
 export default function AiProposalPanel({ templateId, html, css, mockDataJson, onApply }: AiProposalPanelProps) {
   const [instruction, setInstruction] = useState("");
   const [proposals, setProposals] = useState<TemplateAiProposal[]>([]);
@@ -68,7 +76,7 @@ export default function AiProposalPanel({ templateId, html, css, mockDataJson, o
       setActiveProposal(proposal);
       setActiveTab("summary");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "AI proposal failed.");
+      setError(formatAiError(err));
     } finally {
       setLoading(false);
     }
