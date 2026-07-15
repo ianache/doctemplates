@@ -5,6 +5,7 @@ from app.api.content_templates import router as content_templates_router
 from app.api.document_designs import router as document_designs_router
 from app.api.document_types import router as document_types_router
 from app.api.health import router as health_router
+from app.api import ai_models
 from app.api.issuances import public_router as public_issuances_router
 from app.api.issuances import router as issuances_router
 from app.api.static_pdfs import router as static_pdfs_router
@@ -29,6 +30,7 @@ app.include_router(document_designs_router)
 app.include_router(issuances_router)
 app.include_router(public_issuances_router)
 app.include_router(template_ai_proposals_router)
+app.include_router(ai_models.router)
 
 
 @app.get("/")

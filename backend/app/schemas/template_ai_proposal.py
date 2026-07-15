@@ -9,6 +9,7 @@ class HtmlTemplateAiProposalCreate(BaseModel):
     current_html: str
     current_css: str | None = ""
     mock_data: dict | None = None
+    model: str | None = None
 
 
 class HtmlTemplateAiProposalOut(BaseModel):

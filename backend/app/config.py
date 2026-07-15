@@ -43,7 +43,14 @@ class Settings(BaseSettings):
     celery_task_always_eager: bool = False
 
     ai_requests_enabled: bool = False
+    ai_default_model: str = "gpt-4o-mini"
+    ai_allowed_models: str = "gpt-4o-mini"
     ai_provider_model: str = "gpt-4o-mini"
+    gemini_api_key: str = ""
+    groq_api_key: str = ""
+    openai_api_key: str = ""
+    anthropic_api_key: str = ""
+    ollama_api_base: str = "http://localhost:11434"
     ai_request_timeout_seconds: int = 30
     ai_max_input_chars: int = 20000
     ai_max_output_tokens: int = 2000

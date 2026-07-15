@@ -11,6 +11,7 @@ from app.services.pdf_generator import render_html_page_to_pdf
 
 UNSAFE_URL_PATTERN = re.compile(r"(https?:)?//", re.IGNORECASE)
 INLINE_EVENT_PATTERN = re.compile(r"\son[a-z]+\s*=", re.IGNORECASE)
+UNSAFE_CSS_STYLE_CONTEXT_PATTERN = re.compile(r"</\s*style\b|<\s*/?\s*script\b|javascript\s*:", re.IGNORECASE)
 
 
 @dataclass
@@ -49,11 +50,10 @@ class TemplateAiAgent:
         mock_data: dict | None,
     ) -> TemplateAiProposalResult:
         if not self.enabled:
-            return self._failed("AI requests are disabled.")
+            return self.requests_disabled()
 
-        input_size = len(instruction) + len(current_html) + len(current_css) + sum(len(field) for field in document_fields)
-        if input_size > self.max_input_chars:
-            return self._failed("Template is too large for synchronous AI improvement.")
+        if self.is_input_too_large(instruction, current_html, current_css, document_fields):
+            return self.input_size_failed()
 
         messages = self._build_messages(instruction, current_html, current_css, document_fields)
 
@@ -90,6 +90,25 @@ class TemplateAiAgent:
             provider="litellm",
             model=self.model,
         )
+
+    def provider_configuration_failed(self) -> TemplateAiProposalResult:
+        return self._failed("Provider is not configured.")
+
+    def requests_disabled(self) -> TemplateAiProposalResult:
+        return self._failed("AI requests are disabled.")
+
+    def input_size_failed(self) -> TemplateAiProposalResult:
+        return self._failed("Template is too large for synchronous AI improvement.")
+
+    def is_input_too_large(
+        self,
+        instruction: str,
+        current_html: str,
+        current_css: str,
+        document_fields: list[str],
+    ) -> bool:
+        input_size = len(instruction) + len(current_html) + len(current_css) + sum(len(field) for field in document_fields)
+        return input_size > self.max_input_chars
 
     def _build_messages(
         self,
@@ -129,6 +148,8 @@ class TemplateAiAgent:
             errors.append("Generated HTML cannot include <script> tags.")
         if INLINE_EVENT_PATTERN.search(proposed_html):
             errors.append("Generated HTML cannot include inline event handlers.")
+        if UNSAFE_CSS_STYLE_CONTEXT_PATTERN.search(proposed_css):
+            errors.append("Generated CSS cannot break out of its style context or include script-like content.")
         if UNSAFE_URL_PATTERN.search(proposed_html) or UNSAFE_URL_PATTERN.search(proposed_css):
             errors.append("Generated HTML/CSS cannot reference external network assets.")
 

@@ -39,22 +39,41 @@ def create_ai_proposal(
     db: SQLAlchemySession = Depends(get_db),
 ) -> HtmlTemplateAiProposalOut:
     from app.services.template_ai_agent import TemplateAiAgent
+    from app.services.ai_model_catalog import is_provider_configured, resolve_ai_model
 
     template = _load_template(template_id, db)
+    try:
+        selected_model = resolve_ai_model(settings, payload.model)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
     agent = TemplateAiAgent(
-        model=settings.ai_provider_model,
+        model=selected_model.id,
         enabled=settings.ai_requests_enabled,
         timeout_seconds=settings.ai_request_timeout_seconds,
         max_input_chars=settings.ai_max_input_chars,
         max_output_tokens=settings.ai_max_output_tokens,
     )
-    result = agent.create_proposal(
-        instruction=payload.instruction,
-        current_html=payload.current_html,
-        current_css=payload.current_css or "",
-        document_fields=[field.name for field in template.document_type.fields],
-        mock_data=payload.mock_data or template.mock_data or {},
-    )
+    document_fields = [field.name for field in template.document_type.fields]
+    if agent.is_input_too_large(
+        payload.instruction,
+        payload.current_html,
+        payload.current_css or "",
+        document_fields,
+    ):
+        result = agent.input_size_failed()
+    elif not agent.enabled:
+        result = agent.requests_disabled()
+    elif is_provider_configured(settings, selected_model):
+        result = agent.create_proposal(
+            instruction=payload.instruction,
+            current_html=payload.current_html,
+            current_css=payload.current_css or "",
+            document_fields=document_fields,
+            mock_data=payload.mock_data or template.mock_data or {},
+        )
+    else:
+        result = agent.provider_configuration_failed()
     proposal = HtmlTemplateAiProposal(
         template=template,
         created_by=user,
@@ -64,7 +83,7 @@ def create_ai_proposal(
         proposed_html=result.proposed_html,
         proposed_css=result.proposed_css,
         summary=result.summary,
-        provider=result.provider,
+        provider=selected_model.provider,
         model=result.model,
         status=result.status,
         validation_errors=result.validation_errors,

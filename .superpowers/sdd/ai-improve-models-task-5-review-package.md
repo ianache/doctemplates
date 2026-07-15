@@ -1,3 +1,7 @@
+# Task 5 Review Package
+
+## frontend/src/lib/content.ts
+```ts
 import { apiFetch, jsonOrError } from "./api";
 
 export interface AiModelOption {
@@ -215,3 +219,4 @@ export async function markTemplateAiProposalApplied(
     }),
   );
 }
+```
