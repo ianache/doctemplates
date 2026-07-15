@@ -77,10 +77,10 @@ Detalle de los componentes internos del contenedor del **Backend Core** y del **
 ```mermaid
 graph TB
     subgraph "API Routers"
-        R1[/api/static-pdfs]
-        R2[/api/document-types]
-        R3[/api/document-designs]
-        R4[/api/document-issuances]
+        R1["/api/static-pdfs"]
+        R2["/api/document-types"]
+        R3["/api/document-designs"]
+        R4["/api/document-issuances"]
     end
 
     subgraph "Componentes de Lógica y Servicios"

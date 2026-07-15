@@ -421,12 +421,12 @@ Manual verification checklist:
 | A2 | Responsive footer wrapping is the safest layout approach. | Common Pitfalls | A different exact layout may still be acceptable if manual UI checks pass. |
 | A3 | TypeScript build will catch numeric/string mismatch for page-size callbacks. | Common Pitfalls | Runtime testing may be needed if a type escape hides the mismatch. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should the `[5, 10, 20, 50]` options live in a shared constant file?**
    - What we know: the context allows either local or shared extraction if all three pages use the same options. [CITED: .planning/phases/15-implementar-scopes-prd5-md/15-CONTEXT.md]
    - What's unclear: there is no existing shared pagination constants module. [VERIFIED: codebase grep]
-   - Recommendation: use a small local constant in each page or export a component-level constant only if an existing constants pattern is found during implementation. [ASSUMED]
+   - RESOLVED: use a local `const PAGE_SIZE_OPTIONS = [5, 10, 20, 50]` near each page component. Do not create a shared constants file in Phase 15 because no existing shared pagination constants pattern was found, and the implementation plan now locks the local-constant approach. [CITED: .planning/phases/15-implementar-scopes-prd5-md/15-01-PLAN.md]
 
 ## Security Domain
 

@@ -7,127 +7,427 @@
   },
   "item": [
     {
-      "name": "Generar Documento",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "docmanagement_session",
-            "value": "qf-6L6-OZcDxD6ZFwQ7iDGSw7i8_rTVPiEaVhfM_aoA",
-            "type": "text"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json",
-            "type": "text"
-          },
-          {
-            "key": "Cookie",
-            "value": "docmanagement_session=6fT3tmCMPe7GLP4wlTTJaF8ELSA5Nuf32rSM6vNW2F8",
-            "type": "text"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n    \"codigo\": \"C000199985\",\r\n    \"Nombre\": \"ILVER ANACHE\",\r\n    \"correo\": \"ilver.anache@gmail.com\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+      "name": "2026-07-12",
+      "item": [
+        {
+          "name": "Generar Documento - Constancia de Servicio Nueva",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICIzVjEtcDBLdktvSHdJNVpNX3FzNGhRWnNaWF9IWV9qdjhFZzFLaWExcWRJIn0.eyJleHAiOjE3ODM5OTQzMjEsImlhdCI6MTc4Mzk5NDAyMSwianRpIjoidHJydGNjOmFiOThjZTZmLTRjNDMtNmE5ZS1kZjMzLTgyYTM0NzUxNzQ4ZSIsImlzcyI6Imh0dHA6Ly9rZXljbG9hazo4MDgwL3JlYWxtcy9kb2NtYW5hZ2VtZW50IiwiYXVkIjpbImRvY21hbmFnZW1lbnQtYmFja2VuZCIsImFjY291bnQiXSwic3ViIjoiMzVkYjNjMWQtZjUzZS00ODc4LTgzMzUtZTRhYTU2ODYwOGJiIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiZG9jbWFuYWdlbWVudC1hcGktY2xpZW50IiwiYWNyIjoiMSIsInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsImRlZmF1bHQtcm9sZXMtZG9jbWFuYWdlbWVudCIsInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwiY2xpZW50SG9zdCI6IjE3Mi4yNC4wLjEiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsInByZWZlcnJlZF91c2VybmFtZSI6InNlcnZpY2UtYWNjb3VudC1kb2NtYW5hZ2VtZW50LWFwaS1jbGllbnQiLCJjbGllbnRBZGRyZXNzIjoiMTcyLjI0LjAuMSIsImNsaWVudF9pZCI6ImRvY21hbmFnZW1lbnQtYXBpLWNsaWVudCJ9.NzlslSTpdo1Qq9myxvCp6W4dyy3JO0n8QmCQ2b5osWTcniQ6S6ASRKa-1po9E1_aGSnjOViisWWxWZ84tz-713jUzl2ooU2MtrqpIvDqfA22rS0tNz2ntxz8BHlJ47h4UM3GP2v4S7hbHpjnixLsvGqNct3AaTSB-lHV35LIkoE9m9aDVVv6WQWyWIJvkJUIDLn79GEQ8k4F9Hzfl_sMv6P9i-Y-u6aOi4_JnyYYuUl4fihScCgPzLREdaAeDLS8LbqG7SiajCMQSfLPwq9lKRV1CKQth8864BrQ9NrzWSK6PsOjkEhWVfmR8ktBSatwEr1W5QWXQe-s-b5el64cfQ",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "docmanagement_session",
+                "value": "qf-6L6-OZcDxD6ZFwQ7iDGSw7i8_rTVPiEaVhfM_aoA",
+                "type": "text",
+                "disabled": true
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI5NnFDM244b25vaWhfNDZkTUpkaFZQWmI2WFZzQ3V5MTdadHpWSDRwMGhzIn0.eyJleHAiOjE3ODM4MzkxMTksImlhdCI6MTc4MzgzODgxOSwianRpIjoidHJydGNjOjFjNWIzNjRjLWI3NmEtNTIxNy05NWY4LTcxZmY4MzU5NzlhOSIsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODA4MC9yZWFsbXMvZG9jbWFuYWdlbWVudCIsImF1ZCI6WyJkb2NtYW5hZ2VtZW50LWJhY2tlbmQiLCJhY2NvdW50Il0sInN1YiI6IjZiOWRmMWNlLThjZmItNGY3MC05NjM2LTE5YWYxNDQ1NTcwYyIsInR5cCI6IkJlYXJlciIsImF6cCI6ImRvY21hbmFnZW1lbnQtYXBpLWNsaWVudCIsImFjciI6IjEiLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsib2ZmbGluZV9hY2Nlc3MiLCJkZWZhdWx0LXJvbGVzLWRvY21hbmFnZW1lbnQiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoicHJvZmlsZSBlbWFpbCIsImNsaWVudEhvc3QiOiIxNzIuMjQuMC4xIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJzZXJ2aWNlLWFjY291bnQtZG9jbWFuYWdlbWVudC1hcGktY2xpZW50IiwiY2xpZW50QWRkcmVzcyI6IjE3Mi4yNC4wLjEiLCJjbGllbnRfaWQiOiJkb2NtYW5hZ2VtZW50LWFwaS1jbGllbnQifQ.h3Q2cTEiBreHsVLnUyvOX4mL7XnsM_L_JJsWXaJpw9bY6np5bU1W_U_EH6--WxpyuJxK6cKGGinf98P9Ly3hWryYgLZhIchHak8qikCsYu3Q1Zz_mVU1csPVupBH7ppMKEDtGXR0HWyvH9WZaBHTYcp3maE4r78TwPZVxUSVHknp5qIvdqQg1AUR1gjb_9ZlWsAel_mZT-NS5e3nXdYPkbSAsKVGrgLdVLEqTKVZGyIwpJTHRKvu8aoTRrXC05ByTfTevhFtoCZW_9ycyc96YrseatuGXrn4iyb5Xf19y-y45tof74DcIhAaxW9oxIuuV_bpg1bwXIJlhO91_nUYSA",
+                "type": "text",
+                "disabled": true
+              },
+              {
+                "key": "Cookie",
+                "value": "docmanagement_session=\"gAAAAABqUxvcIoANZHoS_UWBX1H-R6lo3XuB7R68CvBaTv_vLCns0njhY52qjKMSTFWH97UEm67elIiywI2gD2tAqQpaZoFTiHxzU_4Astzw6bDelEv26VKH0vK1ZjC2k7nFuIF_HoZPLbpvpvhzSOg60_Cl74tvc-6gSA5zIwLNWMqLUtVQ-YTPGkN_0Duf5ZUDzr8g0G7dobw6ytdl_FSfIqPnsbEjGKHRzrvTz8KSFtCyL-QuyHkrpusySP8IAoGP3Ri4WWjEUvJfvKQEt7Uw0eWyBZpOoQ-utyGqmVTEb-SfVNs05IrcYdv0aQKRSX-w63Jlp0UGZ5SDWuRMCFiYPbpEVh38Lz7y3JUTa6cYlXI2MM1xuSe6Q3ZLstAgps1SPxl_EflQkRpmDzLAr5EPJDlTiqXNaE8NtE2tHWrS32STE5cPfJKo6HD3l7Eoyb759t1BrQDd4QuTi_NpqoKLwXDV8EciN5xZXU0Z8RFoYgr87tmvIGLdXEVLKPcoR2aeKzhW0m4wunJQhC2odhuegKVTWx-Vj9PRRBLx_4K0FKd07FWryJoTEdYhWU5Xkq9SJGnvY3NRSWT3x7I-nxO-I4PlBNq1BqtETq1yLQJWZwIyNbofDx0QrayhE2G4mEn-blyEB5pXU5PbDLCdtzcMyXLvC3vJ8Iuep-Sp7-kWXx4pzf0112mlWz73zXUwXmJcWArIYIsZQSJ-xi3WCO0g3fpj35BKC-izZLFyhf80T6qbVil-LV_52h3b3IzyjmtIch7mCaF9ZjCWJUgWzXr5h6_nKvFWSPhbLwuyAVMSExYoyXzypmaczcgK7Z0bfUT4DH6Uh0p2O8Adzrp_QP95MVAmT1MdCtHJBxdjv_qJ30y6Ij9sSYlCyMqk3hL2i_UYw1Jo70xGkt-EjI_BfCuh7iCVY-Rf3byaSZ5ICZFOzQWNOs5Y3nFZQUiUgf5cHRvWmglkT-CQmyTs9g0M_QI00oVkifaahp6kCGZpJyX8ERDtYUmpMWD4JrLmQUD_Hn8CmrL7rZbmnn-5ug5ar6qqCIsLu64lCQRx06m_V_pHOgGlXsHiapPT2idtjaAL47Ey-IClaujRr9E8iDFyfWWveqUhtYsb4RPIUOmVGej72DuEy6BMrL9TAefBuWr314Sl9Kb_h9hXjbgKestzdljKiw8qmZqrdJLRJUQbKLVjP6bvcW5iXGR72bffZ9Mv1HGYC6t6vaq8YXYhkH1v8YJJ8U7noEipbhdWYGrszocrfSELM1jQ-B3QEsPYJOXgpe9uP9sQ6JpIvBQxJUqvntBwsMU6g75ieUMTQRMwRy6vLnDAPO_qQ7bdusx6qVullY5gZ9S4LZ4mvpnN7xfRZ9ZWoNzyHblF3HZrv1qy5Surcjfs3Om-63jVULHNf3ltTE3RJQn4S36SQLr-l5l6UOj6tbJy2mjfy0wU0Uz4wqEhglG9FsIQtUm-JP_RN82mKewJ7iqliSYJMlTxCbnUufjKzxxdVbPHKU8L3GSQlYP5Cg-eqErU2mHGKtvahf4MMqN5g5BR6aapXzvTmFuQAqMGxHhwvj07fJAtrHSjFbbWLbHG01LI0w-ED9VWdQLUitoTIkmVwh1gw_zvSCz0CjrLO6t1huMHR7RF8cDptjdZ-TGl224bNZo6ZW4ycQu0OVcGEhpVtrak3QlXumNyDdX4Vavr1HHaig==\"",
+                "type": "text",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"data\": {\r\n        \"contrato\": {\r\n            \"numero\": \"10933\",\r\n            \"fecha_inicio\": \"2026-07-11\",\r\n            \"fecha_fin\": \"2027-07-11\",\r\n            \"codigo_cliente\": \"C000199985\",\r\n            \"nombre_cliente\": \"ILVER ANACHE PUPO\"\r\n        },\r\n        \"cita\": {\r\n            \"fecha\": \"2026-07-11\",\r\n            \"equipos\": [\r\n                {\r\n                    \"codigo\": \"PTN-0049\",\r\n                    \"descripcion\": \"RASTREADOR SATELITAL TB 4G/5G\",\r\n                    \"fecha_inicio\": \"2026-07-11\",\r\n                    \"fecha_fin\": \"2027-07-11\"\r\n                }\r\n            ],\r\n            \"accesorios\": [\r\n                {\r\n                    \"codigo\": \"ACC-001\",\r\n                    \"descripcion\": \"BOTON PANICO\",\r\n                    \"cantidad\": 1\r\n                }\r\n            ],\r\n            \"servicios\": [\r\n                {\r\n                    \"codigo\": \"BAS-001\",\r\n                    \"descripcion\": \"SVR PLUS\"\r\n                }\r\n            ]\r\n        }\r\n    },\r\n    \"metadata\": {\r\n        \"contrato\": \"1000\",\r\n        \"motor\": \"MOTOR0001\",\r\n        \"cliente\": \"C000199985\",\r\n        \"placa\": \"C2Q145\"\r\n    }\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8001/api/document-designs/b658b908-65a1-40d6-9d0a-1b62b12f8a61/generate",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8001",
+              "path": [
+                "api",
+                "document-designs",
+                "b658b908-65a1-40d6-9d0a-1b62b12f8a61",
+                "generate"
+              ]
             }
-          }
+          },
+          "response": []
         },
-        "url": {
-          "raw": "localhost:8000/api/document-designs/12fc34de-6d11-4c7d-90bb-dbb87e02aca3/generate",
-          "host": [
-            "localhost"
-          ],
-          "port": "8000",
-          "path": [
-            "api",
-            "document-designs",
-            "12fc34de-6d11-4c7d-90bb-dbb87e02aca3",
-            "generate"
-          ]
+        {
+          "name": "Generar Documento - Constancia de Servicio Nueva Copy",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICIzVjEtcDBLdktvSHdJNVpNX3FzNGhRWnNaWF9IWV9qdjhFZzFLaWExcWRJIn0.eyJleHAiOjE3ODM5OTExMjQsImlhdCI6MTc4Mzk5MDgyNCwianRpIjoidHJydGNjOjc4ODUzODgzLWMzMTQtZDRjMi1lOGU2LWFjNzg4OGU3NTNhNSIsImlzcyI6Imh0dHA6Ly9rZXljbG9hazo4MDgwL3JlYWxtcy9kb2NtYW5hZ2VtZW50IiwiYXVkIjpbImRvY21hbmFnZW1lbnQtYmFja2VuZCIsImFjY291bnQiXSwic3ViIjoiMzVkYjNjMWQtZjUzZS00ODc4LTgzMzUtZTRhYTU2ODYwOGJiIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiZG9jbWFuYWdlbWVudC1hcGktY2xpZW50IiwiYWNyIjoiMSIsInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsImRlZmF1bHQtcm9sZXMtZG9jbWFuYWdlbWVudCIsInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwiY2xpZW50SG9zdCI6IjE3Mi4yNC4wLjEiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsInByZWZlcnJlZF91c2VybmFtZSI6InNlcnZpY2UtYWNjb3VudC1kb2NtYW5hZ2VtZW50LWFwaS1jbGllbnQiLCJjbGllbnRBZGRyZXNzIjoiMTcyLjI0LjAuMSIsImNsaWVudF9pZCI6ImRvY21hbmFnZW1lbnQtYXBpLWNsaWVudCJ9.suPjgDBdoKctLktsJARphIN8pB-F0PKCsDKoTSKuNsZ0sgO9rPI63jxb3MFKMXCPaisrIHlNSzeZrjd2lIxpOTAdBQBIowMcSWH6vW0IlgjDHs8n_ZWycpe7-ZIoaLONahunKmjXHkZOT8EFzZZFI_EEy-y6TwbVjiqoLoXL28KuVgrpdbILi-EhtXdRAMQeWROtuXV6xfOlvt3n0f-B-NgNOYpaeeYAsMuyjbK0mlpCSP-GpC5voF5QXE8b-1mtL5wg6Jpy_k1y6c4qfhoI86aOQr-WGTl_Xi-ioII34DsDAHvUNl1ZI3HACYa-YeqQpOMvqwvabIhjaffLYunyyQ",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "docmanagement_session",
+                "value": "qf-6L6-OZcDxD6ZFwQ7iDGSw7i8_rTVPiEaVhfM_aoA",
+                "type": "text",
+                "disabled": true
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI5NnFDM244b25vaWhfNDZkTUpkaFZQWmI2WFZzQ3V5MTdadHpWSDRwMGhzIn0.eyJleHAiOjE3ODM4MzkxMTksImlhdCI6MTc4MzgzODgxOSwianRpIjoidHJydGNjOjFjNWIzNjRjLWI3NmEtNTIxNy05NWY4LTcxZmY4MzU5NzlhOSIsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODA4MC9yZWFsbXMvZG9jbWFuYWdlbWVudCIsImF1ZCI6WyJkb2NtYW5hZ2VtZW50LWJhY2tlbmQiLCJhY2NvdW50Il0sInN1YiI6IjZiOWRmMWNlLThjZmItNGY3MC05NjM2LTE5YWYxNDQ1NTcwYyIsInR5cCI6IkJlYXJlciIsImF6cCI6ImRvY21hbmFnZW1lbnQtYXBpLWNsaWVudCIsImFjciI6IjEiLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsib2ZmbGluZV9hY2Nlc3MiLCJkZWZhdWx0LXJvbGVzLWRvY21hbmFnZW1lbnQiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoicHJvZmlsZSBlbWFpbCIsImNsaWVudEhvc3QiOiIxNzIuMjQuMC4xIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJzZXJ2aWNlLWFjY291bnQtZG9jbWFuYWdlbWVudC1hcGktY2xpZW50IiwiY2xpZW50QWRkcmVzcyI6IjE3Mi4yNC4wLjEiLCJjbGllbnRfaWQiOiJkb2NtYW5hZ2VtZW50LWFwaS1jbGllbnQifQ.h3Q2cTEiBreHsVLnUyvOX4mL7XnsM_L_JJsWXaJpw9bY6np5bU1W_U_EH6--WxpyuJxK6cKGGinf98P9Ly3hWryYgLZhIchHak8qikCsYu3Q1Zz_mVU1csPVupBH7ppMKEDtGXR0HWyvH9WZaBHTYcp3maE4r78TwPZVxUSVHknp5qIvdqQg1AUR1gjb_9ZlWsAel_mZT-NS5e3nXdYPkbSAsKVGrgLdVLEqTKVZGyIwpJTHRKvu8aoTRrXC05ByTfTevhFtoCZW_9ycyc96YrseatuGXrn4iyb5Xf19y-y45tof74DcIhAaxW9oxIuuV_bpg1bwXIJlhO91_nUYSA",
+                "type": "text",
+                "disabled": true
+              },
+              {
+                "key": "Cookie",
+                "value": "docmanagement_session=\"gAAAAABqUxvcIoANZHoS_UWBX1H-R6lo3XuB7R68CvBaTv_vLCns0njhY52qjKMSTFWH97UEm67elIiywI2gD2tAqQpaZoFTiHxzU_4Astzw6bDelEv26VKH0vK1ZjC2k7nFuIF_HoZPLbpvpvhzSOg60_Cl74tvc-6gSA5zIwLNWMqLUtVQ-YTPGkN_0Duf5ZUDzr8g0G7dobw6ytdl_FSfIqPnsbEjGKHRzrvTz8KSFtCyL-QuyHkrpusySP8IAoGP3Ri4WWjEUvJfvKQEt7Uw0eWyBZpOoQ-utyGqmVTEb-SfVNs05IrcYdv0aQKRSX-w63Jlp0UGZ5SDWuRMCFiYPbpEVh38Lz7y3JUTa6cYlXI2MM1xuSe6Q3ZLstAgps1SPxl_EflQkRpmDzLAr5EPJDlTiqXNaE8NtE2tHWrS32STE5cPfJKo6HD3l7Eoyb759t1BrQDd4QuTi_NpqoKLwXDV8EciN5xZXU0Z8RFoYgr87tmvIGLdXEVLKPcoR2aeKzhW0m4wunJQhC2odhuegKVTWx-Vj9PRRBLx_4K0FKd07FWryJoTEdYhWU5Xkq9SJGnvY3NRSWT3x7I-nxO-I4PlBNq1BqtETq1yLQJWZwIyNbofDx0QrayhE2G4mEn-blyEB5pXU5PbDLCdtzcMyXLvC3vJ8Iuep-Sp7-kWXx4pzf0112mlWz73zXUwXmJcWArIYIsZQSJ-xi3WCO0g3fpj35BKC-izZLFyhf80T6qbVil-LV_52h3b3IzyjmtIch7mCaF9ZjCWJUgWzXr5h6_nKvFWSPhbLwuyAVMSExYoyXzypmaczcgK7Z0bfUT4DH6Uh0p2O8Adzrp_QP95MVAmT1MdCtHJBxdjv_qJ30y6Ij9sSYlCyMqk3hL2i_UYw1Jo70xGkt-EjI_BfCuh7iCVY-Rf3byaSZ5ICZFOzQWNOs5Y3nFZQUiUgf5cHRvWmglkT-CQmyTs9g0M_QI00oVkifaahp6kCGZpJyX8ERDtYUmpMWD4JrLmQUD_Hn8CmrL7rZbmnn-5ug5ar6qqCIsLu64lCQRx06m_V_pHOgGlXsHiapPT2idtjaAL47Ey-IClaujRr9E8iDFyfWWveqUhtYsb4RPIUOmVGej72DuEy6BMrL9TAefBuWr314Sl9Kb_h9hXjbgKestzdljKiw8qmZqrdJLRJUQbKLVjP6bvcW5iXGR72bffZ9Mv1HGYC6t6vaq8YXYhkH1v8YJJ8U7noEipbhdWYGrszocrfSELM1jQ-B3QEsPYJOXgpe9uP9sQ6JpIvBQxJUqvntBwsMU6g75ieUMTQRMwRy6vLnDAPO_qQ7bdusx6qVullY5gZ9S4LZ4mvpnN7xfRZ9ZWoNzyHblF3HZrv1qy5Surcjfs3Om-63jVULHNf3ltTE3RJQn4S36SQLr-l5l6UOj6tbJy2mjfy0wU0Uz4wqEhglG9FsIQtUm-JP_RN82mKewJ7iqliSYJMlTxCbnUufjKzxxdVbPHKU8L3GSQlYP5Cg-eqErU2mHGKtvahf4MMqN5g5BR6aapXzvTmFuQAqMGxHhwvj07fJAtrHSjFbbWLbHG01LI0w-ED9VWdQLUitoTIkmVwh1gw_zvSCz0CjrLO6t1huMHR7RF8cDptjdZ-TGl224bNZo6ZW4ycQu0OVcGEhpVtrak3QlXumNyDdX4Vavr1HHaig==\"",
+                "type": "text",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"data\": {\r\n        \"contrato\": {\r\n            \"numero\": \"10933\",\r\n            \"fecha_inicio\": \"2026-07-11\",\r\n            \"fecha_fin\": \"2027-07-11\",\r\n            \"codigo_cliente\": \"C000199985\",\r\n            \"nombre_cliente\": \"ILVER ANACHE PUPO\"\r\n        },\r\n        \"cita\": {\r\n            \"fecha\": \"2026-07-11\",\r\n            \"equipos\": [\r\n                {\r\n                    \"codigo\": \"PTN-0049\",\r\n                    \"descripcion\": \"RASTREADOR SATELITAL TB 4G/5G\",\r\n                    \"fecha_inicio\": \"2026-07-11\",\r\n                    \"fecha_fin\": \"2027-07-11\"\r\n                }\r\n            ],\r\n            \"accesorios\": [\r\n                {\r\n                    \"codigo\": \"ACC-001\",\r\n                    \"descripcion\": \"BOTON PANICO\",\r\n                    \"cantidad\": 1\r\n                }\r\n            ],\r\n            \"servicios\": [\r\n                {\r\n                    \"codigo\": \"BAS-001\",\r\n                    \"descripcion\": \"SVR PLUS\"\r\n                }\r\n            ]\r\n        }\r\n    },\r\n    \"metadata\": {\r\n        \"contrato\": \"1000\",\r\n        \"motor\": \"MOTOR0001\",\r\n        \"cliente\": \"C000199985\",\r\n        \"placa\": \"C2Q145\"\r\n    }\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8001/api/issuances/",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8001",
+              "path": [
+                "api",
+                "issuances",
+                ""
+              ]
+            }
+          },
+          "response": []
         }
-      },
-      "response": []
+      ]
     },
     {
-      "name": "Generar Documento - Download",
-      "protocolProfileBehavior": {
-        "disableBodyPruning": true
-      },
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "docmanagement_session",
-            "value": "qf-6L6-OZcDxD6ZFwQ7iDGSw7i8_rTVPiEaVhfM_aoA",
-            "type": "text"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json",
-            "type": "text"
-          },
-          {
-            "key": "Cookie",
-            "value": "docmanagement_session=qf-6L6-OZcDxD6ZFwQ7iDGSw7i8_rTVPiEaVhfM_aoA",
-            "type": "text"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n    \"codigo\": \"C000199985\",\r\n    \"Nombre\": \"ILVER ANACHE\",\r\n    \"correo\": \"ilver.anache@gmail.com\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+      "name": "2026-07-11",
+      "item": [
+        {
+          "name": "Generar Documento",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "docmanagement_session",
+                "value": "qf-6L6-OZcDxD6ZFwQ7iDGSw7i8_rTVPiEaVhfM_aoA",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Cookie",
+                "value": "docmanagement_session=syQuIvKqC4QDbXfylL-1JNtSPfmdZhkByEz8STOPuus",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"codigo\": \"C000199985\",\r\n    \"Nombre\": \"ILVER ANACHE\",\r\n    \"correo\": \"ilver.anache@gmail.com\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:8000/api/document-designs/12fc34de-6d11-4c7d-90bb-dbb87e02aca3/generate",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "document-designs",
+                "12fc34de-6d11-4c7d-90bb-dbb87e02aca3",
+                "generate"
+              ]
             }
-          }
+          },
+          "response": []
         },
-        "url": {
-          "raw": "localhost:8000/api/issuances//4a2df81b-2903-4d50-af77-4c80076b23ad/download",
-          "host": [
-            "localhost"
-          ],
-          "port": "8000",
-          "path": [
-            "api",
-            "issuances",
-            "",
-            "4a2df81b-2903-4d50-af77-4c80076b23ad",
-            "download"
-          ]
+        {
+          "name": "Generar Documento - Constancia",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "docmanagement_session",
+                "value": "qf-6L6-OZcDxD6ZFwQ7iDGSw7i8_rTVPiEaVhfM_aoA",
+                "type": "text",
+                "disabled": true
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Cookie",
+                "value": "docmanagement_session=syQuIvKqC4QDbXfylL-1JNtSPfmdZhkByEz8STOPuus",
+                "type": "text",
+                "disabled": true
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI5NnFDM244b25vaWhfNDZkTUpkaFZQWmI2WFZzQ3V5MTdadHpWSDRwMGhzIn0.eyJleHAiOjE3ODM4MzczNDgsImlhdCI6MTc4MzgzNzA0OCwianRpIjoidHJydGNjOjIyZjEwN2M3LTk5YjYtMTkyNS02MGRhLWY5ZTE4YTA2OGYwZSIsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODA4MC9yZWFsbXMvZG9jbWFuYWdlbWVudCIsImF1ZCI6WyJkb2NtYW5hZ2VtZW50LWJhY2tlbmQiLCJhY2NvdW50Il0sInN1YiI6IjZiOWRmMWNlLThjZmItNGY3MC05NjM2LTE5YWYxNDQ1NTcwYyIsInR5cCI6IkJlYXJlciIsImF6cCI6ImRvY21hbmFnZW1lbnQtYXBpLWNsaWVudCIsImFjciI6IjEiLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsib2ZmbGluZV9hY2Nlc3MiLCJkZWZhdWx0LXJvbGVzLWRvY21hbmFnZW1lbnQiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoicHJvZmlsZSBlbWFpbCIsImNsaWVudEhvc3QiOiIxNzIuMjQuMC4xIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJzZXJ2aWNlLWFjY291bnQtZG9jbWFuYWdlbWVudC1hcGktY2xpZW50IiwiY2xpZW50QWRkcmVzcyI6IjE3Mi4yNC4wLjEiLCJjbGllbnRfaWQiOiJkb2NtYW5hZ2VtZW50LWFwaS1jbGllbnQifQ.Dx4YflO94mOpxIMe6rQ1nZbTuBc_uRng-uiZQGXc0sXb689TMu1F1y66S6ypMTNUQSus2leHBUvrJokNWMoIIIFKvM2CqrVhn8eOEanrHNMJnGFaAcCsMAePMxMI8iRYwEAoZSsp6wO8Si8qo8qRcrloe52M9jRD5W8jnVkAES-1TeJkx-aOYSXk4Z1-aMD6Z01wUbanz8KSeRC68i2CcZspUwVSUpp_H8lAMan_fwPQ7ta8KNgekPKe5GtEIj2OTedhYZswVHhWkX4fz3nHFg_PlTZnsHqVBK1gwZVbqrq2OC4jZRNCavZ41Udm6-21zl2Hay4yGeajHhtn31VPww",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"cliente\": {\r\n        \"nombre\": \"ILVER ANACHE\",\r\n        \"ruc\": \"20536823327\"\r\n    },\r\n    \"factura\": {\r\n        \"items\": [\r\n            {\r\n                \"cantidad\": 1,\r\n                \"codigo\": \"PTN-0049\",\r\n                \"descripcion\": \"GPS SATELITAL\"\r\n            }\r\n        ]\r\n    }\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:8001/api/document-designs/e66ffb92-5013-4b91-9425-083de94f88af/generate",
+              "host": [
+                "localhost"
+              ],
+              "port": "8001",
+              "path": [
+                "api",
+                "document-designs",
+                "e66ffb92-5013-4b91-9425-083de94f88af",
+                "generate"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Generar Documento - Constancia de Servicio",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "docmanagement_session",
+                "value": "qf-6L6-OZcDxD6ZFwQ7iDGSw7i8_rTVPiEaVhfM_aoA",
+                "type": "text",
+                "disabled": true
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI5NnFDM244b25vaWhfNDZkTUpkaFZQWmI2WFZzQ3V5MTdadHpWSDRwMGhzIn0.eyJleHAiOjE3ODM4MzczNDgsImlhdCI6MTc4MzgzNzA0OCwianRpIjoidHJydGNjOjIyZjEwN2M3LTk5YjYtMTkyNS02MGRhLWY5ZTE4YTA2OGYwZSIsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODA4MC9yZWFsbXMvZG9jbWFuYWdlbWVudCIsImF1ZCI6WyJkb2NtYW5hZ2VtZW50LWJhY2tlbmQiLCJhY2NvdW50Il0sInN1YiI6IjZiOWRmMWNlLThjZmItNGY3MC05NjM2LTE5YWYxNDQ1NTcwYyIsInR5cCI6IkJlYXJlciIsImF6cCI6ImRvY21hbmFnZW1lbnQtYXBpLWNsaWVudCIsImFjciI6IjEiLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsib2ZmbGluZV9hY2Nlc3MiLCJkZWZhdWx0LXJvbGVzLWRvY21hbmFnZW1lbnQiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoicHJvZmlsZSBlbWFpbCIsImNsaWVudEhvc3QiOiIxNzIuMjQuMC4xIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJzZXJ2aWNlLWFjY291bnQtZG9jbWFuYWdlbWVudC1hcGktY2xpZW50IiwiY2xpZW50QWRkcmVzcyI6IjE3Mi4yNC4wLjEiLCJjbGllbnRfaWQiOiJkb2NtYW5hZ2VtZW50LWFwaS1jbGllbnQifQ.Dx4YflO94mOpxIMe6rQ1nZbTuBc_uRng-uiZQGXc0sXb689TMu1F1y66S6ypMTNUQSus2leHBUvrJokNWMoIIIFKvM2CqrVhn8eOEanrHNMJnGFaAcCsMAePMxMI8iRYwEAoZSsp6wO8Si8qo8qRcrloe52M9jRD5W8jnVkAES-1TeJkx-aOYSXk4Z1-aMD6Z01wUbanz8KSeRC68i2CcZspUwVSUpp_H8lAMan_fwPQ7ta8KNgekPKe5GtEIj2OTedhYZswVHhWkX4fz3nHFg_PlTZnsHqVBK1gwZVbqrq2OC4jZRNCavZ41Udm6-21zl2Hay4yGeajHhtn31VPww",
+                "type": "text"
+              },
+              {
+                "key": "Cookie",
+                "value": "docmanagement_session=\"gAAAAABqUxvcIoANZHoS_UWBX1H-R6lo3XuB7R68CvBaTv_vLCns0njhY52qjKMSTFWH97UEm67elIiywI2gD2tAqQpaZoFTiHxzU_4Astzw6bDelEv26VKH0vK1ZjC2k7nFuIF_HoZPLbpvpvhzSOg60_Cl74tvc-6gSA5zIwLNWMqLUtVQ-YTPGkN_0Duf5ZUDzr8g0G7dobw6ytdl_FSfIqPnsbEjGKHRzrvTz8KSFtCyL-QuyHkrpusySP8IAoGP3Ri4WWjEUvJfvKQEt7Uw0eWyBZpOoQ-utyGqmVTEb-SfVNs05IrcYdv0aQKRSX-w63Jlp0UGZ5SDWuRMCFiYPbpEVh38Lz7y3JUTa6cYlXI2MM1xuSe6Q3ZLstAgps1SPxl_EflQkRpmDzLAr5EPJDlTiqXNaE8NtE2tHWrS32STE5cPfJKo6HD3l7Eoyb759t1BrQDd4QuTi_NpqoKLwXDV8EciN5xZXU0Z8RFoYgr87tmvIGLdXEVLKPcoR2aeKzhW0m4wunJQhC2odhuegKVTWx-Vj9PRRBLx_4K0FKd07FWryJoTEdYhWU5Xkq9SJGnvY3NRSWT3x7I-nxO-I4PlBNq1BqtETq1yLQJWZwIyNbofDx0QrayhE2G4mEn-blyEB5pXU5PbDLCdtzcMyXLvC3vJ8Iuep-Sp7-kWXx4pzf0112mlWz73zXUwXmJcWArIYIsZQSJ-xi3WCO0g3fpj35BKC-izZLFyhf80T6qbVil-LV_52h3b3IzyjmtIch7mCaF9ZjCWJUgWzXr5h6_nKvFWSPhbLwuyAVMSExYoyXzypmaczcgK7Z0bfUT4DH6Uh0p2O8Adzrp_QP95MVAmT1MdCtHJBxdjv_qJ30y6Ij9sSYlCyMqk3hL2i_UYw1Jo70xGkt-EjI_BfCuh7iCVY-Rf3byaSZ5ICZFOzQWNOs5Y3nFZQUiUgf5cHRvWmglkT-CQmyTs9g0M_QI00oVkifaahp6kCGZpJyX8ERDtYUmpMWD4JrLmQUD_Hn8CmrL7rZbmnn-5ug5ar6qqCIsLu64lCQRx06m_V_pHOgGlXsHiapPT2idtjaAL47Ey-IClaujRr9E8iDFyfWWveqUhtYsb4RPIUOmVGej72DuEy6BMrL9TAefBuWr314Sl9Kb_h9hXjbgKestzdljKiw8qmZqrdJLRJUQbKLVjP6bvcW5iXGR72bffZ9Mv1HGYC6t6vaq8YXYhkH1v8YJJ8U7noEipbhdWYGrszocrfSELM1jQ-B3QEsPYJOXgpe9uP9sQ6JpIvBQxJUqvntBwsMU6g75ieUMTQRMwRy6vLnDAPO_qQ7bdusx6qVullY5gZ9S4LZ4mvpnN7xfRZ9ZWoNzyHblF3HZrv1qy5Surcjfs3Om-63jVULHNf3ltTE3RJQn4S36SQLr-l5l6UOj6tbJy2mjfy0wU0Uz4wqEhglG9FsIQtUm-JP_RN82mKewJ7iqliSYJMlTxCbnUufjKzxxdVbPHKU8L3GSQlYP5Cg-eqErU2mHGKtvahf4MMqN5g5BR6aapXzvTmFuQAqMGxHhwvj07fJAtrHSjFbbWLbHG01LI0w-ED9VWdQLUitoTIkmVwh1gw_zvSCz0CjrLO6t1huMHR7RF8cDptjdZ-TGl224bNZo6ZW4ycQu0OVcGEhpVtrak3QlXumNyDdX4Vavr1HHaig==\"",
+                "type": "text",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"data\": {\r\n        \"cita\": {\r\n            \"fecha\": \"2026-07-11\",\r\n            \"equipos\": [\r\n                {\r\n                    \"codigo\": \"PTN-0049\",\r\n                    \"descripcion\": \"RASTREADOR SATELITAL TBT 5G\",\r\n                    \"fecha_inicio\": \"2026-07-11\",\r\n                    \"fecha_fin\": \"2027-07-11\"\r\n                }\r\n            ],\r\n            \"servicio\": {\r\n                \"codigo\": \"BAS-001\",\r\n                \"descripcion\": \"SVR X\"\r\n            },\r\n            \"accesorios\": [\r\n                {\r\n                    \"codigo\": \"ACC-001\",\r\n                    \"descripcion\": \"BOTON PANICO\",\r\n                    \"cantidad\": 1\r\n                }\r\n            ],\r\n            \"cliente\": {\r\n                \"codigo\": \"C000199985\",\r\n                \"nombre\": \"ILVER ANACHE PUPO\"\r\n            }\r\n        },\r\n        \"contrato\": {\r\n            \"codigo\": \"1000\",\r\n            \"fecha_inicio\": \"2026-07-11\",\r\n            \"fecha_fin\": \"2027-07-11\"\r\n        }\r\n    },\r\n    \"metadata\": {\r\n        \"contrato\": \"1000\",\r\n        \"motor\": \"MOTOR0001\",\r\n        \"socionegocio\": \"C000199985\"\r\n    }\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8001/api/content/templates",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8001",
+              "path": [
+                "api",
+                "content",
+                "templates"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Generar Documento - Download",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "docmanagement_session",
+                "value": "qf-6L6-OZcDxD6ZFwQ7iDGSw7i8_rTVPiEaVhfM_aoA",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Cookie",
+                "value": "docmanagement_session=qf-6L6-OZcDxD6ZFwQ7iDGSw7i8_rTVPiEaVhfM_aoA",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"codigo\": \"C000199985\",\r\n    \"Nombre\": \"ILVER ANACHE\",\r\n    \"correo\": \"ilver.anache@gmail.com\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:8000/api/issuances//4a2df81b-2903-4d50-af77-4c80076b23ad/download",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "issuances",
+                "",
+                "4a2df81b-2903-4d50-af77-4c80076b23ad",
+                "download"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Previsualiazacion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "docmanagement_session=6fT3tmCMPe7GLP4wlTTJaF8ELSA5Nuf32rSM6vNW2F8",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/document-designs/dd0f0d77-0b2c-4ddf-a310-ff6d960420f8/preview",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "document-designs",
+                "dd0f0d77-0b2c-4ddf-a310-ff6d960420f8",
+                "preview"
+              ]
+            }
+          },
+          "response": []
         }
-      },
-      "response": []
+      ]
     },
     {
-      "name": "Previsualiazacion",
+      "name": "Request Token",
       "request": {
         "method": "POST",
-        "header": [
-          {
-            "key": "Cookie",
-            "value": "docmanagement_session=6fT3tmCMPe7GLP4wlTTJaF8ELSA5Nuf32rSM6vNW2F8",
-            "type": "text"
-          }
-        ],
+        "header": [],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "grant_type",
+              "value": "client_credentials",
+              "type": "text",
+              "uuid": "e7d96cb7-b84d-4133-8e4d-52a122f37216"
+            },
+            {
+              "key": "client_id",
+              "value": "docmanagement-api-client",
+              "type": "text",
+              "uuid": "d50d912d-91d6-407a-83e7-d14a48d34c80"
+            },
+            {
+              "key": "client_secret",
+              "value": "dev-api-secret-change-in-prod",
+              "type": "text",
+              "uuid": "0473cf45-8677-4928-b06f-f339f66b4f7a"
+            }
+          ]
+        },
         "url": {
-          "raw": "http://127.0.0.1:8000/api/document-designs/dd0f0d77-0b2c-4ddf-a310-ff6d960420f8/preview",
+          "raw": "http://keycloak:8080/realms/docmanagement/protocol/openid-connect/token",
           "protocol": "http",
           "host": [
-            "127",
-            "0",
-            "0",
-            "1"
+            "keycloak"
           ],
-          "port": "8000",
+          "port": "8080",
           "path": [
-            "api",
-            "document-designs",
-            "dd0f0d77-0b2c-4ddf-a310-ff6d960420f8",
-            "preview"
+            "realms",
+            "docmanagement",
+            "protocol",
+            "openid-connect",
+            "token"
           ]
         }
       },

@@ -2,17 +2,17 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Nested Objects and Case-Insensitive Templates
-status: completed
-stopped_at: Phase 14 completed successfully
-last_updated: "2026-07-13T06:50:00.000Z"
+status: planned
+stopped_at: Phase 15 planned successfully
+last_updated: "2026-07-14T02:45:00.000Z"
 progress:
-  total_phases: 9
+  total_phases: 10
   completed_phases: 8
   total_plans: 25
   completed_plans: 25
-  percent: 100
-current_phase: 14
-current_phase_name: async-pdf-generation-jobs-with-celery-redis-and-job-ui
+  percent: 80
+current_phase: 15
+current_phase_name: pagedtable-page-size-selector
 ---
 
 # Project State
@@ -22,14 +22,14 @@ current_phase_name: async-pdf-generation-jobs-with-celery-redis-and-job-ui
 See: .planning/PROJECT.md (updated 2026-07-09)
 
 **Core value:** Operational users can visually compose a document design (templates + fixed content, in order) and reliably generate a correct final PDF from it via API, without engineering involvement per document type.
-**Current focus:** Milestone v2.0 completed
+**Current focus:** Phase 15 planned and ready to execute
 
 ## Current Position
 
-- Phase: 14 (Async PDF Generation Jobs with Celery/Redis and Job UI) — COMPLETED
-- Plan: 5 of 5
-- Status: Completed
-- Last activity: 2026-07-13 — Phase 14 completed successfully
+- Phase: 15 (PagedTable Page Size Selector) — READY
+- Plan: 0 of 1
+- Status: Planned
+- Last activity: 2026-07-14 — Phase 15 planned successfully
 
 ## Performance Metrics
 
@@ -137,6 +137,8 @@ None.
 
 - Phase 11 added: Necesito introducir un componente bff entre frontend y backend aislando la logica del core en el backend
 - Phase 14 added: implementar .scopes\PRD4.md
+- Phase 15 added: implementar .scopes\PRD5.md
+- Phase 16 added: AI agent for page templating
 
 ## Session Continuity
 

@@ -101,3 +101,25 @@ Plans:
 - [x] 14-03-PLAN.md — Celery worker, Redis service, and Docker Compose runtime.
 - [x] 14-04-PLAN.md — BFF/frontend generated-documents job management UI.
 - [x] 14-05-PLAN.md — Cross-layer backend, worker, BFF, frontend, and compose verification.
+
+### Phase 15: PagedTable Page Size Selector
+
+**Goal:** Add a reusable page-size selector to PagedTable/Pagination using the existing Select atom, and update all current PagedTable consumers to support configurable rows per page.
+**Requirements:** PAGE-01, PAGE-02, PAGE-03, PAGE-04, PAGE-05, PAGE-06, PAGE-07
+**Depends on:** Phase 14
+**Plans:** 1 plan
+
+Plans:
+
+- [ ] 15-01-PLAN.md — Reusable PagedTable/Pagination page-size selector and current consumer wiring.
+
+### Phase 16: AI agent for page templating
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 15
+**Plans:** 0 plans
+
+Plans:
+
+- [ ] TBD (run /gsd-plan-phase 16 to break down)
