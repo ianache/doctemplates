@@ -35,6 +35,7 @@ import {
 } from "../../lib/documentDesigns";
 import { getDocumentType, type DocumentTypeField, type DocumentTypeMetadata } from "../../lib/documentTypes";
 import { generateMockDataFromFields } from "../../lib/schemaFields";
+import { listXlsxTemplates, type XlsxTemplateDetail } from "../../lib/xlsxTemplates";
 import AddContentModal from "./components/organisms/AddContentModal";
 import DesignPageCard from "./components/molecules/DesignPageCard";
 import DesignPageInspector from "./components/organisms/DesignPageInspector";
@@ -150,6 +151,9 @@ export default function DocumentDesignDetailPage() {
   const [previewBlob, setPreviewBlob] = useState<Blob | null>(null);
   const [previewMode, setPreviewMode] = useState<"fragment" | "pdf">("fragment");
   const [activeRightTab, setActiveRightTab] = useState<"inspector" | "mockData">("inspector");
+  const [xlsxTemplates, setXlsxTemplates] = useState<XlsxTemplateDetail[]>([]);
+  const [selectedXlsxTemplateId, setSelectedXlsxTemplateId] = useState("");
+  const [savingXlsxTemplate, setSavingXlsxTemplate] = useState(false);
 
   const [leftWidth, setLeftWidth] = useState(380);
   const [rightWidth, setRightWidth] = useState(330);
@@ -312,6 +316,23 @@ export default function DocumentDesignDetailPage() {
     };
   }, [design?.document_type_id, design?.id]);
 
+  useEffect(() => {
+    if (!design?.document_type_id || design.output_format !== "xlsx") return;
+    let cancelled = false;
+    listXlsxTemplates(design.document_type_id)
+      .then((templates) => {
+        if (cancelled) return;
+        setXlsxTemplates(templates);
+        setSelectedXlsxTemplateId(design.xlsx_template_id ?? templates[0]?.id ?? "");
+      })
+      .catch(() => {
+        if (!cancelled) setError("We couldn't load XLSX templates for this design.");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [design?.document_type_id, design?.id, design?.output_format, design?.xlsx_template_id]);
+
   const handleResetMockData = () => {
     const mockData = generateMockDataFromFields(docTypeFields);
     let initialMock: Record<string, any> = mockData;
@@ -358,9 +379,13 @@ export default function DocumentDesignDetailPage() {
     }
   };
 
-  const handleTriggerPdfPreview = async () => {
-    if (!design) return;
-    setPreviewLoading(true);
+const handleTriggerPdfPreview = async () => {
+if (!design) return;
+if (design.output_format === "xlsx") {
+setPreviewError("XLSX designs use the template preview in the content library.");
+return;
+}
+setPreviewLoading(true);
     setPreviewError(null);
     try {
       const blob = await previewDocumentDesign(design.id, parsedPayload);
@@ -380,6 +405,8 @@ export default function DocumentDesignDetailPage() {
       const updated = await updateDocumentDesign(design.id, {
         name: design.name,
         description: design.description,
+        output_format: design.output_format,
+        xlsx_template_id: design.xlsx_template_id,
         mock_data: parsedPayload,
       });
       setDesign(updated);
@@ -387,6 +414,27 @@ export default function DocumentDesignDetailPage() {
       setPreviewError(err instanceof Error ? err.message : "Failed to persist mock data to server.");
     } finally {
       setIsSavingMock(false);
+    }
+  };
+
+  const handleSaveXlsxTemplate = async () => {
+    if (!design || !selectedXlsxTemplateId) return;
+    setSavingXlsxTemplate(true);
+    setError(null);
+    try {
+      const updated = await updateDocumentDesign(design.id, {
+        name: design.name,
+        description: design.description,
+        output_format: design.output_format,
+        xlsx_template_id: selectedXlsxTemplateId,
+        mock_data: design.mock_data ?? null,
+      });
+      setDesign(updated);
+      setNotice("XLSX template assigned.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "We couldn't assign the XLSX template.");
+    } finally {
+      setSavingXlsxTemplate(false);
     }
   };
 
@@ -639,6 +687,33 @@ export default function DocumentDesignDetailPage() {
           ) : null}
 
           {error ? <p className="mt-md rounded border border-error/30 p-sm text-body-sm text-error">{error}</p> : null}
+          {design.output_format === "xlsx" && design.status === "draft" ? (
+            <div className="mt-md rounded border border-outline-variant bg-surface-container-lowest p-sm">
+              <label className="block text-label-caps text-on-surface-variant">
+                XLSX Template
+                <select
+                  value={selectedXlsxTemplateId}
+                  onChange={(event) => setSelectedXlsxTemplateId(event.target.value)}
+                  className="mt-xs w-full rounded border border-outline px-sm py-xs text-body-sm text-on-surface focus:border-primary focus:outline-none"
+                >
+                  {xlsxTemplates.length === 0 ? <option value="">No XLSX templates available</option> : null}
+                  {xlsxTemplates.map((template) => (
+                    <option key={template.id} value={template.id}>
+                      {template.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button
+                type="button"
+                disabled={!selectedXlsxTemplateId || selectedXlsxTemplateId === design.xlsx_template_id || savingXlsxTemplate}
+                className="mt-sm rounded bg-primary px-md py-xs text-body-sm font-bold text-white hover:bg-primary/90 disabled:opacity-50"
+                onClick={handleSaveXlsxTemplate}
+              >
+                {savingXlsxTemplate ? "Saving..." : "Assign Template"}
+              </button>
+            </div>
+          ) : null}
           {notice ? (
             <div className="mt-md rounded border border-outline-variant bg-surface-container-lowest p-sm text-body-sm text-on-surface">
               <div className="flex flex-wrap items-center justify-between gap-sm">
@@ -737,8 +812,8 @@ export default function DocumentDesignDetailPage() {
         <div className="flex items-center justify-between gap-md border-b border-outline-variant bg-surface px-lg py-md">
           <div className="min-w-0">
             <p className="font-label-caps text-on-surface-variant">
-              {previewMode === "pdf"
-                ? "Generated PDF"
+{previewMode === "pdf"
+? design?.output_format === "xlsx" ? "XLSX Template" : "Generated PDF"
                 : selectedPage
                 ? `Page ${selectedPage.position + 1}`
                 : "Preview"}
@@ -769,7 +844,7 @@ export default function DocumentDesignDetailPage() {
                 }`}
                 onClick={() => handleSetPreviewMode("pdf")}
               >
-                PDF Preview
+          {design?.output_format === "xlsx" ? "Template Preview" : "PDF Preview"}
               </button>
             </div>
             {previewMode === "fragment" && (
@@ -781,11 +856,18 @@ export default function DocumentDesignDetailPage() {
         </div>
 
         <div className={`page-canvas-bg flex min-h-0 flex-1 items-start justify-center overflow-auto p-xl ${isResizing ? 'pointer-events-none' : ''}`}>
-          {previewMode === "pdf" ? (
-            <div className="w-full max-w-[800px] bg-surface-container-lowest p-md border border-outline-variant rounded-lg shadow-lg">
-              <PreviewFrame blob={previewBlob} loading={previewLoading} error={previewError} />
-            </div>
-          ) : (
+{previewMode === "pdf" ? (
+<div className="w-full max-w-[800px] bg-surface-container-lowest p-md border border-outline-variant rounded-lg shadow-lg">
+{design?.output_format === "xlsx" ? (
+<div className="flex min-h-[360px] flex-col items-center justify-center gap-md text-center">
+<span className="material-symbols-outlined text-[48px] text-primary">table</span>
+<p className="text-sm font-bold text-secondary">Use the XLSX template detail page for workbook preview.</p>
+</div>
+) : (
+<PreviewFrame blob={previewBlob} loading={previewLoading} error={previewError} />
+)}
+</div>
+) : (
             <div className="flex min-h-[760px] w-full max-w-[595px] flex-col border border-outline-variant bg-white p-xl shadow-lg">
               {selectedPage ? (
                 selectedPage.block_type === "html_template" && typeof selectedPage.snapshot.html === "string" ? (

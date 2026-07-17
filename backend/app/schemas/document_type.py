@@ -6,6 +6,7 @@ import re
 from pydantic import BaseModel, ConfigDict, model_validator, field_validator
 
 FieldType = Literal["string", "number", "date", "boolean"]
+OutputFormat = Literal["pdf", "xlsx"]
 
 PARENT_SEGMENT_RE = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*(?:\[\])?$")
 LEAF_SEGMENT_RE = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
@@ -70,6 +71,16 @@ class DocumentTypeCreate(BaseModel):
     description: str | None = None
     fields: list[DocumentTypeFieldIn]
     metadata_definitions: list[DocumentTypeMetadataIn] = []
+    allowed_output_formats: list[OutputFormat] = ["pdf"]
+
+    @field_validator("allowed_output_formats")
+    @classmethod
+    def validate_allowed_output_formats(cls, values: list[OutputFormat]) -> list[OutputFormat]:
+        if not values:
+            raise ValueError("At least one output format must be allowed")
+        if len(values) != len(set(values)):
+            raise ValueError("Allowed output formats must be unique")
+        return values
 
     @model_validator(mode="after")
     def validate_schema_structure(self) -> "DocumentTypeCreate":
@@ -139,6 +150,7 @@ class DocumentTypeListItem(BaseModel):
     id: UUID
     name: str
     description: str | None
+    allowed_output_formats: list[OutputFormat] = ["pdf"]
     field_count: int
     created_by_email: str
     created_at: datetime
@@ -150,6 +162,7 @@ class DocumentTypeDetail(BaseModel):
     id: UUID
     name: str
     description: str | None
+    allowed_output_formats: list[OutputFormat] = ["pdf"]
     fields: list[DocumentTypeFieldOut]
     metadata_definitions: list[DocumentTypeMetadataOut] = []
     created_by_email: str

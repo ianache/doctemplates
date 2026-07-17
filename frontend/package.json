@@ -16,6 +16,7 @@
     "@tiptap/pm": "^3.27.3",
     "@tiptap/react": "^3.27.3",
     "@tiptap/starter-kit": "^3.27.3",
+    "jszip": "^3.10.1",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-hook-form": "^7.81.0",

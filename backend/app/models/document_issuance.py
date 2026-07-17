@@ -6,12 +6,17 @@ from app.db import Base
 
 
 ISSUANCE_STATUSES = ("queued", "processing", "success", "failure")
+ISSUANCE_OUTPUT_FORMATS = ("pdf", "xlsx")
 
 
 class DocumentIssuance(Base):
     __tablename__ = "document_issuances"
     __table_args__ = (
         CheckConstraint(f"status IN {ISSUANCE_STATUSES!r}", name="ck_document_issuance_status"),
+        CheckConstraint(
+            f"output_format IN {ISSUANCE_OUTPUT_FORMATS!r}",
+            name="ck_document_issuance_output_format",
+        ),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
@@ -19,6 +24,10 @@ class DocumentIssuance(Base):
         ForeignKey("document_designs.id", ondelete="RESTRICT")
     )
     storage_key: Mapped[str | None] = mapped_column(nullable=True, default=None)
+    output_format: Mapped[str] = mapped_column(default="pdf")
+    mime_type: Mapped[str | None] = mapped_column(nullable=True, default=None)
+    filename: Mapped[str | None] = mapped_column(nullable=True, default=None)
+    preview_storage_key: Mapped[str | None] = mapped_column(nullable=True, default=None)
 
     @property
     def file_path(self) -> str | None:

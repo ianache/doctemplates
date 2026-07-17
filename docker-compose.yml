@@ -54,6 +54,7 @@ services:
       STORAGE_S3_REGION: us-east-1
       STORAGE_S3_BUCKET_STATIC_PDFS: docmanagement-static-pdfs
       STORAGE_S3_BUCKET_ISSUANCES: docmanagement-issuances
+      STORAGE_S3_BUCKET_XLSX_TEMPLATES: ${STORAGE_S3_BUCKET_XLSX_TEMPLATES:-docmanagement-xlsx-templates}
       AI_REQUESTS_ENABLED: ${AI_REQUESTS_ENABLED:-false}
       AI_DEFAULT_MODEL: ${AI_DEFAULT_MODEL:-gemini/gemini-2.0-flash}
       AI_PROVIDER_MODEL: ${AI_PROVIDER_MODEL:-gpt-4o-mini}
@@ -79,6 +80,8 @@ services:
         condition: service_started
       redis:
         condition: service_started
+      minio-init:
+        condition: service_completed_successfully
 
   bff:
     build:
@@ -124,6 +127,25 @@ services:
     volumes:
       - minio-data:/data
 
+  minio-init:
+    image: minio/mc:RELEASE.2024-01-28T16-23-14Z
+    depends_on:
+      minio:
+        condition: service_started
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-password123}
+      STORAGE_S3_BUCKET_STATIC_PDFS: docmanagement-static-pdfs
+      STORAGE_S3_BUCKET_ISSUANCES: docmanagement-issuances
+      STORAGE_S3_BUCKET_XLSX_TEMPLATES: ${STORAGE_S3_BUCKET_XLSX_TEMPLATES:-docmanagement-xlsx-templates}
+    entrypoint: >
+      /bin/sh -c "
+      until mc alias set local http://minio:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD; do sleep 2; done;
+      mc mb --ignore-existing local/$$STORAGE_S3_BUCKET_STATIC_PDFS;
+      mc mb --ignore-existing local/$$STORAGE_S3_BUCKET_ISSUANCES;
+      mc mb --ignore-existing local/$$STORAGE_S3_BUCKET_XLSX_TEMPLATES;
+      "
+
   redis:
     image: redis:7-alpine
     ports:
@@ -151,6 +173,7 @@ services:
       STORAGE_S3_REGION: us-east-1
       STORAGE_S3_BUCKET_STATIC_PDFS: docmanagement-static-pdfs
       STORAGE_S3_BUCKET_ISSUANCES: docmanagement-issuances
+      STORAGE_S3_BUCKET_XLSX_TEMPLATES: ${STORAGE_S3_BUCKET_XLSX_TEMPLATES:-docmanagement-xlsx-templates}
     volumes:
       - content-storage:/app/.content-storage
     depends_on:
@@ -158,6 +181,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+      minio-init:
+        condition: service_completed_successfully
 
 volumes:
   pgdata:

@@ -13,6 +13,7 @@ const ROUTE_LABELS: Record<string, string> = {
   versions: "Version History",
   templates: "Templates",
   "static-pdfs": "Static PDFs",
+  "xlsx-templates": "XLSX Templates",
   static: "Static PDFs",
   upload: "Upload",
 };
@@ -162,6 +163,20 @@ export default function AuthenticatedShell() {
                 >
                   <span className="material-symbols-outlined text-[18px] shrink-0">picture_as_pdf</span>
                   <span className="text-body-sm whitespace-nowrap">Static PDFs</span>
+                </NavLink>
+                <NavLink
+                  to="/content/xlsx-templates"
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 rounded px-sm py-sm transition-colors ${
+                      isActive
+                        ? "bg-surface-container font-bold text-primary"
+                        : "text-secondary hover:bg-surface-container"
+                    }`
+                  }
+                  title="XLSX Templates"
+                >
+                  <span className="material-symbols-outlined text-[18px] shrink-0">table</span>
+                  <span className="text-body-sm whitespace-nowrap">XLSX Templates</span>
                 </NavLink>
               </div>
             )}

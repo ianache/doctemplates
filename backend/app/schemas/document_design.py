@@ -3,17 +3,23 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
+from app.schemas.document_type import OutputFormat
+
 
 class DocumentDesignCreate(BaseModel):
     document_type_id: UUID
     name: str
     description: str | None = None
+    output_format: OutputFormat = "pdf"
+    xlsx_template_id: UUID | None = None
     mock_data: dict | None = None
 
 
 class DocumentDesignUpdate(BaseModel):
     name: str
     description: str | None = None
+    output_format: OutputFormat = "pdf"
+    xlsx_template_id: UUID | None = None
     mock_data: dict | None = None
 
 
@@ -61,6 +67,8 @@ class DocumentDesignListItem(BaseModel):
     id: UUID
     name: str
     description: str | None
+    output_format: OutputFormat = "pdf"
+    xlsx_template_id: UUID | None = None
     status: str
     version_group_id: UUID | None = None
     version_number: int | None = None
@@ -77,6 +85,8 @@ class DocumentDesignDetail(BaseModel):
     id: UUID
     name: str
     description: str | None
+    output_format: OutputFormat = "pdf"
+    xlsx_template_id: UUID | None = None
     status: str
     version_group_id: UUID | None = None
     version_number: int | None = None

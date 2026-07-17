@@ -10,6 +10,9 @@ import HtmlTemplateCreatePage from "./pages/content/HtmlTemplateCreatePage";
 import HtmlTemplateDetailPage from "./pages/content/HtmlTemplateDetailPage";
 import StaticPdfUploadPage from "./pages/content/StaticPdfUploadPage";
 import StaticPdfDetailPage from "./pages/content/StaticPdfDetailPage";
+import XlsxTemplatesPage from "./pages/content/XlsxTemplatesPage";
+import XlsxTemplateUploadPage from "./pages/content/XlsxTemplateUploadPage";
+import XlsxTemplateDetailPage from "./pages/content/XlsxTemplateDetailPage";
 import DocumentDesignListPage from "./pages/document-designs/DocumentDesignListPage";
 import DocumentDesignCreatePage from "./pages/document-designs/DocumentDesignCreatePage";
 import DocumentDesignDetailPage from "./pages/document-designs/DocumentDesignDetailPage";
@@ -42,6 +45,9 @@ function App() {
         <Route path="content/static" element={<StaticPdfsPage />} />
         <Route path="content/static-pdfs/upload" element={<StaticPdfUploadPage />} />
         <Route path="content/static-pdfs/:id" element={<StaticPdfDetailPage />} />
+        <Route path="content/xlsx-templates" element={<XlsxTemplatesPage />} />
+        <Route path="content/xlsx-templates/upload" element={<XlsxTemplateUploadPage />} />
+        <Route path="content/xlsx-templates/:id" element={<XlsxTemplateDetailPage />} />
       </Route>
     </Routes>
   );

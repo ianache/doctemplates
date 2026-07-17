@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
-import { createDocumentType, getDocumentType, updateDocumentType, type FieldType, type DocumentTypeMetadataIn } from "../../lib/documentTypes";
+import { createDocumentType, getDocumentType, updateDocumentType, type DocumentTypeCreatePayload, type FieldType, type DocumentTypeMetadataIn, type OutputFormat } from "../../lib/documentTypes";
 import { SchemaFieldEditor } from "./components/organisms/SchemaFieldEditor";
 import { SchemaMetadataEditor } from "./components/organisms/SchemaMetadataEditor";
 import { validateSchemaFields, normalizeSchemaFields } from "../../lib/schemaFields";
@@ -18,6 +18,7 @@ type FormValues = {
   description: string;
   fields: FieldRow[];
   metadata_definitions: DocumentTypeMetadataIn[];
+  allowed_output_formats: OutputFormat[];
 };
 
 function generateMockPayload(fields: FieldRow[], metadata: DocumentTypeMetadataIn[]) {
@@ -182,6 +183,7 @@ export default function DocumentTypeCreatePage() {
       description: "",
       fields: [{ name: "new_field", type: "string", description: "" }],
       metadata_definitions: [],
+      allowed_output_formats: ["pdf"],
     },
   });
 
@@ -211,6 +213,7 @@ export default function DocumentTypeCreatePage() {
               type: m.type,
               required: m.required,
             })),
+            allowed_output_formats: data.allowed_output_formats ?? ["pdf"],
           });
         }
       })
@@ -232,13 +235,17 @@ export default function DocumentTypeCreatePage() {
     }
 
     const normalizedFields = normalizeSchemaFields(values.fields);
+    const allowedOutputFormats = values.allowed_output_formats.filter(
+      (format): format is OutputFormat => format === "pdf" || format === "xlsx",
+    );
 
     try {
-      const payload = {
+      const payload: DocumentTypeCreatePayload = {
         name: values.name,
         description: values.description || null,
         fields: normalizedFields,
         metadata_definitions: values.metadata_definitions,
+        allowed_output_formats: allowedOutputFormats.length ? allowedOutputFormats : (["pdf"] as OutputFormat[]),
       };
       const saved = isEdit
         ? await updateDocumentType(id!, payload)
@@ -327,6 +334,22 @@ export default function DocumentTypeCreatePage() {
               />
             </label>
           </div>
+
+          <fieldset className="mb-lg rounded border border-outline-variant p-md">
+            <legend className="px-xs text-[11px] font-bold uppercase tracking-[0.05em] text-secondary">
+              Output Formats
+            </legend>
+            <div className="flex gap-md">
+              <label className="flex items-center gap-xs text-sm text-on-surface">
+                <input type="checkbox" value="pdf" {...register("allowed_output_formats")} />
+                PDF
+              </label>
+              <label className="flex items-center gap-xs text-sm text-on-surface">
+                <input type="checkbox" value="xlsx" {...register("allowed_output_formats")} />
+                XLSX
+              </label>
+            </div>
+          </fieldset>
 
           {/* Visual Schema Tree Builder */}
           <div className="mt-lg">

@@ -1,10 +1,8 @@
-from pathlib import Path
 from datetime import date, datetime, time
 from typing import Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
-from fastapi.responses import FileResponse
 from sqlalchemy import func
 from sqlalchemy.orm import Session as SQLAlchemySession, joinedload
 
@@ -55,6 +53,10 @@ def _issuance_out(issuance: DocumentIssuance) -> DocumentIssuanceLibraryItem:
         id=issuance.id,
         design_version_id=issuance.design_version_id,
         design_name=issuance.design_version.name,
+        output_format=issuance.output_format,
+        mime_type=issuance.mime_type,
+        filename=issuance.filename,
+        preview_storage_key=issuance.preview_storage_key,
         status=issuance.status,
         design_status=issuance.design_version.status,
         design_version_number=issuance.design_version.version_number,
@@ -74,15 +76,20 @@ def _issuance_out(issuance: DocumentIssuance) -> DocumentIssuanceLibraryItem:
     )
 
 
-def _pdf_response(issuance: DocumentIssuance, storage_provider: StorageProvider) -> Response:
+def _document_response(
+    issuance: DocumentIssuance,
+    storage_provider: StorageProvider,
+    disposition: str = "attachment",
+) -> Response:
     try:
         return storage_provider.get_download_response(
             issuance.storage_key,
-            filename=f"{issuance.id}.pdf",
-            category="issuances"
+            filename=issuance.filename or f"{issuance.id}.pdf",
+            category="issuances",
+            disposition=disposition,
         )
     except FileNotFoundError:
-        raise HTTPException(status_code=404, detail="Issued PDF file not found on storage")
+        raise HTTPException(status_code=404, detail="Issued document file not found on storage")
 
 
 def _append_tracelog(
@@ -117,7 +124,7 @@ def _verify_issuance_ready(issuance: DocumentIssuance) -> None:
     if not issuance.storage_key:
         raise HTTPException(
             status_code=409,
-            detail="Document PDF is not ready"
+            detail="Document file is not ready"
         )
 
 
@@ -134,7 +141,7 @@ def public_download_issuance(
 
     issuance = _require_issuance(db, issuance_id)
     _verify_issuance_ready(issuance)
-    response = _pdf_response(issuance, storage_provider)
+    response = _document_response(issuance, storage_provider)
     _append_tracelog(
         db,
         issuance,
@@ -206,15 +213,7 @@ def preview_issuance(
 ):
     issuance = _require_issuance(db, issuance_id)
     _verify_issuance_ready(issuance)
-    try:
-        return storage_provider.get_download_response(
-            issuance.storage_key,
-            filename=f"{issuance.id}.pdf",
-            category="issuances",
-            disposition="inline"
-        )
-    except FileNotFoundError:
-        raise HTTPException(status_code=404, detail="Issued PDF file not found on storage")
+    return _document_response(issuance, storage_provider, disposition="inline")
 
 
 @router.get("/{issuance_id}/download")
@@ -227,7 +226,7 @@ def download_issuance(
 ):
     issuance = _require_issuance(db, issuance_id)
     _verify_issuance_ready(issuance)
-    response = _pdf_response(issuance, storage_provider)
+    response = _document_response(issuance, storage_provider)
     _append_tracelog(
         db,
         issuance,

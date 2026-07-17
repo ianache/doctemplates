@@ -1,13 +1,14 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import CheckConstraint, ForeignKey, UniqueConstraint, func
+from sqlalchemy import CheckConstraint, ForeignKey, JSON, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
 
 ALLOWED_FIELD_TYPES = ("string", "number", "date", "boolean")
 ALLOWED_METADATA_TYPES = ("text", "number", "date", "datetime", "boolean")
+DEFAULT_OUTPUT_FORMATS = ["pdf"]
 
 
 class DocumentType(Base):
@@ -16,6 +17,9 @@ class DocumentType(Base):
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     name: Mapped[str] = mapped_column(index=True)
     description: Mapped[str | None]
+    allowed_output_formats: Mapped[list[str]] = mapped_column(
+        JSON, default=lambda: list(DEFAULT_OUTPUT_FORMATS)
+    )
     created_by_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 

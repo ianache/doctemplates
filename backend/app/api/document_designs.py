@@ -19,6 +19,7 @@ from app.models.document_issuance import DocumentIssuance
 from app.models.document_tracelog import DocumentTracelog
 from app.models.static_pdf_asset import StaticPdfAsset
 from app.models.user import User
+from app.models.xlsx_template import XlsxTemplate
 from app.schemas.document_issuance import DocumentIssuanceOut
 from app.services.pdf_generator import generate_composed_pdf
 from app.dependencies import get_storage_provider
@@ -75,6 +76,42 @@ def _require_page(design: DocumentDesign, page_id: UUID) -> DocumentDesignPage:
     return page
 
 
+def _validate_design_output(
+    db: SQLAlchemySession,
+    document_type: DocumentType,
+    output_format: str,
+    xlsx_template_id: UUID | None,
+) -> XlsxTemplate | None:
+    allowed_formats = document_type.allowed_output_formats or ["pdf"]
+    if output_format not in allowed_formats:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Document type does not allow {output_format} output",
+        )
+
+    if output_format == "xlsx" and xlsx_template_id is None:
+        raise HTTPException(status_code=400, detail="XLSX designs require xlsx_template_id")
+
+    if output_format == "pdf" and xlsx_template_id is not None:
+        raise HTTPException(
+            status_code=400,
+            detail="PDF designs cannot reference an XLSX template",
+        )
+
+    if xlsx_template_id is None:
+        return None
+
+    template = db.query(XlsxTemplate).filter(XlsxTemplate.id == xlsx_template_id).first()
+    if template is None:
+        raise HTTPException(status_code=404, detail="XLSX template not found")
+    if template.document_type_id != document_type.id:
+        raise HTTPException(
+            status_code=400,
+            detail="XLSX template must belong to the design document type",
+        )
+    return template
+
+
 def _page_out(page: DocumentDesignPage) -> DocumentDesignPageOut:
     return DocumentDesignPageOut(
         id=page.id,
@@ -122,6 +159,8 @@ def _detail(design: DocumentDesign, db: SQLAlchemySession = None) -> DocumentDes
         id=design.id,
         name=design.name,
         description=design.description,
+        output_format=design.output_format,
+        xlsx_template_id=design.xlsx_template_id,
         status=design.status,
         version_group_id=design.version_group_id,
         version_number=design.version_number,
@@ -142,11 +181,19 @@ def create_document_design(
     db: SQLAlchemySession = Depends(get_db),
 ) -> DocumentDesignDetail:
     document_type = require_document_type(db, payload.document_type_id)
+    xlsx_template = _validate_design_output(
+        db,
+        document_type,
+        payload.output_format,
+        payload.xlsx_template_id,
+    )
 
     design = DocumentDesign(
         document_type=document_type,
         name=payload.name,
         description=payload.description,
+        output_format=payload.output_format,
+        xlsx_template=xlsx_template,
         status="draft",
         created_by=user,
         mock_data=payload.mock_data,
@@ -176,9 +223,17 @@ def update_document_design(
     )
     if design is None:
         raise HTTPException(status_code=404, detail="Document design not found")
+    xlsx_template = _validate_design_output(
+        db,
+        design.document_type,
+        payload.output_format,
+        payload.xlsx_template_id,
+    )
 
     design.name = payload.name
     design.description = payload.description
+    design.output_format = payload.output_format
+    design.xlsx_template = xlsx_template
     design.mock_data = payload.mock_data
 
     db.commit()
@@ -207,6 +262,8 @@ def list_document_designs(
             id=design.id,
             name=design.name,
             description=design.description,
+            output_format=design.output_format,
+            xlsx_template_id=design.xlsx_template_id,
             status=design.status,
             version_group_id=design.version_group_id,
             version_number=design.version_number,
@@ -400,6 +457,8 @@ def fork_document_design_version(
         document_type_id=current.document_type_id,
         name=current.name,
         description=current.description,
+        output_format=current.output_format,
+        xlsx_template_id=current.xlsx_template_id,
         status="draft",
         version_group_id=group_id,
         version_number=next_version,
@@ -464,6 +523,8 @@ def list_document_design_versions(
             id=design.id,
             name=design.name,
             description=design.description,
+            output_format=design.output_format,
+            xlsx_template_id=design.xlsx_template_id,
             status=design.status,
             version_group_id=design.version_group_id,
             version_number=design.version_number,
@@ -642,6 +703,7 @@ def generate_document(
         id=issuance_id,
         design_version_id=design.id,
         storage_key=None,
+        output_format=design.output_format,
         user_id=user.id,
         input_data=data,
         metadata_values=coerced_metadata,
@@ -678,6 +740,8 @@ def preview_document(
     design = _require_design(db, design_id)
     if design.status not in ("draft", "active"):
         raise HTTPException(status_code=400, detail="Preview only allowed for draft or active designs")
+    if design.output_format == "xlsx":
+        raise HTTPException(status_code=400, detail="XLSX designs use template preview")
 
     # Split data and metadata
     data = payload.get("data", payload) if isinstance(payload, dict) else {}

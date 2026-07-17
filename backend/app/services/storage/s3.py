@@ -1,4 +1,5 @@
 import io
+import mimetypes
 from pathlib import Path
 import boto3
 from botocore.client import Config
@@ -46,7 +47,7 @@ class S3StorageProvider(StorageProvider):
             Bucket=bucket,
             Key=cleaned_key,
             Body=content,
-            ContentType="application/pdf"
+            ContentType=mimetypes.guess_type(cleaned_key)[0] or "application/octet-stream"
         )
         return cleaned_key
 
@@ -87,7 +88,7 @@ class S3StorageProvider(StorageProvider):
         headers = {"Content-Disposition": f'{disposition}; filename="{filename}"'}
         return StreamingResponse(
             _stream(),
-            media_type="application/pdf",
+            media_type=mimetypes.guess_type(filename)[0] or "application/octet-stream",
             headers=headers,
         )
 

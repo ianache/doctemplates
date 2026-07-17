@@ -17,6 +17,7 @@ def get_storage_provider() -> StorageProvider:
             buckets={
                 "static_pdfs": settings.storage_s3_bucket_static_pdfs,
                 "issuances": settings.storage_s3_bucket_issuances,
+                "xlsx_templates": settings.storage_s3_bucket_xlsx_templates,
             }
         )
     else:
@@ -24,5 +25,6 @@ def get_storage_provider() -> StorageProvider:
             root_paths={
                 "static_pdfs": settings.content_storage_root,
                 "issuances": settings.issuance_storage_root,
+                "xlsx_templates": settings.xlsx_template_storage_root,
             }
         )

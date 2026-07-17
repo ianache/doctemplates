@@ -8,20 +8,23 @@ import {
   type HtmlTemplateListItem,
   type StaticPdfAssetListItem,
 } from "../../lib/content";
+import { listXlsxTemplates, type XlsxTemplateDetail } from "../../lib/xlsxTemplates";
 
 export default function ContentLibraryPage() {
   const [templates, setTemplates] = useState<HtmlTemplateListItem[] | null>(null);
   const [pdfAssets, setPdfAssets] = useState<StaticPdfAssetListItem[] | null>(null);
+  const [xlsxTemplates, setXlsxTemplates] = useState<XlsxTemplateDetail[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
 
-    Promise.all([listHtmlTemplates(), listStaticPdfAssets()])
-      .then(([templateRows, pdfRows]) => {
+    Promise.all([listHtmlTemplates(), listStaticPdfAssets(), listXlsxTemplates()])
+      .then(([templateRows, pdfRows, xlsxRows]) => {
         if (cancelled) return;
         setTemplates(templateRows);
         setPdfAssets(pdfRows);
+        setXlsxTemplates(xlsxRows);
       })
       .catch(() => {
         if (!cancelled) setError("We couldn't load the content library. Please try again.");
@@ -50,6 +53,12 @@ export default function ContentLibraryPage() {
               className="rounded border border-primary px-md py-xs font-bold uppercase tracking-wide text-label-caps text-primary hover:bg-primary/10"
             >
               Upload PDF
+            </Link>
+            <Link
+              to="/content/xlsx-templates/upload"
+              className="rounded border border-primary px-md py-xs font-bold uppercase tracking-wide text-label-caps text-primary hover:bg-primary/10"
+            >
+              Upload XLSX
             </Link>
           </>
         }
@@ -109,6 +118,48 @@ export default function ContentLibraryPage() {
                   <span className="font-bold text-on-surface">{templates.length}</span> templates
                 </p>
               </div>
+            </div>
+          )}
+        </section>
+
+        <section id="xlsx-templates">
+          <div className="mb-sm flex items-center justify-between gap-md">
+            <h3 className="font-headings text-headline-md text-on-surface">XLSX Templates</h3>
+            <Link to="/content/xlsx-templates/upload" className="text-sm font-bold text-primary hover:underline">
+              Upload XLSX
+            </Link>
+          </div>
+
+          {xlsxTemplates === null ? null : xlsxTemplates.length === 0 ? (
+            <div className="rounded-lg border border-outline-variant bg-surface-container-lowest px-lg py-xl text-center">
+              <p className="text-sm text-on-surface-variant">No XLSX templates yet</p>
+            </div>
+          ) : (
+            <div className="overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest">
+              <table className="w-full border-collapse text-left">
+                <thead>
+                  <tr className="border-b border-outline-variant bg-surface-container-low">
+                    <th className="px-md py-sm font-bold uppercase text-label-caps text-secondary">Name</th>
+                    <th className="px-md py-sm font-bold uppercase text-label-caps text-secondary">Document Type</th>
+                    <th className="px-md py-sm font-bold uppercase text-label-caps text-secondary">Tokens</th>
+                    <th className="px-md py-sm font-bold uppercase text-label-caps text-secondary">Warnings</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-outline-variant">
+                  {xlsxTemplates.map((item) => (
+                    <tr key={item.id} className="transition-colors hover:bg-surface">
+                      <td className="px-md py-md">
+                        <Link to={`/content/xlsx-templates/${item.id}`} className="font-bold text-primary hover:underline">
+                          {item.name}
+                        </Link>
+                      </td>
+                      <td className="px-md py-md text-on-surface">{item.document_type_name}</td>
+                      <td className="px-md py-md text-on-surface">{item.detected_tokens.length}</td>
+                      <td className="px-md py-md text-on-surface">{item.validation_warnings.length}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </section>

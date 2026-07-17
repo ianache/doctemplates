@@ -20,6 +20,10 @@ class DocumentIssuanceOut(BaseModel):
     id: UUID
     design_version_id: UUID
     file_path: str | None = None
+    output_format: str = "pdf"
+    mime_type: str | None = None
+    filename: str | None = None
+    preview_storage_key: str | None = None
     user_id: UUID
     input_data: dict
     metadata_values: dict | None = None
@@ -38,6 +42,10 @@ class DocumentIssuanceLibraryItem(BaseModel):
     id: UUID
     design_version_id: UUID
     design_name: str
+    output_format: str = "pdf"
+    mime_type: str | None = None
+    filename: str | None = None
+    preview_storage_key: str | None = None
     status: str
     design_status: str
     design_version_number: int | None

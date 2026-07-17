@@ -8,15 +8,13 @@ from app.db import SessionLocal
 from app.models.document_issuance import DocumentIssuance
 from app.models.document_tracelog import DocumentTracelog
 from app.models.document_design import DocumentDesign
-from app.services.pdf_generator import generate_composed_pdf
+from app.services.document_generation import generate_document_file
 from app.dependencies import get_storage_provider
 
 logger = logging.getLogger(__name__)
 
 
-@celery_app.task(name="app.workers.document_generation.generate_document_pdf")
-def generate_document_pdf(issuance_id: str) -> None:
-    """Task to generate a composed PDF document asynchronously."""
+def _generate_document_impl(issuance_id: str) -> None:
     db = SessionLocal()
     try:
         issuance_uuid = issuance_id if isinstance(issuance_id, uuid.UUID) else uuid.UUID(issuance_id)
@@ -47,6 +45,7 @@ def generate_document_pdf(issuance_id: str) -> None:
             .options(
                 joinedload(DocumentDesign.document_type),
                 joinedload(DocumentDesign.created_by),
+                joinedload(DocumentDesign.xlsx_template),
                 selectinload(DocumentDesign.pages),
             )
             .filter(DocumentDesign.id == issuance.design_version_id)
@@ -56,25 +55,23 @@ def generate_document_pdf(issuance_id: str) -> None:
         if not design:
             raise ValueError(f"DocumentDesign {issuance.design_version_id} not found.")
 
-        # 2. Generate PDF bytes
+        # 2. Generate document bytes
         storage_provider = get_storage_provider()
-        pdf_bytes = generate_composed_pdf(
-            design,
-            issuance.input_data,
-            db,
-            storage_provider,
-            mock_fallback=False
-        )
+        issuance.design_version = design
+        generated = generate_document_file(issuance, db, storage_provider)
 
         # 3. Save to storage
         storage_key = storage_provider.save(
-            f"{issuance.id}.pdf",
-            pdf_bytes,
+            f"{issuance.id}.{generated.extension}",
+            generated.content,
             category="issuances"
         )
 
         # 4. Update status to success
         issuance.storage_key = storage_key
+        issuance.output_format = design.output_format
+        issuance.mime_type = generated.mime_type
+        issuance.filename = generated.filename
         issuance.status = "success"
         issuance.completed_at = datetime.utcnow()
 
@@ -90,11 +87,11 @@ def generate_document_pdf(issuance_id: str) -> None:
         )
         db.add(tracelog)
         db.commit()
-        logger.info(f"Successfully generated PDF for DocumentIssuance {issuance_id}")
+        logger.info(f"Successfully generated document for DocumentIssuance {issuance_id}")
 
     except Exception as e:
         db.rollback()
-        logger.exception(f"Error generating PDF for DocumentIssuance {issuance_id}")
+        logger.exception(f"Error generating document for DocumentIssuance {issuance_id}")
         
         # Open a new transaction to record the failure status securely
         fail_db = SessionLocal()
@@ -115,3 +112,15 @@ def generate_document_pdf(issuance_id: str) -> None:
         raise e
     finally:
         db.close()
+
+
+@celery_app.task(name="app.workers.document_generation.generate_document")
+def generate_document(issuance_id: str) -> None:
+    """Task to generate a document file asynchronously."""
+    return _generate_document_impl(issuance_id)
+
+
+@celery_app.task(name="app.workers.document_generation.generate_document_pdf")
+def generate_document_pdf(issuance_id: str) -> None:
+    """Backward-compatible task name for already queued PDF generation jobs."""
+    return _generate_document_impl(issuance_id)

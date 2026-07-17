@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     frontend_origin: str
     content_storage_root: str = "../.content-storage"
     issuance_storage_root: str = "../.content-storage/issuances"
+    xlsx_template_storage_root: str = "../.content-storage/xlsx-templates"
 
     # Storage Decoupling Settings
     storage_provider_type: str = "local"
@@ -36,6 +37,7 @@ class Settings(BaseSettings):
     storage_s3_region: str | None = None
     storage_s3_bucket_static_pdfs: str = "docmanagement-static-pdfs"
     storage_s3_bucket_issuances: str = "docmanagement-issuances"
+    storage_s3_bucket_xlsx_templates: str = "docmanagement-xlsx-templates"
 
     # Celery Settings
     celery_broker_url: str = "redis://redis:6379/0"

@@ -1,4 +1,5 @@
 import { apiFetch, jsonOrError, readErrorMessage } from "./api";
+import type { OutputFormat } from "./documentTypes";
 
 export type DesignStatus = "draft" | "active";
 export type DesignBlockType = "html_template" | "static_pdf";
@@ -19,6 +20,8 @@ export interface DocumentDesignListItem {
   id: string;
   name: string;
   description: string | null;
+  output_format: OutputFormat;
+  xlsx_template_id: string | null;
   status: DesignStatus | "superseded";
   version_group_id: string | null;
   version_number: number | null;
@@ -38,6 +41,8 @@ export interface DocumentDesignCreatePayload {
   document_type_id: string;
   name: string;
   description: string | null;
+  output_format?: OutputFormat;
+  xlsx_template_id?: string | null;
   mock_data?: Record<string, unknown> | null;
 }
 
@@ -191,6 +196,8 @@ export async function previewDocumentDesign(
 export interface DocumentDesignUpdatePayload {
   name: string;
   description: string | null;
+  output_format?: OutputFormat;
+  xlsx_template_id?: string | null;
   mock_data?: Record<string, unknown> | null;
 }
 

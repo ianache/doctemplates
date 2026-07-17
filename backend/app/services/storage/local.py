@@ -1,4 +1,5 @@
 import io
+import mimetypes
 import os
 from pathlib import Path
 from fastapi import Response
@@ -45,9 +46,10 @@ class LocalStorageProvider(StorageProvider):
         if not path.exists():
             raise FileNotFoundError(f"File not found for download: {path}")
         headers = {"Content-Disposition": f'{disposition}; filename="{filename}"'}
+        media_type = mimetypes.guess_type(filename)[0] or "application/octet-stream"
         return FileResponse(
             path,
-            media_type="application/pdf",
+            media_type=media_type,
             headers=headers,
         )
 

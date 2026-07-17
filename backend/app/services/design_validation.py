@@ -93,6 +93,31 @@ def get_design_warnings(design: DocumentDesign, db: SQLAlchemySession = None) ->
 def validate_design_activation(design: DocumentDesign, db: SQLAlchemySession) -> None:
     if not design.name or not design.document_type_id:
         raise HTTPException(status_code=400, detail="Design name and document type are required")
+
+    allowed_formats = design.document_type.allowed_output_formats or ["pdf"]
+    if design.output_format not in allowed_formats:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Document type does not allow {design.output_format} output",
+        )
+
+    if design.output_format == "xlsx":
+        if design.xlsx_template_id is None:
+            raise HTTPException(
+                status_code=400,
+                detail="XLSX designs require a template before activation",
+            )
+        if design.xlsx_template is None:
+            raise HTTPException(status_code=404, detail="XLSX template not found")
+        if design.xlsx_template.document_type_id != design.document_type_id:
+            raise HTTPException(
+                status_code=400,
+                detail="XLSX template must belong to the design document type",
+            )
+        if design.xlsx_template.validation_warnings:
+            raise HTTPException(status_code=400, detail="XLSX template has validation warnings")
+        return
+
     if not design.pages:
         raise HTTPException(status_code=400, detail="Active designs require at least one page")
 

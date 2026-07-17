@@ -11,6 +11,7 @@ from app.models.document_issuance import DocumentIssuance
 from app.models.document_tracelog import DocumentTracelog
 from app.models.document_type import DocumentType
 from app.models.user import User
+from app.services.document_generation import GeneratedDocument
 from app.workers.document_generation import generate_document_pdf
 from app.utils.signature import generate_issuance_signature
 
@@ -69,7 +70,7 @@ def test_enqueue_endpoint_flow(
         return MockAsyncResult()
 
     import app.workers.document_generation as dg
-    monkeypatch.setattr(dg.generate_document_pdf, "delay", mock_delay)
+    monkeypatch.setattr(dg.generate_document, "delay", mock_delay)
 
     response = client.post(f"/api/document-designs/{design.id}/generate", json={"name": "Acme"})
     assert response.status_code == 202
@@ -106,10 +107,15 @@ def test_worker_success_path(
     db_session.add(issuance)
     db_session.commit()
 
-    # Mock PDF generation
+    # Mock document generation
     monkeypatch.setattr(
-        "app.workers.document_generation.generate_composed_pdf",
-        lambda *args, **kwargs: b"%PDF-dummy-success",
+        "app.workers.document_generation.generate_document_file",
+        lambda *args, **kwargs: GeneratedDocument(
+            content=b"%PDF-dummy-success",
+            mime_type="application/pdf",
+            filename=f"{issuance.id}.pdf",
+            extension="pdf",
+        ),
     )
 
     # Call worker task directly
@@ -120,6 +126,9 @@ def test_worker_success_path(
     updated = db_session.get(DocumentIssuance, issuance.id)
     assert updated.status == "success"
     assert updated.storage_key is not None
+    assert updated.output_format == "pdf"
+    assert updated.mime_type == "application/pdf"
+    assert updated.filename == f"{issuance.id}.pdf"
     assert updated.completed_at is not None
     assert updated.started_at is not None
     assert updated.error_message is None
@@ -157,7 +166,7 @@ def test_worker_failure_path(
     # Force an exception during rendering
     def raise_err(*args, **kwargs):
         raise RuntimeError("PDF engine crashed horribly!")
-    monkeypatch.setattr("app.workers.document_generation.generate_composed_pdf", raise_err)
+    monkeypatch.setattr("app.workers.document_generation.generate_document_file", raise_err)
 
     # Call worker task
     with pytest.raises(Exception):
@@ -196,8 +205,8 @@ def test_worker_idempotency(
     def track_call(*args, **kwargs):
         nonlocal generator_called
         generator_called = True
-        return b""
-    monkeypatch.setattr("app.workers.document_generation.generate_composed_pdf", track_call)
+        raise AssertionError("generator should not be called for completed issuance")
+    monkeypatch.setattr("app.workers.document_generation.generate_document_file", track_call)
 
     # Call task
     generate_document_pdf(issuance.id)

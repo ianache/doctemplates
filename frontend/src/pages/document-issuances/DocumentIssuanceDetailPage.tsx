@@ -3,6 +3,8 @@ import { Link, useParams } from "react-router-dom";
 
 import PageHeader from "../../components/molecules/PageHeader";
 import IssuanceProperties from "../../components/molecules/IssuanceProperties";
+import PagedTable from "../../components/organisms/PagedTable";
+import type { Column } from "../../components/organisms/PagedTable";
 import { API_BASE_URL, apiFetch } from "../../lib/api";
 import {
   getDocumentIssuance,
@@ -11,12 +13,27 @@ import {
   type DocumentIssuanceDetail,
   type DocumentTracelog,
 } from "../../lib/documentIssuances";
+import {
+  DEFAULT_DATA_EXPORT_SELECTION,
+  downloadIssuanceDataExport,
+  selectedDataExportSections,
+  type DataExportSection,
+  type DataExportSelection,
+} from "../../lib/issuanceDataExport";
 
 const EVENT_LABELS: Record<string, string> = {
   generation: "Generated",
   download: "Downloaded",
   share: "Shared",
 };
+
+const DATA_EXPORT_LABELS: Record<DataExportSection, string> = {
+  input_data: "Input data",
+  metadata_values: "Metadata values",
+  tracelogs: "Audit tracelogs",
+};
+
+const AUDIT_PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 
 function clipboardUrl(path: string) {
   if (/^https?:\/\//i.test(path)) return path;
@@ -44,6 +61,12 @@ export default function DocumentIssuanceDetailPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [sharing, setSharing] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [showDataExportModal, setShowDataExportModal] = useState(false);
+  const [dataExportSelection, setDataExportSelection] = useState<DataExportSelection>(DEFAULT_DATA_EXPORT_SELECTION);
+  const [dataExportError, setDataExportError] = useState<string | null>(null);
+  const [exportingData, setExportingData] = useState(false);
+  const [auditPage, setAuditPage] = useState(1);
+  const [auditPageSize, setAuditPageSize] = useState(5);
 
   useEffect(() => {
     if (!id) return;
@@ -83,7 +106,11 @@ export default function DocumentIssuanceDetailPage() {
   const [previewError, setPreviewError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!detail || detail.status !== "success") return;
+    if (!detail || detail.status !== "success" || detail.output_format !== "pdf") {
+      setBlobUrl(null);
+      setPreviewError(null);
+      return;
+    }
     let cancelled = false;
     let objectUrl: string | null = null;
     setBlobUrl(null);
@@ -109,6 +136,10 @@ export default function DocumentIssuanceDetailPage() {
     };
   }, [detail]);
 
+  useEffect(() => {
+    setAuditPage(1);
+  }, [tracelogs.length, auditPageSize]);
+
   const handleDownload = async () => {
     if (!detail) return;
     setDownloading(true);
@@ -120,7 +151,7 @@ export default function DocumentIssuanceDetailPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${detail.design_name}.pdf`;
+      a.download = detail.filename ?? `${detail.design_name}.${detail.output_format}`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -128,9 +159,34 @@ export default function DocumentIssuanceDetailPage() {
       const logs = await getDocumentTracelogs(detail.id);
       setTracelogs(logs);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "We couldn't download the PDF.");
+      setError(err instanceof Error ? err.message : "We couldn't download this document.");
     } finally {
       setDownloading(false);
+    }
+  };
+
+  const openDataExportModal = () => {
+    setDataExportSelection(DEFAULT_DATA_EXPORT_SELECTION);
+    setDataExportError(null);
+    setShowDataExportModal(true);
+  };
+
+  const toggleDataExportSection = (section: DataExportSection) => {
+    setDataExportSelection((current) => ({ ...current, [section]: !current[section] }));
+    setDataExportError(null);
+  };
+
+  const handleDownloadData = async () => {
+    if (!detail) return;
+    setExportingData(true);
+    setDataExportError(null);
+    try {
+      await downloadIssuanceDataExport(detail, tracelogs, dataExportSelection);
+      setShowDataExportModal(false);
+    } catch (err) {
+      setDataExportError(err instanceof Error ? err.message : "We couldn't export this data.");
+    } finally {
+      setExportingData(false);
     }
   };
 
@@ -152,6 +208,52 @@ export default function DocumentIssuanceDetailPage() {
       setSharing(false);
     }
   };
+
+  const auditRows = tracelogs.slice((auditPage - 1) * auditPageSize, auditPage * auditPageSize);
+
+  const handleAuditPageSizeChange = (nextSize: number) => {
+    setAuditPageSize(nextSize);
+    setAuditPage(1);
+  };
+
+  const auditColumns: Column<DocumentTracelog>[] = [
+    {
+      key: "event",
+      header: "Event",
+      render: (log) => <span className="font-bold">{EVENT_LABELS[log.event_type] ?? log.event_type}</span>,
+    },
+    {
+      key: "date",
+      header: "Date",
+      render: (log) => formatDate(log.created_at),
+    },
+    {
+      key: "actor",
+      header: "Actor",
+      render: (log) => (log.user_id ? "User" : "Anonymous"),
+    },
+    {
+      key: "user_id",
+      header: "User ID",
+      render: (log) =>
+        log.user_id ? (
+          <span className="block max-w-[220px] truncate font-mono text-xs" title={log.user_id}>
+            {log.user_id}
+          </span>
+        ) : (
+          "None"
+        ),
+    },
+    {
+      key: "metadata",
+      header: "Metadata",
+      render: (log) => {
+        const entries = Object.entries(log.metadata);
+        if (entries.length === 0) return "None";
+        return <span className="text-xs">{entries.map(([key, value]) => `${key}: ${metadataValue(value)}`).join("; ")}</span>;
+      },
+    },
+  ];
 
   if (error && detail === undefined) return <p className="text-sm text-error">{error}</p>;
   if (detail === undefined) return null;
@@ -185,7 +287,15 @@ export default function DocumentIssuanceDetailPage() {
               onClick={handleDownload}
               disabled={downloading || detail.status !== "success"}
             >
-              {downloading ? "Downloading..." : "Download PDF"}
+              {downloading ? "Downloading..." : `Download ${detail.output_format.toUpperCase()}`}
+            </button>
+            <button
+              type="button"
+              className="rounded border border-primary px-md py-xs text-sm font-bold text-primary hover:bg-primary/10 disabled:opacity-50"
+              onClick={openDataExportModal}
+              disabled={detail.status !== "success"}
+            >
+              Download Data
             </button>
             <button
               type="button"
@@ -209,17 +319,24 @@ export default function DocumentIssuanceDetailPage() {
       <div className="grid gap-lg lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="space-y-lg">
           <div>
-            <h2 className="mb-sm font-headings text-[18px] font-bold text-on-surface">PDF Preview</h2>
+            <h2 className="mb-sm font-headings text-[18px] font-bold text-on-surface">
+              {detail.output_format === "pdf" ? "PDF Preview" : "Generated Workbook"}
+            </h2>
             {detail.status === "failure" ? (
               <div className="rounded-lg border border-error bg-surface-container-low p-lg text-center">
                 <span className="material-symbols-outlined text-[48px] text-error mb-2">error</span>
                 <h3 className="font-headings text-[18px] font-bold text-on-surface mb-2">Generation Failed</h3>
                 <p className="text-sm text-error max-w-lg mx-auto font-mono bg-surface-container-lowest p-md rounded border border-outline-variant">
-                  {detail.error_message || "An unknown error occurred during PDF generation."}
+                  {detail.error_message || "An unknown error occurred during document generation."}
                 </p>
               </div>
             ) : previewError ? (
               <p className="rounded border border-error/30 p-md text-sm text-error">{previewError}</p>
+            ) : detail.output_format !== "pdf" && detail.status === "success" ? (
+              <div className="flex h-[320px] w-full flex-col items-center justify-center gap-md rounded border border-outline-variant bg-surface-container-lowest">
+                <span className="material-symbols-outlined text-[40px] text-primary">table</span>
+                <p className="text-sm font-bold text-secondary">Preview is available after download.</p>
+              </div>
             ) : blobUrl ? (
               <iframe
                 title={`PDF preview for ${detail.design_name}`}
@@ -230,7 +347,7 @@ export default function DocumentIssuanceDetailPage() {
               <div className="flex h-[720px] w-full flex-col items-center justify-center gap-md rounded border border-outline-variant bg-surface-container-lowest">
                 <span className="material-symbols-outlined animate-spin text-[32px] text-primary">progress_activity</span>
                 <p className="text-sm font-bold text-secondary">
-                  {detail.status === "queued" ? "Waiting in queue..." : "Generating PDF document..."}
+                  {detail.status === "queued" ? "Waiting in queue..." : `Generating ${detail.output_format.toUpperCase()} document...`}
                 </p>
               </div>
             ) : (
@@ -260,57 +377,77 @@ export default function DocumentIssuanceDetailPage() {
               </div>
             </section>
           )}
-
-          <section>
-            <h2 className="mb-sm font-headings text-[18px] font-bold text-on-surface">Input Data</h2>
-            <pre className="max-h-80 overflow-auto rounded border border-outline-variant bg-surface-container-lowest p-md text-xs leading-5 text-on-surface">
-              {JSON.stringify(detail.input_data, null, 2)}
-            </pre>
-          </section>
-
-          <section>
-            <h2 className="mb-sm font-headings text-[18px] font-bold text-on-surface">Audit Timeline</h2>
-            {tracelogs.length === 0 ? (
-              <p className="rounded border border-outline-variant bg-surface-container-lowest p-md text-sm text-on-surface-variant">
-                No tracelog events recorded.
-              </p>
-            ) : (
-              <ol className="space-y-sm">
-                {tracelogs.map((log) => (
-                  <li key={log.id} className="border-l-2 border-outline-variant pl-md">
-                    <div className="flex items-start justify-between gap-sm">
-                      <div>
-                        <div className="font-bold text-on-surface">
-                          {EVENT_LABELS[log.event_type] ?? log.event_type}
-                        </div>
-                        <div className="text-xs text-on-surface-variant">{formatDate(log.created_at)}</div>
-                      </div>
-                      <span className="rounded bg-surface-container px-sm py-xs text-[11px] font-bold uppercase text-secondary">
-                        {log.user_id ? "User" : "Anonymous"}
-                      </span>
-                    </div>
-                    {log.user_id ? (
-                      <div className="mt-xs break-all font-mono text-xs text-on-surface-variant">
-                        {log.user_id}
-                      </div>
-                    ) : null}
-                    {Object.keys(log.metadata).length > 0 ? (
-                      <dl className="mt-sm space-y-xs text-xs">
-                        {Object.entries(log.metadata).map(([key, value]) => (
-                          <div key={key} className="grid grid-cols-[88px_minmax(0,1fr)] gap-sm">
-                            <dt className="text-on-surface-variant">{key}</dt>
-                            <dd className="break-words text-on-surface">{metadataValue(value)}</dd>
-                          </div>
-                        ))}
-                      </dl>
-                    ) : null}
-                  </li>
-                ))}
-              </ol>
-            )}
-          </section>
         </aside>
       </div>
+
+      <section className="mt-lg">
+        <h2 className="mb-sm font-headings text-[18px] font-bold text-on-surface">Audit Timeline</h2>
+        <PagedTable
+          columns={auditColumns}
+          rows={auditRows}
+          rowKey={(log) => log.id}
+          page={auditPage}
+          pageSize={auditPageSize}
+          total={tracelogs.length}
+          itemName="audit events"
+          onChangePage={setAuditPage}
+          pageSizeOptions={AUDIT_PAGE_SIZE_OPTIONS}
+          onChangePageSize={handleAuditPageSizeChange}
+          emptyState={<p className="p-md text-sm text-on-surface-variant">No tracelog events recorded.</p>}
+        />
+      </section>
+
+      {showDataExportModal ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-md">
+          <div className="w-full max-w-lg rounded border border-outline-variant bg-surface-container-lowest p-lg shadow-xl">
+            <div className="flex items-center justify-between gap-md">
+              <h2 className="font-headings text-[18px] font-bold text-on-surface">Download data</h2>
+              <button
+                type="button"
+                className="text-sm font-bold text-primary disabled:opacity-50"
+                onClick={() => setShowDataExportModal(false)}
+                disabled={exportingData}
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="mt-md space-y-sm">
+              {(Object.keys(DATA_EXPORT_LABELS) as DataExportSection[]).map((section) => (
+                <label key={section} className="flex items-center gap-sm text-sm text-on-surface">
+                  <input
+                    type="checkbox"
+                    checked={dataExportSelection[section]}
+                    onChange={() => toggleDataExportSection(section)}
+                  />
+                  <span>{DATA_EXPORT_LABELS[section]}</span>
+                </label>
+              ))}
+            </div>
+
+            {dataExportError ? <p className="mt-md text-sm text-error">{dataExportError}</p> : null}
+
+            <div className="mt-lg flex justify-end gap-sm">
+              <button
+                type="button"
+                className="rounded border border-outline-variant px-md py-xs text-sm font-bold text-on-surface disabled:opacity-50"
+                onClick={() => setShowDataExportModal(false)}
+                disabled={exportingData}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="rounded bg-primary px-md py-xs text-sm font-bold text-white hover:bg-primary/90 disabled:opacity-50"
+                onClick={handleDownloadData}
+                disabled={exportingData || selectedDataExportSections(dataExportSelection).length === 0}
+              >
+                {exportingData ? "Preparing..." : "Download"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }

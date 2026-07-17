@@ -68,6 +68,7 @@ backend:
       region: "us-east-1"
       bucketStaticPdfs: "docmanagement-static-pdfs"
       bucketIssuances: "docmanagement-issuances"
+      bucketXlsxTemplates: "docmanagement-xlsx-templates"
   resources: {}
 
 ingress:

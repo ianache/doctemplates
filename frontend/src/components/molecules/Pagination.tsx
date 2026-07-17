@@ -58,7 +58,7 @@ export default function Pagination({
         </p>
         {showPageSizeSelector ? (
           <label className="flex items-center gap-sm text-body-sm text-secondary">
-            <span>Rows per page</span>
+            <span>Rows/page</span>
             <Select
               className="w-auto min-w-[4.5rem] bg-white"
               value={String(pageSize)}

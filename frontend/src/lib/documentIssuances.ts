@@ -17,6 +17,10 @@ export interface DocumentIssuanceListItem {
   id: string;
   design_version_id: string;
   design_name: string;
+  output_format: "pdf" | "xlsx";
+  mime_type?: string | null;
+  filename?: string | null;
+  preview_storage_key?: string | null;
   status: DocumentIssuanceStatus;
   design_status: string;
   design_version_number: number | null;

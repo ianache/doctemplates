@@ -11,6 +11,7 @@ from app.models.document_issuance import DocumentIssuance
 from app.models.document_tracelog import DocumentTracelog
 from app.models.document_type import DocumentType
 from app.models.user import User
+from app.services.document_generation import GeneratedDocument
 
 
 def _auth_client(client: TestClient, db_session: SQLAlchemySession) -> User:
@@ -175,8 +176,13 @@ def test_generate_document_creates_generation_tracelog(
     
     # Mock generation in the Celery worker
     monkeypatch.setattr(
-        "app.workers.document_generation.generate_composed_pdf",
-        lambda *args, **kwargs: b"%PDF-1.4\n%%EOF",
+        "app.workers.document_generation.generate_document_file",
+        lambda *args, **kwargs: GeneratedDocument(
+            content=b"%PDF-1.4\n%%EOF",
+            mime_type="application/pdf",
+            filename="test.pdf",
+            extension="pdf",
+        ),
     )
 
     response = client.post(f"/api/document-designs/{design.id}/generate", json={"name": "Acme"})
@@ -192,4 +198,3 @@ def test_generate_document_creates_generation_tracelog(
     assert tracelog.user_id == user.id
     assert tracelog.metadata_["source"] == "Celery Worker"
     assert tracelog.metadata_["design_id"] == str(design.id)
-

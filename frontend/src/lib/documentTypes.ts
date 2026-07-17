@@ -2,6 +2,7 @@ import { apiFetch } from "./api";
 
 export type FieldType = "string" | "number" | "date" | "boolean";
 export type MetadataType = "text" | "number" | "date" | "datetime" | "boolean";
+export type OutputFormat = "pdf" | "xlsx";
 
 export interface DocumentTypeFieldIn {
   name: string;
@@ -38,6 +39,7 @@ export interface DocumentTypeDetail {
   description: string | null;
   fields: DocumentTypeField[];
   metadata_definitions: DocumentTypeMetadata[];
+  allowed_output_formats: OutputFormat[];
   created_by_email: string;
   created_at: string;
 }
@@ -47,6 +49,7 @@ export interface DocumentTypeCreatePayload {
   description: string | null;
   fields: DocumentTypeFieldIn[];
   metadata_definitions: DocumentTypeMetadataIn[];
+  allowed_output_formats: OutputFormat[];
 }
 
 export async function listDocumentTypes(): Promise<DocumentTypeListItem[]> {

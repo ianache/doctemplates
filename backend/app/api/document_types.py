@@ -30,6 +30,7 @@ def _to_detail(document_type: DocumentType) -> DocumentTypeDetail:
         id=document_type.id,
         name=document_type.name,
         description=document_type.description,
+        allowed_output_formats=document_type.allowed_output_formats,
         fields=[
             DocumentTypeFieldOut(
                 id=field.id,
@@ -62,6 +63,7 @@ def create_document_type(
     document_type = DocumentType(
         name=payload.name,
         description=payload.description,
+        allowed_output_formats=payload.allowed_output_formats,
         created_by=user,
         fields=[
             DocumentTypeField(
@@ -108,6 +110,7 @@ def list_document_types(
             id=document_type.id,
             name=document_type.name,
             description=document_type.description,
+            allowed_output_formats=document_type.allowed_output_formats,
             field_count=len(document_type.fields),
             created_by_email=document_type.created_by.email,
             created_at=document_type.created_at,
@@ -159,6 +162,7 @@ def update_document_type(
 
     document_type.name = payload.name
     document_type.description = payload.description
+    document_type.allowed_output_formats = payload.allowed_output_formats
 
     # Clear existing associations first to trigger delete-orphan cascades
     document_type.fields.clear()
